@@ -15,21 +15,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Server configuration error" }, { status: 500 })
     }
 
-    // First check if a user role already exists
-    const { data: existingRole, error: checkError } = await supabaseAdmin
+    // First check if a user role already exists - don't use single()
+    const { data: existingRoles, error: checkError } = await supabaseAdmin
       .from("user_roles")
       .select("*")
       .eq("user_id", userId)
-      .single()
 
-    if (checkError && !checkError.message.includes("No rows found")) {
+    if (checkError) {
       console.error("Error checking existing user role:", checkError)
       return NextResponse.json({ error: `Role check failed: ${checkError.message}` }, { status: 500 })
     }
 
-    // If role exists, update it; otherwise insert a new one
+    // If role exists (we found at least one row), update it; otherwise insert a new one
     let roleError = null
-    if (existingRole) {
+    if (existingRoles && existingRoles.length > 0) {
       console.log("User role already exists, updating...")
       const { error } = await supabaseAdmin.from("user_roles").update({ role }).eq("user_id", userId)
       roleError = error
@@ -49,20 +48,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: `Role management failed: ${roleError.message}` }, { status: 500 })
     }
 
-    // Check if role-specific record already exists
+    // Check if role-specific record already exists - don't use single()
     let specificRecordExists = false
     if (role === "doctor") {
-      const { data, error } = await supabaseAdmin.from("doctors").select("*").eq("user_id", userId).single()
-      specificRecordExists = !!data && !error
+      const { data, error } = await supabaseAdmin.from("doctors").select("*").eq("user_id", userId)
+      specificRecordExists = !!data && data.length > 0 && !error
     } else if (role === "nurse") {
-      const { data, error } = await supabaseAdmin.from("nurses").select("*").eq("user_id", userId).single()
-      specificRecordExists = !!data && !error
+      const { data, error } = await supabaseAdmin.from("nurses").select("*").eq("user_id", userId)
+      specificRecordExists = !!data && data.length > 0 && !error
     } else if (role === "patient") {
-      const { data, error } = await supabaseAdmin.from("patients").select("*").eq("user_id", userId).single()
-      specificRecordExists = !!data && !error
+      const { data, error } = await supabaseAdmin.from("patients").select("*").eq("user_id", userId)
+      specificRecordExists = !!data && data.length > 0 && !error
     } else if (role === "pharmacist") {
-      const { data, error } = await supabaseAdmin.from("pharmacists").select("*").eq("user_id", userId).single()
-      specificRecordExists = !!data && !error
+      const { data, error } = await supabaseAdmin.from("pharmacists").select("*").eq("user_id", userId)
+      specificRecordExists = !!data && data.length > 0 && !error
     }
 
     // Create role-specific entry if it doesn't exist

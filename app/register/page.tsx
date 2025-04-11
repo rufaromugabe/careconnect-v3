@@ -98,8 +98,23 @@ export default function Register() {
             }),
           })
 
+          // Log the raw response for debugging
+          console.log("Register page - Role setup API response status:", response.status)
+          
+          // Get the response text first for debugging
+          const responseText = await response.text();
+          console.log("Register page - Role setup API response:", responseText);
+          
+          // Try to parse as JSON if possible
+          let result;
+          try {
+            result = JSON.parse(responseText);
+          } catch (e) {
+            console.error("Register page - Failed to parse API response as JSON:", e);
+            throw new Error("Invalid response format from server");
+          }
+
           if (!response.ok) {
-            const result = await response.json()
             throw new Error(result.error || "Failed to create user role")
           }
 
