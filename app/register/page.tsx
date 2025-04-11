@@ -85,42 +85,81 @@ export default function Register() {
         try {
           console.log("Register page - User created, setting up role")
           
-          // Call the server action to create role entries - no need for arbitrary wait
-          const response = await fetch("/api/auth/create-role", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId: data.user.id,
-              role: role,
-              name: name,
-            }),
-          })
+          // Set a maximum timeout for the entire role setup process
+          const setupRoleWithTimeout = async () => {
+            // Create a promise that will be rejected after the timeout
+            const timeoutPromise = new Promise((_, reject) => {
+              setTimeout(() => {
+                reject(new Error("Role setup timed out"));
+              }, 8000); // 8 second timeout for the entire process
+            });
 
-          // Log the raw response for debugging
-          console.log("Register page - Role setup API response status:", response.status)
+            // Create the actual role setup promise
+            const setupRolePromise = new Promise(async (resolve, reject) => {
+              try {
+                // Call the server action to create role entries
+                const controller = new AbortController();
+                const signal = controller.signal;
+                
+                const response = await fetch("/api/auth/create-role", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    userId: data.user.id,
+                    role: role,
+                    name: name,
+                  }),
+                  signal
+                });
+                
+                // Log the raw response for debugging
+                console.log("Register page - Role setup API response status:", response.status);
+                
+                // Get the response text first for debugging
+                const responseText = await response.text();
+                console.log("Register page - Role setup API response:", responseText);
+                
+                // Try to parse as JSON if possible
+                let result;
+                try {
+                  result = JSON.parse(responseText);
+                } catch (e) {
+                  console.error("Register page - Failed to parse API response as JSON:", e);
+                  reject(new Error("Invalid response format from server"));
+                  return;
+                }
+                
+                if (!response.ok) {
+                  reject(new Error(result.error || "Failed to create user role"));
+                  return;
+                }
+                
+                resolve(result);
+              } catch (error) {
+                reject(error);
+              }
+            });
+            
+            // Race the role setup against the timeout
+            return Promise.race([setupRolePromise, timeoutPromise]);
+          };
           
-          // Get the response text first for debugging
-          const responseText = await response.text();
-          console.log("Register page - Role setup API response:", responseText);
-          
-          // Try to parse as JSON if possible
-          let result;
           try {
-            result = JSON.parse(responseText);
-          } catch (e) {
-            console.error("Register page - Failed to parse API response as JSON:", e);
-            throw new Error("Invalid response format from server");
+            // Try to set up the role with a timeout
+            await setupRoleWithTimeout();
+            console.log("Register page - Role setup successful, signing in user");
+          } catch (setupError) {
+            // If it times out or fails, we'll continue with sign-in anyway
+            console.warn("Register page - Role setup issue:", setupError);
+            console.log("Register page - Continuing with sign in despite role setup issue");
           }
-
-          if (!response.ok) {
-            throw new Error(result.error || "Failed to create user role")
-          }
-
-          console.log("Register page - Role setup successful, signing in user")
-
-          // Explicitly sign in the user after successful registration
+          
+          // Set the role cookie directly as a backup
+          document.cookie = `user_role=${role}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+          
+          // Explicitly sign in the user after registration
           const { error: signInError, session } = await signIn(email, password)
 
           if (signInError) {
@@ -149,6 +188,7 @@ export default function Register() {
           const { error: metadataError } = await supabase.auth.updateUser({
             data: {
               profile_completed: false,
+              role: role, // Also store role in metadata as backup
             }
           })
           
@@ -162,68 +202,66 @@ export default function Register() {
           })
 
           console.log("Register page - Redirecting to dashboard:", role)
+          
+          // Force a 1-second delay before redirect to ensure cookies are set
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
           // Redirect to the appropriate dashboard
           router.push(`/${role}/dashboard`)
         } catch (roleSetupError: any) {
           console.error("Register page - Role setup error:", roleSetupError)
 
-          // Check if this is a duplicate key error, which means the role was already created
-          if (roleSetupError.message && roleSetupError.message.includes("duplicate key")) {
-            console.log("Register page - Duplicate key error, role likely exists, signing in user")
+          // Set the role cookie directly even on error
+          document.cookie = `user_role=${role}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
 
-            // Explicitly sign in the user after successful registration
-            const { error: signInError, session } = await signIn(email, password)
+          // Explicitly sign in the user after registration
+          const { error: signInError, session } = await signIn(email, password)
 
-            if (signInError) {
-              console.error("Register page - Sign in error after registration:", signInError)
-              toast({
-                title: "Registration successful",
-                description: "Your account has been created, but we couldn't sign you in automatically. Please log in.",
-              })
-              router.push("/")
-              return
-            }
-
-            if (!session) {
-              console.error("Register page - No session after sign in")
-              toast({
-                title: "Registration successful",
-                description: "Your account has been created, but we couldn't sign you in automatically. Please log in.",
-              })
-              router.push("/")
-              return
-            }
-
-            console.log("Register page - Sign in successful, session established")
-            
-            // Update user metadata to mark profile as not completed for duplicate user flow too
-            const { error: metadataError } = await supabase.auth.updateUser({
-              data: {
-                profile_completed: false,
-              }
-            })
-            
-            if (metadataError) {
-              console.error("Register page - Error updating user metadata:", metadataError)
-            }
-            
+          if (signInError) {
+            console.error("Register page - Sign in error after registration:", signInError)
             toast({
               title: "Registration successful",
-              description: "Your account has been created and you're now signed in.",
+              description: "Your account has been created, but we couldn't sign you in automatically. Please log in.",
             })
-
-            console.log("Register page - Redirecting to dashboard:", role)
-            // Redirect to the appropriate dashboard
-            router.push(`/${role}/dashboard`)
+            router.push("/")
             return
           }
 
-          toast({
-            title: "Account created but role setup failed",
-            description: "Your account was created, but we couldn't set up your role. Please contact support.",
-            variant: "destructive",
+          if (!session) {
+            console.error("Register page - No session after sign in")
+            toast({
+              title: "Registration successful",
+              description: "Your account has been created, but we couldn't sign you in automatically. Please log in.",
+            })
+            router.push("/")
+            return
+          }
+
+          console.log("Register page - Sign in successful, session established despite role setup error")
+          
+          // Update user metadata to mark profile as not completed
+          const { error: metadataError } = await supabase.auth.updateUser({
+            data: {
+              profile_completed: false,
+              role: role, // Also store role in metadata as backup
+            }
           })
-          router.push("/")
+          
+          if (metadataError) {
+            console.error("Register page - Error updating user metadata:", metadataError)
+          }
+          
+          toast({
+            title: "Registration successful",
+            description: "Your account has been created and you're now signed in.",
+          })
+
+          // Force a 1-second delay before redirect to ensure cookies are set
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          console.log("Register page - Redirecting to dashboard despite setup errors:", role)
+          // Redirect to the appropriate dashboard
+          router.push(`/${role}/dashboard`)
         }
       } else {
         // This shouldn't happen if there's no error, but just in case
