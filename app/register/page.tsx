@@ -16,6 +16,7 @@ import Link from "next/link"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AnimatedBeam, AnimatedGradientText } from "@/components/ui/animated-beam"
 import { motion } from "framer-motion"
+import { supabase } from "@/lib/supabase"
 
 export default function Register() {
   const [name, setName] = useState("")
@@ -129,7 +130,16 @@ export default function Register() {
 
           console.log("Register page - Sign in successful, session established")
           
-          // No need for artificial delay here - proceed immediately to redirect
+          // Update user metadata to mark profile as not completed
+          const { error: metadataError } = await supabase.auth.updateUser({
+            data: {
+              profile_completed: false,
+            }
+          })
+          
+          if (metadataError) {
+            console.error("Register page - Error updating user metadata:", metadataError)
+          }
           
           toast({
             title: "Registration successful",
@@ -171,7 +181,16 @@ export default function Register() {
 
             console.log("Register page - Sign in successful, session established")
             
-            // No need for artificial delay - redirect immediately
+            // Update user metadata to mark profile as not completed for duplicate user flow too
+            const { error: metadataError } = await supabase.auth.updateUser({
+              data: {
+                profile_completed: false,
+              }
+            })
+            
+            if (metadataError) {
+              console.error("Register page - Error updating user metadata:", metadataError)
+            }
             
             toast({
               title: "Registration successful",

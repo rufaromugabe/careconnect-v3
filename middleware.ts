@@ -258,7 +258,7 @@ export async function middleware(req: NextRequest) {
         // redirect them to their dashboard
         const basePath = `/${path.split("/")[1]}/`
         const allowedPaths = roleRouteMap[roleData.role] || []
-        const hasAccess = allowedPaths.some((allowedPath) => basePath.startsWith(allowedPath))
+        const hasAccess = allowedPaths.some((allowedPath: string) => basePath.startsWith(allowedPath))
 
         if (!hasAccess) {
           console.log(`Middleware - User with role ${roleData.role} attempted to access unauthorized route: ${path}`)
@@ -278,7 +278,7 @@ export async function middleware(req: NextRequest) {
     // If we have a role cookie, check if the user has access to the requested route
     const basePath = `/${path.split("/")[1]}/`
     const allowedPaths = roleRouteMap[roleCookie] || []
-    const hasAccess = allowedPaths.some((allowedPath) => basePath.startsWith(allowedPath))
+    const hasAccess = allowedPaths.some((allowedPath: string) => basePath.startsWith(allowedPath))
 
     if (!hasAccess) {
       console.log(`Middleware - User with role ${roleCookie} attempted to access unauthorized route: ${path}`)
@@ -287,14 +287,21 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // Add this check after verifying the user's role
-
   // Check if the user's profile is completed
   if (session?.user?.user_metadata && session.user.user_metadata.profile_completed !== true) {
-    // Skip profile completion check for public routes and profile completion routes
+    // Skip profile completion check fsor public routes and profile completion routes
     if (!path.includes("/complete-profile") && !isPublicRoute) {
-      console.log("Middleware - User profile not completed, redirecting to profile completion")
-      return NextResponse.redirect(new URL(`/${roleCookie}/complete-profile`, req.url))
+      console.log(`Middleware - User (${session.user.id}) profile not completed, role: ${roleCookie}, redirecting to profile completion`)
+      
+      // Determine which role's complete-profile page to redirect to
+      let redirectRole = roleCookie || session.user.user_metadata?.role
+      
+      if (redirectRole) {
+        return NextResponse.redirect(new URL(`/${redirectRole}/complete-profile`, req.url))
+      }
+      
+      // If no role is found, redirect to dashboard which will handle redirection
+      return NextResponse.redirect(new URL(`/dashboard`, req.url))
     }
   }
 
