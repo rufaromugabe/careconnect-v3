@@ -43,7 +43,7 @@ export function AuthProvider({
   const router = useRouter()
   const { toast } = useToast()
 
-  // New function to refresh role cookie with timeouts and better error handling
+  // New function to refresh role cookie
   const refreshRoleCookie = async (userId: string): Promise<string | null> => {
     console.log("Auth context - Refreshing role cookie for user:", userId)
 
@@ -51,128 +51,56 @@ export function AuthProvider({
     document.cookie = "user_role=; path=/; max-age=0; SameSite=Lax"
 
     try {
-      // First try to get the role from the database with a timeout
-      const databaseRolePromise = new Promise<string | null>(async (resolve) => {
-        try {
-          const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId).single()
-          
-          if (!error && data?.role) {
-            console.log("Auth context - Refreshed role from database:", data.role)
-            resolve(data.role)
-          } else {
-            resolve(null)
-          }
-        } catch (e) {
-          console.error("Auth context - Error in database role lookup:", e)
-          resolve(null)
-        }
-      })
+      // First try to get the role from the database
+      const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId).single()
 
-      // Set a timeout for the database query
-      const roleWithTimeout = Promise.race([
-        databaseRolePromise,
-        new Promise<null>((resolve) => setTimeout(() => {
-          console.log("Auth context - Database role lookup timed out")
-          resolve(null)
-        }, 3000)) // 3 second timeout
-      ])
-
-      // Attempt to get the role from the database first
-      const databaseRole = await roleWithTimeout
-      if (databaseRole) {
-        setUserRole(databaseRole)
-        document.cookie = `user_role=${databaseRole}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-        return databaseRole
+      if (!error && data?.role) {
+        console.log("Auth context - Refreshed role from database:", data.role)
+        setUserRole(data.role)
+        document.cookie = `user_role=${data.role}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+        return data.role
       }
 
-      // If database lookup failed, try API as fallback with a timeout
-      const apiRolePromise = new Promise<string | null>(async (resolve) => {
+      if (error) {
+        console.error("Auth context - Error refreshing role from database:", error)
+
+        // Try API as fallback
         try {
-          const controller = new AbortController()
-          const signal = controller.signal
-          
           const response = await fetch("/api/auth/get-role", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ userId }),
             cache: "no-store",
-            signal
           })
 
           if (response.ok) {
             const result = await response.json()
             if (result.role) {
               console.log("Auth context - Refreshed role from API:", result.role)
-              resolve(result.role)
-              return
+              setUserRole(result.role)
+              document.cookie = `user_role=${result.role}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+              return result.role
             }
           }
-          resolve(null)
         } catch (apiError) {
           console.error("Auth context - API fetch error:", apiError)
-          resolve(null)
         }
-      })
-
-      // Set a timeout for the API call
-      const apiRoleWithTimeout = Promise.race([
-        apiRolePromise,
-        new Promise<null>((resolve) => setTimeout(() => {
-          console.log("Auth context - API role lookup timed out")
-          resolve(null)
-        }, 3000)) // 3 second timeout
-      ])
-
-      // Try to get the role from the API
-      const apiRole = await apiRoleWithTimeout
-      if (apiRole) {
-        setUserRole(apiRole)
-        document.cookie = `user_role=${apiRole}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-        return apiRole
       }
 
       // Check user metadata as last resort
-      try {
-        const { data: userData, error: userError } = await supabase.auth.getUser()
-        if (!userError && userData?.user?.user_metadata?.role) {
-          const metadataRole = userData.user.user_metadata.role
-          console.log("Auth context - Refreshed role from user metadata:", metadataRole)
-          setUserRole(metadataRole)
-          document.cookie = `user_role=${metadataRole}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-          return metadataRole
-        }
-      } catch (metadataError) {
-        console.error("Auth context - Error getting role from metadata:", metadataError)
-      }
-
-      // If no role found through any method, try to use role from signup data
-      // This handles the case during registration when the role might not be in DB yet
-      if (user?.user_metadata?.role) {
-        const signupRole = user.user_metadata.role
-        console.log("Auth context - Using role from signup metadata:", signupRole)
-        setUserRole(signupRole)
-        document.cookie = `user_role=${signupRole}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-        return signupRole
+      const { data: userData, error: userError } = await supabase.auth.getUser()
+      if (!userError && userData?.user?.user_metadata?.role) {
+        const metadataRole = userData.user.user_metadata.role
+        console.log("Auth context - Refreshed role from user metadata:", metadataRole)
+        setUserRole(metadataRole)
+        document.cookie = `user_role=${metadataRole}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+        return metadataRole
       }
 
       console.log("Auth context - Could not refresh role, no role found")
       return null
     } catch (error) {
       console.error("Auth context - Error in refreshRoleCookie:", error)
-      
-      // Fallback to user metadata if everything else fails
-      try {
-        if (user?.user_metadata?.role) {
-          const fallbackRole = user.user_metadata.role
-          console.log("Auth context - Fallback to role from user metadata:", fallbackRole)
-          setUserRole(fallbackRole)
-          document.cookie = `user_role=${fallbackRole}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-          return fallbackRole
-        }
-      } catch (e) {
-        console.error("Auth context - Error in fallback role retrieval:", e)
-      }
-      
       return null
     }
   }
