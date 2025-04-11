@@ -93,13 +93,7 @@ export default function Home() {
 
       console.log("Login page - Login successful, session established")
 
-      // Ensure the session is properly established before redirecting
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Refresh the session to make sure it's properly stored
-      await refreshSession()
-
-      // Get the user role from the cookie first
+      // Using cookie check first as it's fastest
       const roleCookie = document.cookie
         .split("; ")
         .find((row) => row.startsWith("user_role="))
@@ -111,9 +105,16 @@ export default function Home() {
         return
       }
 
-      // If no cookie, try to get the role from user metadata or database
-      const role = await getUserRole()
+      // If user metadata contains role, use that (second fastest)
+      if (session.user.user_metadata?.role) {
+        const role = session.user.user_metadata.role
+        console.log("Login page - Found role in user metadata, redirecting to:", role)
+        router.push(`/${role}/dashboard`)
+        return
+      }
 
+      // Last resort - get role from database/API
+      const role = await getUserRole()
       if (role) {
         console.log("Login page - Redirecting to role dashboard:", role)
         router.push(`/${role}/dashboard`)

@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "CareConnect",
   description: "A comprehensive healthcare management system",
-    generator: 'v0.dev'
+  generator: 'v0.dev'
 }
 
 export default async function RootLayout({
@@ -19,10 +19,16 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  // Check for session cookie
+  // Check for session cookie - using cookies asynchronously
   const cookieStore = cookies()
-  const sessionActive = cookieStore.get("supabase-auth-session-active")?.value === "true"
-  let userRole = cookieStore.get("user_role")?.value
+  // Get cookies asynchronously and safely
+  const sessionActiveValue = (await cookieStore).has("supabase-auth-session-active") ? 
+    (await cookieStore).get("supabase-auth-session-active")!.value : undefined
+  const sessionActive = sessionActiveValue === "true"
+  
+  let userRoleValue = (await cookieStore).has("user_role") ? 
+    (await cookieStore).get("user_role")!.value : undefined
+  let userRole = userRoleValue
 
   console.log("Root Layout - Session active cookie:", sessionActive)
   console.log("Root Layout - User role cookie:", userRole)
@@ -68,6 +74,3 @@ export default async function RootLayout({
     </html>
   )
 }
-
-
-import './globals.css'

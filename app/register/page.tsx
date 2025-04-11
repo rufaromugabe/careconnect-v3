@@ -83,10 +83,8 @@ export default function Register() {
       if (data?.user) {
         try {
           console.log("Register page - User created, setting up role")
-          // Wait a moment to ensure the user is fully created in the database
-          await new Promise((resolve) => setTimeout(resolve, 2000))
-
-          // Call the server action to create role entries
+          
+          // Call the server action to create role entries - no need for arbitrary wait
           const response = await fetch("/api/auth/create-role", {
             method: "POST",
             headers: {
@@ -130,13 +128,9 @@ export default function Register() {
           }
 
           console.log("Register page - Sign in successful, session established")
-
-          // Ensure the session is properly established before redirecting
-          await new Promise((resolve) => setTimeout(resolve, 1000))
-
-          // Refresh the session to make sure it's properly stored
-          await refreshSession()
-
+          
+          // No need for artificial delay here - proceed immediately to redirect
+          
           toast({
             title: "Registration successful",
             description: "Your account has been created and you're now signed in.",
@@ -176,13 +170,9 @@ export default function Register() {
             }
 
             console.log("Register page - Sign in successful, session established")
-
-            // Ensure the session is properly established before redirecting
-            await new Promise((resolve) => setTimeout(resolve, 1000))
-
-            // Refresh the session to make sure it's properly stored
-            await refreshSession()
-
+            
+            // No need for artificial delay - redirect immediately
+            
             toast({
               title: "Registration successful",
               description: "Your account has been created and you're now signed in.",
