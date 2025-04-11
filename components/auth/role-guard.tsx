@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 import { Loader2 } from "lucide-react"
@@ -19,6 +19,38 @@ export function RoleGuard({ children, requiredRole, fallback }: RoleGuardProps) 
   const router = useRouter()
   const path = usePathname()
 
+  // Optimized role check function
+  const checkAccess = useCallback(async () => {
+    try {
+      // First check if we have the role in a cookie (fastest)
+      const roleCookie = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("user_role="))
+        ?.split("=")[1]
+
+      // Quick check with cookie
+      if (roleCookie) {
+        const hasAccess = roleCookie === requiredRole || roleCookie === "super-admin"
+        if (hasAccess) {
+          setAuthorized(true)
+          return
+        }
+      }
+
+      // If no cookie or no access, do a full check
+      const hasRequiredRole = await hasRole(requiredRole)
+      setAuthorized(hasRequiredRole)
+
+      if (!hasRequiredRole) {
+        router.push("/unauthorized")
+      }
+    } catch (error) {
+      console.error("Error checking role:", error)
+      // If there's an error checking the role, redirect to login
+      router.push("/")
+    }
+  }, [hasRole, requiredRole, router])
+
   useEffect(() => {
     // If no user is logged in, redirect to login immediately
     if (!isLoading && !user) {
@@ -32,44 +64,13 @@ export function RoleGuard({ children, requiredRole, fallback }: RoleGuardProps) 
         router.push(`/${requiredRole}/complete-profile`)
         return
       }
+
+      // Check role access
+      checkAccess()
     }
+  }, [isLoading, user, path, requiredRole, router, isProfileCompleted, checkAccess])
 
-    const checkRole = async () => {
-      try {
-        // First check if we have the role in a cookie
-        const roleCookie = document.cookie
-          .split("; ")
-          .find((row) => row.startsWith("user_role="))
-          ?.split("=")[1]
-
-        // Quick check with cookie
-        if (roleCookie) {
-          const hasAccess = roleCookie === requiredRole || roleCookie === "super-admin"
-          if (hasAccess) {
-            setAuthorized(true)
-            return
-          }
-        }
-
-        // If no cookie or no access, do a full check
-        const hasRequiredRole = await hasRole(requiredRole)
-        setAuthorized(hasRequiredRole)
-
-        if (!hasRequiredRole) {
-          router.push("/unauthorized")
-        }
-      } catch (error) {
-        console.error("Error checking role:", error)
-        // If there's an error checking the role, redirect to login
-        router.push("/")
-      }
-    }
-
-    if (!isLoading) {
-      checkRole()
-    }
-  }, [hasRole, requiredRole, router, isLoading, user, isProfileCompleted, path])
-
+  // Show loading state
   if (isLoading || authorized === null) {
     return (
       fallback || (
@@ -80,5 +81,6 @@ export function RoleGuard({ children, requiredRole, fallback }: RoleGuardProps) 
     )
   }
 
+  // Render children only if authorized
   return authorized ? <>{children}</> : null
 }

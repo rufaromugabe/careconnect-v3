@@ -14,22 +14,38 @@ if (!supabaseUrl || !supabaseAnonKey) {
   }
 }
 
-// Create a standard client with anonymous key, with fallback empty strings to prevent runtime errors
+// Update the supabase client configuration for better performance
 export const supabase = createClient(supabaseUrl || "", supabaseAnonKey || "", {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
+    detectSessionInUrl: true,
+    flowType: "pkce",
+  },
+  global: {
+    headers: {
+      "x-application-name": "care-connect",
+    },
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10,
+    },
   },
 })
 
-// Create an admin client with service role key (only available on the server)
-// Only create supabaseAdmin when running on the server
+// Update the admin client configuration
 export const supabaseAdmin =
   typeof window === "undefined"
     ? createClient(supabaseUrl || "", supabaseServiceRoleKey || "", {
         auth: {
           autoRefreshToken: false,
           persistSession: false,
+        },
+        global: {
+          headers: {
+            "x-application-name": "care-connect-admin",
+          },
         },
       })
     : null

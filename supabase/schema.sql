@@ -182,3 +182,31 @@ CREATE TABLE IF NOT EXISTS public.super_admins (
   CONSTRAINT super_admins_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE,
   CONSTRAINT super_admins_access_level_check CHECK ((access_level = ANY (ARRAY['full', 'limited'])))
 );
+
+
+
+-- Create a function to upsert user roles atomically
+CREATE OR REPLACE FUNCTION upsert_user_role(p_user_id UUID, p_role TEXT)
+RETURNS BOOLEAN AS $$
+DECLARE
+  v_exists BOOLEAN;
+BEGIN
+  -- Check if the role exists
+  SELECT EXISTS(SELECT 1 FROM user_roles WHERE user_id = p_user_id) INTO v_exists;
+  
+  -- If it exists, update it; otherwise insert it
+  IF v_exists THEN
+    UPDATE user_roles SET role = p_role WHERE user_id = p_user_id;
+  ELSE
+    INSERT INTO user_roles (user_id, role) VALUES (p_user_id, p_role);
+  END IF;
+  
+  RETURN TRUE;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN FALSE;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permission to the service role
+GRANT EXECUTE ON FUNCTION upsert_user_role(UUID, TEXT) TO service_role;

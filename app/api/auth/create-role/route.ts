@@ -15,58 +15,47 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Server configuration error" }, { status: 500 })
     }
 
-    // First check if a user role already exists - don't use single()
-    const { data: existingRoles, error: checkError } = await supabaseAdmin
-      .from("user_roles")
-      .select("*")
-      .eq("user_id", userId)
+    // First update the user metadata to include the role
+    const { error: metadataError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+      user_metadata: { role, profile_completed: false },
+    })
 
-    if (checkError) {
-      console.error("Error checking existing user role:", checkError)
-      return NextResponse.json({ error: `Role check failed: ${checkError.message}` }, { status: 500 })
+    if (metadataError) {
+      console.error("Error updating user metadata:", metadataError)
+      // Continue anyway, as the database role is more important
     }
 
-    // If role exists (we found at least one row), update it; otherwise insert a new one
-    let roleError = null
-    if (existingRoles && existingRoles.length > 0) {
-      console.log("User role already exists, updating...")
-      const { error } = await supabaseAdmin.from("user_roles").update({ role }).eq("user_id", userId)
-      roleError = error
-    } else {
-      console.log("Creating new user role...")
-      const { error } = await supabaseAdmin.from("user_roles").insert([
-        {
-          user_id: userId,
-          role: role,
-        },
-      ])
-      roleError = error
+    // First check if a user role already exists - use a transaction for atomicity
+    const { data, error } = await supabaseAdmin.rpc("upsert_user_role", {
+      p_user_id: userId,
+      p_role: role,
+    })
+
+    if (error) {
+      console.error("Error upserting user role:", error)
+      return NextResponse.json({ error: `Role management failed: ${error.message}` }, { status: 500 })
     }
 
-    if (roleError) {
-      console.error("Error managing user role:", roleError)
-      return NextResponse.json({ error: `Role management failed: ${roleError.message}` }, { status: 500 })
-    }
-
-    // Check if role-specific record already exists - don't use single()
+    // Check if role-specific record already exists
     let specificRecordExists = false
     if (role === "doctor") {
-      const { data, error } = await supabaseAdmin.from("doctors").select("*").eq("user_id", userId)
-      specificRecordExists = !!data && data.length > 0 && !error
+      const { data, error } = await supabaseAdmin.from("doctors").select("*").eq("user_id", userId).single()
+      specificRecordExists = !!data && !error
     } else if (role === "nurse") {
-      const { data, error } = await supabaseAdmin.from("nurses").select("*").eq("user_id", userId)
-      specificRecordExists = !!data && data.length > 0 && !error
+      const { data, error } = await supabaseAdmin.from("nurses").select("*").eq("user_id", userId).single()
+      specificRecordExists = !!data && !error
     } else if (role === "patient") {
-      const { data, error } = await supabaseAdmin.from("patients").select("*").eq("user_id", userId)
-      specificRecordExists = !!data && data.length > 0 && !error
+      const { data, error } = await supabaseAdmin.from("patients").select("*").eq("user_id", userId).single()
+      specificRecordExists = !!data && !error
     } else if (role === "pharmacist") {
-      const { data, error } = await supabaseAdmin.from("pharmacists").select("*").eq("user_id", userId)
-      specificRecordExists = !!data && data.length > 0 && !error
+      const { data, error } = await supabaseAdmin.from("pharmacists").select("*").eq("user_id", userId).single()
+      specificRecordExists = !!data && !error
     }
 
     // Create role-specific entry if it doesn't exist
-    let specificRoleError = null
     if (!specificRecordExists) {
+      let specificRoleError = null
+
       if (role === "doctor") {
         const { error } = await supabaseAdmin.from("doctors").insert([
           {

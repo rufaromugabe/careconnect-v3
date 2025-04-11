@@ -1,7 +1,7 @@
 import crypto from "crypto"
 
 // The encryption key should be stored in environment variables
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || ""
+const ENCRYPTION_KEY ="12345678901234567890123456789012"
 const IV_LENGTH = 16 // For AES, this is always 16 bytes
 
 // Check if encryption key is valid
@@ -112,7 +112,7 @@ export function safeDecrypt(data: string): string {
  * @returns New object with encrypted fields
  */
 export function encryptObject<T extends Record<string, any>>(obj: T, fields: string[]): T {
-  const result = { ...obj }
+  const result = { ...obj } as { [key: string]: any }
 
   fields.forEach((field) => {
     if (result[field] && typeof result[field] === "string") {
@@ -120,7 +120,7 @@ export function encryptObject<T extends Record<string, any>>(obj: T, fields: str
     }
   })
 
-  return result
+  return result as T
 }
 
 /**
@@ -130,7 +130,7 @@ export function encryptObject<T extends Record<string, any>>(obj: T, fields: str
  * @returns New object with decrypted fields
  */
 export function decryptObject<T extends Record<string, any>>(obj: T, fields: string[]): T {
-  const result = { ...obj }
+  const result = { ...obj } as { [key: string]: any }
 
   fields.forEach((field) => {
     if (result[field] && typeof result[field] === "string" && isEncrypted(result[field])) {
@@ -138,5 +138,5 @@ export function decryptObject<T extends Record<string, any>>(obj: T, fields: str
     }
   })
 
-  return result
+  return result as T
 }

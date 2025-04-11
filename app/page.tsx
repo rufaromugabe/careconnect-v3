@@ -42,6 +42,7 @@ export default function Home() {
     }
   }, [searchParams, toast])
 
+  // Update the handleLogin function for better performance
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -93,7 +94,7 @@ export default function Home() {
 
       console.log("Login page - Login successful, session established")
 
-      // Using cookie check first as it's fastest
+      // Get the user role from the cookie first (fastest)
       const roleCookie = document.cookie
         .split("; ")
         .find((row) => row.startsWith("user_role="))
@@ -105,16 +106,18 @@ export default function Home() {
         return
       }
 
-      // If user metadata contains role, use that (second fastest)
+      // If no cookie, check user metadata (second fastest)
       if (session.user.user_metadata?.role) {
         const role = session.user.user_metadata.role
-        console.log("Login page - Found role in user metadata, redirecting to:", role)
+        console.log("Login page - Found role in metadata, redirecting to:", role)
+        document.cookie = `user_role=${role}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
         router.push(`/${role}/dashboard`)
         return
       }
 
-      // Last resort - get role from database/API
+      // If no metadata, try to get the role from the database or API
       const role = await getUserRole()
+
       if (role) {
         console.log("Login page - Redirecting to role dashboard:", role)
         router.push(`/${role}/dashboard`)
