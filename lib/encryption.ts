@@ -139,4 +139,5 @@ export function decryptObject<T extends Record<string, any>>(obj: T, fields: str
   })
 
   return result as T
+  
 }
