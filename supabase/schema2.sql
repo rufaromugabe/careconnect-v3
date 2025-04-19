@@ -227,3 +227,29 @@ create table public.vital_signs (
   constraint vital_signs_health_record_id_fkey foreign KEY (health_record_id) references health_records (id) on delete CASCADE,
   constraint vital_signs_recorded_by_fkey foreign KEY (recorded_by) references auth.users (id)
 ) TABLESPACE pg_default;
+
+-- Create a function to upsert user roles atomically
+CREATE OR REPLACE FUNCTION upsert_user_role(p_user_id UUID, p_role TEXT)
+RETURNS BOOLEAN AS $$
+DECLARE
+  v_exists BOOLEAN;
+BEGIN
+  -- Check if the role exists
+  SELECT EXISTS(SELECT 1 FROM user_roles WHERE user_id = p_user_id) INTO v_exists;
+  
+  -- If it exists, update it; otherwise insert it
+  IF v_exists THEN
+    UPDATE user_roles SET role = p_role WHERE user_id = p_user_id;
+  ELSE
+    INSERT INTO user_roles (user_id, role) VALUES (p_user_id, p_role);
+  END IF;
+  
+  RETURN TRUE;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN FALSE;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permission to the service role
+GRANT EXECUTE ON FUNCTION upsert_user_role(UUID, TEXT) TO service_role;

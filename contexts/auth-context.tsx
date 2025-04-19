@@ -60,6 +60,8 @@ export function AuthProvider({
   const [isLoading, setIsLoading] = useState(true)
   const [isSupabaseInitialized, setIsSupabaseInitialized] = useState(true)
   const [userRole, setUserRole] = useState<string | null>(initialRole || null)
+  const [initAuth, setInitAuth] = useState(false)
+  const [hasInitialized, setHasInitialized] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
 
@@ -173,6 +175,11 @@ export function AuthProvider({
 
   // Initialize auth state
   useEffect(() => {
+    if (hasInitialized) {
+      console.log("Auth context - Already initialized, skipping")
+      return
+    }
+
     const initAuth = async () => {
       try {
         console.log("Auth context - Initializing session")
@@ -226,10 +233,15 @@ export function AuthProvider({
         setIsSupabaseInitialized(false)
       } finally {
         setIsLoading(false)
+        setHasInitialized(true) // Set the initialization flag to true
       }
     }
 
-    initAuth()
+    const setData = () => {
+      initAuth()
+    }
+
+    setData()
 
     // Set up auth state change listener
     const {
@@ -268,10 +280,14 @@ export function AuthProvider({
       setIsLoading(false)
     })
 
+    // Set up a periodic session refresh
+    const refreshInterval = setInterval(refreshSession, 60 * 60 * 1000) // Refresh every hour
+
     return () => {
       subscription.unsubscribe()
+      clearInterval(refreshInterval)
     }
-  }, [toast, initialRole, persistSession, refreshRoleCookie])
+  }, [toast, initialRole, persistSession, refreshRoleCookie, refreshSession, hasInitialized])
 
   // Optimized sign in function
   const signIn = useCallback(
