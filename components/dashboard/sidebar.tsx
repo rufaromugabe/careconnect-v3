@@ -55,6 +55,7 @@ export function Sidebar({ role }: SidebarProps) {
       { href: "/super-admin/users", label: "Manage Users", icon: Users },
       { href: "/super-admin/hospitals", label: "Manage Hospitals", icon: Building }, // Fixed the label
       { href: "/super-admin/alerts", label: "System Alerts", icon: AlertCircle },
+      { href: "/super-admin/system-logs", label: "System Logs", icon: Activity },
     ],
     nurse: [
       { href: "/nurse/dashboard", label: "Dashboard", icon: Home },

@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
     // First update the user metadata to include the role
     const { error: metadataError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-      user_metadata: { role, profile_completed: false },
+      user_metadata: { role, profile_completed: false, is_verified: false },
     })
 
     if (metadataError) {
@@ -29,6 +29,7 @@ export async function POST(request: Request) {
     const { data, error } = await supabaseAdmin.rpc("upsert_user_role", {
       p_user_id: userId,
       p_role: role,
+      
     })
 
     if (error) {

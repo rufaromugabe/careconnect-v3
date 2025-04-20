@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/use-toast"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { supabase } from "@/lib/supabase"
+import { logAction } from "@/lib/logging"
 
 interface Hospital {
   id: string
@@ -139,7 +140,19 @@ export default function SuperAdminHospitalsPage() {
       }
 
       const newHospital = await response.json()
+      //logging action
+      await logAction(
+        user.id,
+        `created hospital: ${newHospital.name}`,
+        {
+          email: user.email,
+          status: "created",
+          hospital_name: newHospital.name,
+          hospital_location: newHospital.location,
 
+
+        }
+      )
       // Update the hospitals list
       setHospitals((prev) => [...prev, newHospital])
 
@@ -183,6 +196,19 @@ export default function SuperAdminHospitalsPage() {
       }
 
       const updatedHospital = await response.json()
+      //logging action
+      await logAction(
+        user.id,
+        `updated hospital: ${currentHospital.name} to ${updatedHospital.name}`,
+        {
+          email: user.email,
+          status: "updated",
+          hospital_name: updatedHospital.name,
+          hospital_location: updatedHospital.location,
+
+
+        }
+      )
 
       // Update the hospitals list
       setHospitals((prev) => prev.map((hospital) => (hospital.id === updatedHospital.id ? updatedHospital : hospital)))
@@ -223,7 +249,17 @@ export default function SuperAdminHospitalsPage() {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.error || "Failed to delete hospital")
       }
-
+      //logging action
+      await logAction(
+        user.id,
+        `deleted hospital: ${currentHospital.name}`,
+        {
+          email: user.email,
+          status: "deleted",
+          hospital_name: currentHospital.name,
+          hospital_location: currentHospital.location,
+        }
+      )
       // Update the hospitals list
       setHospitals((prev) => prev.filter((hospital) => hospital.id !== currentHospital.id))
 

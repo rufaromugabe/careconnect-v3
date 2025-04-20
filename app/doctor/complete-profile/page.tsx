@@ -168,8 +168,8 @@ export default function DoctorCompleteProfilePage() {
         description: "Your doctor profile has been set up successfully.",
       })
 
-      // Redirect to dashboard
-      router.push("/doctor/dashboard")
+      // Redirect to waiting approval page
+      router.push("/waiting-approval")
     } catch (error: any) {
       console.error("Error completing profile:", error.message)
       toast({

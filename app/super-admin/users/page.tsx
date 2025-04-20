@@ -133,10 +133,6 @@ export default function SuperAdminUsersPage() {
                   <Filter className="h-4 w-4 mr-2" />
                   Filter
                 </Button>
-                <Button size="sm">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Add User
-                </Button>
               </div>
             </div>
 

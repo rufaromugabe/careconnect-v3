@@ -24,6 +24,7 @@ import { Header } from "@/components/layout/header"
 import { useAuth } from "@/contexts/auth-context"
 import { getDoctorProfile, getAppointments, getDoctorPatients } from "@/lib/data-service"
 import { supabase } from "@/lib/supabase"
+import { logAction } from "@/lib/logging"
 
 export default function DoctorAppointmentsPage() {
   const { user } = useAuth()
@@ -99,7 +100,17 @@ export default function DoctorAppointmentsPage() {
 
       // Insert the appointment
       const { error: appointmentError } = await supabase.from("appointments").insert(newAppointment)
+      //logging action
+      await logAction(
+        doctorProfile.id,
+        `created an appointment for patient: ${newAppointment.patient_id}`,
+        {
+          email: user.email,
+          status: "created",
+          dateTime: newAppointment.date_time,
 
+        }
+      )
       if (appointmentError) throw appointmentError
 
       // Refresh appointments
@@ -201,7 +212,6 @@ export default function DoctorAppointmentsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>ID</TableHead>
                     <TableHead>Patient</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Time</TableHead>
@@ -213,7 +223,6 @@ export default function DoctorAppointmentsPage() {
                   {filteredAppointments.length > 0 ? (
                     filteredAppointments.map((appointment) => (
                       <TableRow key={appointment.id}>
-                        <TableCell className="font-medium">{appointment.id}</TableCell>
                         <TableCell>
                           {appointment.patients?.users?.user_metadata?.full_name ||
                             appointment.patients?.users?.user_metadata?.name ||

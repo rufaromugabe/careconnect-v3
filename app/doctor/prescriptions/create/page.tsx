@@ -16,6 +16,7 @@ import { getDoctorProfile, getDoctorPatients } from "@/lib/data-service"
 import { supabase } from "@/lib/supabase"
 import { toast } from "@/components/ui/use-toast"
 import { encrypt } from "@/lib/encryption" // Import encrypt directly
+import { logAction } from "@/lib/logging"
 
 export default function CreatePrescriptionPage() {
   const router = useRouter()
@@ -139,11 +140,24 @@ export default function CreatePrescriptionPage() {
         const { error: medicationsError } = await supabase.from("medications").insert(medicationsToInsert)
 
         if (medicationsError) throw medicationsError
-
+        //log the action
+        await logAction(
+          doctorProfile.id,
+          `created prescription for patient: ${selectedPatient.id}`,
+          {
+            email: user.email,
+            status: "created",
+            prescription_id: prescriptionId,
+            patient_id: selectedPatient.id,
+          }
+        )
+        
         toast({
           title: "Success",
           description: "Prescription created successfully",
         })
+
+        
 
         // Navigate back to prescriptions list
         router.push("/doctor/prescriptions")

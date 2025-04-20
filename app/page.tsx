@@ -72,11 +72,20 @@ export default function Home() {
 
       if (error) {
         console.error("Login page - Login error:", error)
+      
+        const isInvalidCredentials = error.message
+          .toLowerCase()
+          .includes("invalid login credentials")
+      
         toast({
           title: "Login failed",
-          description: error.message,
+          description: isInvalidCredentials
+            ? "Incorrect email or password. Please try again."
+            : error.message || "An error occurred. Please try again later.",
           variant: "destructive",
+          duration: 4000,
         })
+      
         setIsLoading(false)
         return
       }

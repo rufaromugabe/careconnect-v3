@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/use-toast"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { supabase } from "@/lib/supabase"
+import { logAction } from "@/lib/logging"
 
 interface Pharmacy {
   id: string
@@ -83,6 +84,16 @@ export default function SuperAdminPharmaciesPage() {
 
         const data = await response.json()
         setPharmacies(data)
+        // log action
+        await logAction(
+          user.id,
+          "accessed pharmacies list",
+          {
+            email: user.email,
+            status: "ok",
+            
+          }
+        )
       } catch (err: any) {
         console.error("Error loading pharmacies data:", err)
         setError(err.message || "Failed to load pharmacies data")
@@ -139,7 +150,17 @@ export default function SuperAdminPharmaciesPage() {
       }
 
       const newPharmacy = await response.json()
-
+      // log action
+      await logAction(
+        user.id,
+        `created new pharmacy: ${newPharmacy.name}`,
+        {
+          email: user.email,
+          status: "created",
+          pharmacy_name: newPharmacy.name,
+          pharmacy_location: newPharmacy.location,
+        }
+      )
       // Update the pharmacies list
       setPharmacies((prev) => [...prev, newPharmacy])
 
@@ -183,7 +204,18 @@ export default function SuperAdminPharmaciesPage() {
       }
 
       const updatedPharmacy = await response.json()
+      // log action
+      await logAction(
+        user.id,
+        `updated pharmacy: ${currentPharmacy.name}`,
+        {
+          email: user.email,
+          status: "created",
+          pharmacy_name: updatedPharmacy.name,
+          pharmacy_location: updatedPharmacy.location,
 
+        }
+      )
       // Update the pharmacies list
       setPharmacies((prev) => prev.map((pharmacy) => (pharmacy.id === updatedPharmacy.id ? updatedPharmacy : pharmacy)))
 
@@ -223,6 +255,18 @@ export default function SuperAdminPharmaciesPage() {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.error || "Failed to delete pharmacy")
       }
+      // log action
+      await logAction(
+        user.id,
+        `deleted pharmacy: ${currentPharmacy.name}`,
+        {
+          email: user.email,
+          status: "deleted",
+          pharmacy_name: currentPharmacy.name,
+          pharmacy_location: currentPharmacy.location,
+        }
+      )
+
 
       // Update the pharmacies list
       setPharmacies((prev) => prev.filter((pharmacy) => pharmacy.id !== currentPharmacy.id))
