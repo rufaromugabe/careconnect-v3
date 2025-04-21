@@ -174,7 +174,7 @@ export default function Register() {
         await new Promise((resolve) => setTimeout(resolve, 1000))
 
         // Redirect to the appropriate dashboard
-        router.push(`/${role}/dashboard`)
+        router.push(`/${role}/complete-profile`)
       } else {
         // This shouldn't happen if there's no error, but just in case
         console.log("Register page - No user data returned after registration")

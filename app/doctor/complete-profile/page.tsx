@@ -169,7 +169,7 @@ export default function DoctorCompleteProfilePage() {
       })
 
       // Redirect to dashboard
-      router.push("/doctor/dashboard")
+      router.push("/doctor/verify")
     } catch (error: any) {
       console.error("Error completing profile:", error.message)
       toast({

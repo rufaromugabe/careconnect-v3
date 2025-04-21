@@ -15,15 +15,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Server configuration error" }, { status: 500 })
     }
 
-    // First update the user metadata to include the role
-    const { error: metadataError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-      user_metadata: { role, profile_completed: false, is_verified: false },
-    })
-
-    if (metadataError) {
-      console.error("Error updating user metadata:", metadataError)
-      // Continue anyway, as the database role is more important
+    if (role == "patient" || role == "Patient") {
+      const { error: metadataError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        user_metadata: { role, profile_completed: false, is_verified: true },
+      })
+      if (metadataError) {
+        console.error("Error updating user metadata:", metadataError)
+        // Continue anyway, as the database role is more important
+      }
     }
+    else {
+      const { error: metadataError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        user_metadata: { role, profile_completed: false, is_verified: false },
+      })
+      if (metadataError) {
+        console.error("Error updating user metadata:", metadataError)
+        // Continue anyway, as the database role is more important
+      }
+    }
+    
+
+    
 
     // First check if a user role already exists - use a transaction for atomicity
     const { data, error } = await supabaseAdmin.rpc("upsert_user_role", {

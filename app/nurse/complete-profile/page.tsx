@@ -169,7 +169,7 @@ export default function NurseCompleteProfilePage() {
       })
 
       // Redirect to dashboard
-      router.push("/nurse/dashboard")
+      router.push("/nurse/verify")
     } catch (error: any) {
       console.error("Error completing profile:", error.message)
       toast({

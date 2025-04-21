@@ -166,7 +166,7 @@ export default function PharmacistCompleteProfilePage() {
       })
 
       // Redirect to dashboard
-      router.push("/pharmacist/dashboard")
+      router.push("/pharmacist/verify")
     } catch (error: any) {
       console.error("Error completing profile:", error.message)
       toast({
