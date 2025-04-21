@@ -127,13 +127,18 @@ export async function middleware(req: NextRequest) {
 
   // Check for the role cookie
   const roleCookie = getCookie(req, "user_role")
+  const is_verified = getCookie(req, "is_verified")
 
   // If there's a role cookie, check access
   if (roleCookie) {
+    if (is_verified !== "true") {
+      return NextResponse.redirect(new URL(`/${roleCookie}/verify`, req.url))
+    }
     // Check if the user has access to the requested route
     if (!hasAccessToPath(roleCookie, path)) {
       return NextResponse.redirect(new URL(`/${roleCookie}/dashboard`, req.url))
     }
+    
 
     // Check if profile is completed
     if (
@@ -143,7 +148,15 @@ export async function middleware(req: NextRequest) {
     ) {
       return NextResponse.redirect(new URL(`/${roleCookie}/complete-profile`, req.url))
     }
-
+    // Check if the user is verified
+    if (
+      session?.user?.user_metadata &&
+      session.user.user_metadata.is_verified !== true &&
+      !path.includes("/verify")
+    ) {
+      return NextResponse.redirect(new URL(`/${roleCookie}/verify`, req.url))
+    }
+    
     // User has access, continue
     return res
   }
@@ -151,9 +164,16 @@ export async function middleware(req: NextRequest) {
   // If no role cookie, check user metadata
   if (session.user.user_metadata?.role) {
     const role = session.user.user_metadata.role
-
+    const is_verified = session.user.user_metadata.is_verified
     // Set the role cookie
     res.cookies.set("user_role", role, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      httpOnly: false,
+      sameSite: "lax",
+    })
+    // Set the is_verified cookie
+    res.cookies.set("is_verified", is_verified, {
       path: "/",
       maxAge: 60 * 60 * 24 * 7, // 7 days
       httpOnly: false,
@@ -172,6 +192,14 @@ export async function middleware(req: NextRequest) {
       !path.includes("/complete-profile")
     ) {
       return NextResponse.redirect(new URL(`/${role}/complete-profile`, req.url))
+    }
+    // Check if the user is verified
+    if (
+      session?.user?.user_metadata &&
+      session.user.user_metadata.is_verified !== true &&
+      !path.includes("/verify")
+    ) {
+      return NextResponse.redirect(new URL(`/${role}/verify`, req.url))
     }
 
     // User has access, continue

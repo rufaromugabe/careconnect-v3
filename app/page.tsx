@@ -1,58 +1,77 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useRouter, useSearchParams } from "next/navigation"
-import { Stethoscope, User, FlaskRoundIcon as Flask, Thermometer, Heart, AlertTriangle } from "lucide-react"
-import { useAuth } from "@/contexts/auth-context"
-import { useToast } from "@/components/ui/use-toast"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AnimatedBeam, AnimatedGradientText } from "@/components/ui/animated-beam"
-import { motion } from "framer-motion"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  Stethoscope,
+  User,
+  FlaskRoundIcon as Flask,
+  Thermometer,
+  Heart,
+  AlertTriangle,
+} from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
+import { useToast } from "@/components/ui/use-toast";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  AnimatedBeam,
+  AnimatedGradientText,
+} from "@/components/ui/animated-beam";
+import { motion } from "framer-motion";
 
 export default function Home() {
-  const [email, setEmail] = useState<string>("")
-  const [password, setPassword] = useState<string>("")
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
-  const { signIn, signInWithGoogle, isSupabaseInitialized, refreshSession, getUserRole } = useAuth()
-  const { toast } = useToast()
-  const searchParams = useSearchParams()
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const {
+    signIn,
+    signInWithGoogle,
+    isSupabaseInitialized,
+    refreshSession,
+    getUserRole,
+  } = useAuth();
+  const { toast } = useToast();
+  const searchParams = useSearchParams();
 
   // Check for error parameters in the URL
   useEffect(() => {
-    const error = searchParams.get("error")
+    const error = searchParams.get("error");
     if (error === "role_assignment_failed") {
       toast({
         title: "Authentication error",
-        description: "Failed to assign a role to your account. Please try again or contact support.",
+        description:
+          "Failed to assign a role to your account. Please try again or contact support.",
         variant: "destructive",
-      })
+      });
     } else if (error === "patient_creation_failed") {
       toast({
         title: "Authentication error",
-        description: "Failed to create your patient profile. Please try again or contact support.",
+        description:
+          "Failed to create your patient profile. Please try again or contact support.",
         variant: "destructive",
-      })
+      });
     }
-  }, [searchParams, toast])
+  }, [searchParams, toast]);
 
   // Update the handleLogin function for better performance
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!isSupabaseInitialized) {
       toast({
         title: "Configuration Error",
-        description: "The authentication system is not properly configured. Please contact support.",
+        description:
+          "The authentication system is not properly configured. Please contact support.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (!email || !password) {
@@ -60,23 +79,23 @@ export default function Home() {
         title: "Missing fields",
         description: "Please fill in all fields",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
-      console.log("Login page - Attempting to sign in:", email)
-      const { error, session } = await signIn(email, password)
+      console.log("Login page - Attempting to sign in:", email);
+      const { error, session } = await signIn(email, password);
 
       if (error) {
-        console.error("Login page - Login error:", error)
-      
+        console.error("Login page - Login error:", error);
+
         const isInvalidCredentials = error.message
           .toLowerCase()
-          .includes("invalid login credentials")
-      
+          .includes("invalid login credentials");
+
         toast({
           title: "Login failed",
           description: isInvalidCredentials
@@ -84,74 +103,116 @@ export default function Home() {
             : error.message || "An error occurred. Please try again later.",
           variant: "destructive",
           duration: 4000,
-        })
-      
-        setIsLoading(false)
-        return
+        });
+
+        setIsLoading(false);
+        return;
       }
 
       if (!session) {
-        console.error("Login page - No session after login")
+        console.error("Login page - No session after login");
         toast({
           title: "Login failed",
           description: "Failed to establish a session. Please try again.",
           variant: "destructive",
-        })
-        setIsLoading(false)
-        return
+        });
+        setIsLoading(false);
+        return;
       }
 
-      console.log("Login page - Login successful, session established")
+      console.log("Login page - Login successful, session established");
 
-      // Get the user role from the cookie first (fastest)
-      const roleCookie = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("user_role="))
-        ?.split("=")[1]
+      // Helper function to get a cookie by name
+      function getCookieValue(name: string): string | undefined {
+        return document.cookie
+          .split("; ")
+          .find((row) => row.startsWith(`${name}=`))
+          ?.split("=")[1];
+      }
+
+      // Get values from cookies
+      const roleCookie = getCookieValue("user_role");
+      const isVerifiedCookie = getCookieValue("is_verified");
 
       if (roleCookie) {
-        console.log("Login page - Found role in cookie, redirecting to:", roleCookie)
-        router.push(`/${roleCookie}/dashboard`)
-        return
+        console.log("Login page - Found role in cookie:", roleCookie);
+
+        if (isVerifiedCookie !== "true") {
+          console.log(
+            "Login page - User not verified (cookie), redirecting to verification"
+          );
+          router.push(`/${roleCookie}/verify`);
+          return;
+        }
+
+        console.log(
+          "Login page - Redirecting to dashboard for role:",
+          roleCookie
+        );
+        router.push(`/${roleCookie}/dashboard`);
+        return;
       }
 
       // If no cookie, check user metadata (second fastest)
       if (session.user.user_metadata?.role) {
-        const role = session.user.user_metadata.role
-        console.log("Login page - Found role in metadata, redirecting to:", role)
-        document.cookie = `user_role=${role}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-        router.push(`/${role}/dashboard`)
-        return
+        const role = session.user.user_metadata.role;
+        const isVerified = session.user.user_metadata?.is_verified;
+
+        if (isVerified !== true) {
+          console.log(
+            "Login page - User is not verified, redirecting to verification"
+          );
+          router.push(`/${role}/verify`);
+          return;
+        }
+
+        console.log(
+          "Login page - Found role in metadata, redirecting to:",
+          role
+        );
+
+        // Set both cookies
+        document.cookie = `user_role=${role}; path=/; max-age=${
+          60 * 60 * 24 * 7
+        }; SameSite=Lax`;
+        document.cookie = `is_verified=${isVerified}; path=/; max-age=${
+          60 * 60 * 24 * 7
+        }; SameSite=Lax`;
+
+        router.push(`/${role}/dashboard`);
+        return;
       }
 
       // If no metadata, try to get the role from the database or API
-      const role = await getUserRole()
+      const role = await getUserRole();
 
       if (role) {
-        console.log("Login page - Redirecting to role dashboard:", role)
-        router.push(`/${role}/dashboard`)
+        console.log("Login page - Redirecting to role dashboard:", role);
+        router.push(`/${role}/dashboard`);
       } else {
-        console.log("Login page - No role found, redirecting to role selection")
-        router.push("/auth/select-role")
+        console.log(
+          "Login page - No role found, redirecting to role selection"
+        );
+        router.push("/auth/select-role");
       }
     } catch (error) {
-      console.error("Login page - Login error:", error)
+      console.error("Login page - Login error:", error);
       toast({
         title: "Login failed",
         description: "An unexpected error occurred",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const roleIcons = [
     { Icon: Stethoscope, label: "Doctor", delay: 0.1 },
     { Icon: Thermometer, label: "Nurse", delay: 0.2 },
     { Icon: User, label: "Patient", delay: 0.3 },
     { Icon: Flask, label: "Pharmacist", delay: 0.4 },
-  ]
+  ];
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-background to-muted flex flex-col items-center justify-center">
@@ -169,7 +230,12 @@ export default function Home() {
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.2 }}
+              transition={{
+                type: "spring",
+                stiffness: 260,
+                damping: 20,
+                delay: 0.2,
+              }}
             >
               <Heart className="h-12 w-12 text-primary mr-3" />
             </motion.div>
@@ -183,8 +249,8 @@ export default function Home() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.8 }}
           >
-            A comprehensive healthcare management system connecting doctors, nurses, patients, and pharmacists for
-            better healthcare delivery.
+            A comprehensive healthcare management system connecting doctors,
+            nurses, patients, and pharmacists for better healthcare delivery.
           </motion.p>
         </motion.div>
 
@@ -193,7 +259,8 @@ export default function Home() {
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Configuration Error</AlertTitle>
             <AlertDescription>
-              The application is not properly configured. Please make sure the environment variables are set correctly.
+              The application is not properly configured. Please make sure the
+              environment variables are set correctly.
             </AlertDescription>
           </Alert>
         )}
@@ -276,7 +343,9 @@ export default function Home() {
                       className="w-full group relative overflow-hidden"
                       disabled={isLoading || !isSupabaseInitialized}
                     >
-                      <span className="relative z-10">{isLoading ? "Logging in..." : "Login"}</span>
+                      <span className="relative z-10">
+                        {isLoading ? "Logging in..." : "Login"}
+                      </span>
                       <span className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </Button>
                   </motion.div>
@@ -286,7 +355,9 @@ export default function Home() {
                       <span className="w-full border-t" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+                      <span className="bg-background px-2 text-muted-foreground">
+                        Or continue with
+                      </span>
                     </div>
                   </div>
 
@@ -302,21 +373,21 @@ export default function Home() {
                       disabled={!isSupabaseInitialized}
                       onClick={async () => {
                         try {
-                          const { error } = await signInWithGoogle()
+                          const { error } = await signInWithGoogle();
                           if (error) {
                             toast({
                               title: "Login failed",
                               description: error.message,
                               variant: "destructive",
-                            })
+                            });
                           }
                         } catch (error) {
-                          console.error("Google login error:", error)
+                          console.error("Google login error:", error);
                           toast({
                             title: "Login failed",
                             description: "An unexpected error occurred",
                             variant: "destructive",
-                          })
+                          });
                         }
                       }}
                     >
@@ -337,7 +408,9 @@ export default function Home() {
                           ></path>
                         </svg>
                         Sign in with Google
-                        <span className="ml-2 text-xs text-muted-foreground">(as Patient)</span>
+                        <span className="ml-2 text-xs text-muted-foreground">
+                          (as Patient)
+                        </span>
                       </span>
                       <span className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </Button>
@@ -350,11 +423,17 @@ export default function Home() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.9, duration: 0.5 }}
                 >
-                  <a href="#" className="hover:underline text-primary transition-colors">
+                  <a
+                    href="#"
+                    className="hover:underline text-primary transition-colors"
+                  >
                     Forgot password?
                   </a>
                   <span className="mx-2">•</span>
-                  <a href="/register" className="hover:underline text-primary transition-colors">
+                  <a
+                    href="/register"
+                    className="hover:underline text-primary transition-colors"
+                  >
                     Create an account
                   </a>
                 </motion.div>
@@ -364,5 +443,5 @@ export default function Home() {
         </div>
       </div>
     </div>
-  )
+  );
 }

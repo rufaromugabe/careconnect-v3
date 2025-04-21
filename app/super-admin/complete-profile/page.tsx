@@ -20,6 +20,7 @@ export default function SuperAdminProfileCompletion() {
   const [formData, setFormData] = useState({
     name: user?.user_metadata?.full_name || user?.user_metadata?.name || "",
     accessLevel: "full",
+    is_verified: true,
   })
 
   const handleChange = (e) => {
@@ -42,6 +43,7 @@ export default function SuperAdminProfileCompletion() {
           full_name: formData.name,
           profile_completed: true,
           access_level: formData.accessLevel,
+          is_verified: formData.is_verified,
         },
       })
 

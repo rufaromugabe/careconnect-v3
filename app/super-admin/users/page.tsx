@@ -1,43 +1,44 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Sidebar } from "@/components/dashboard/sidebar"
-import { Header } from "@/components/layout/header"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, UserPlus, UserX, UserCheck, Filter } from "lucide-react"
-import { useAuth } from "@/contexts/auth-context"
-import { supabase } from "@/lib/supabase"
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Sidebar } from "@/components/dashboard/sidebar";
+import { Header } from "@/components/layout/header";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, UserPlus, UserX, UserCheck, Filter } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
+import { supabase } from "@/lib/supabase";
+import { logAction } from "@/lib/logging";
 
 export default function SuperAdminUsersPage() {
-  const { user } = useAuth()
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [users, setUsers] = useState<any[]>([])
-  const [filteredUsers, setFilteredUsers] = useState<any[]>([])
-  const [activeTab, setActiveTab] = useState("all")
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [users, setUsers] = useState<any[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState("all");
 
   useEffect(() => {
     async function loadData() {
-      if (!user) return
+      if (!user) return;
 
       try {
-        setLoading(true)
+        setLoading(true);
 
         // First, check if the user has the super-admin role in their metadata
-        const isSuperAdmin = user.user_metadata?.role === "super-admin"
+        const isSuperAdmin = user.user_metadata?.role === "super-admin";
 
         if (!isSuperAdmin) {
-          throw new Error("Unauthorized: User is not a super admin")
+          throw new Error("Unauthorized: User is not a super admin");
         }
 
         // Get the session for the auth token
-        const { data: sessionData } = await supabase.auth.getSession()
-        const token = sessionData?.session?.access_token
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData?.session?.access_token;
 
         if (!token) {
-          throw new Error("No authentication token available")
+          throw new Error("No authentication token available");
         }
 
         // Fetch users directly using the admin API endpoint
@@ -47,51 +48,105 @@ export default function SuperAdminUsersPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        })
+        });
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}))
-          console.error("API response error:", response.status, errorData)
-          throw new Error(errorData.error || `API error: ${response.status}`)
+          const errorData = await response.json().catch(() => ({}));
+          console.error("API response error:", response.status, errorData);
+          throw new Error(errorData.error || `API error: ${response.status}`);
         }
 
-        const userData = await response.json()
+        const userData = await response.json();
+        console.log(userData);
 
         // Format the user data
         const formattedUsers = userData.map((user: any) => ({
           id: user.id,
           email: user.email,
-          name: user.user_metadata?.full_name || user.user_metadata?.name || "Unknown",
+          name:
+            user.user_metadata?.full_name ||
+            user.user_metadata?.name ||
+            "Unknown",
           role: user.user_metadata?.role || "Unknown",
+          is_verified: user.user_metadata?.is_verified || false,
           createdAt: new Date(user.created_at),
           updatedAt: new Date(user.updated_at),
-        }))
+        }));
 
-        setUsers(formattedUsers)
-        setFilteredUsers(formattedUsers)
+        setUsers(formattedUsers);
+        console.log("Fetched users:", formattedUsers);
+        setFilteredUsers(formattedUsers);
       } catch (err: any) {
-        console.error("Error loading users data:", err)
-        setError(err.message || "Failed to load users data")
+        console.error("Error loading users data:", err);
+        setError(err.message || "Failed to load users data");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
-
-    loadData()
-  }, [user])
+    loadData();
+  }, [user]);
 
   useEffect(() => {
     // Filter users based on active tab
     if (activeTab === "all") {
-      setFilteredUsers(users)
+      setFilteredUsers(users);
     } else {
-      setFilteredUsers(users.filter((user) => user.role === activeTab))
+      setFilteredUsers(users.filter((user) => user.role === activeTab));
     }
-  }, [activeTab, users])
+  }, [activeTab, users]);
+  const handleToggleVerification = async (
+    userId: string,
+    currentIsVerified: boolean
+  ) => {
+    const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData?.session?.access_token;
+
+        if (!token) {
+          throw new Error("No authentication token available");
+        }
+    try {
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ is_verified: !currentIsVerified }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(
+          result.error || "Failed to update user verification status"
+        );
+      }
+      //log action
+      const action = currentIsVerified
+      ? `disabled user account: ${userId}`
+      : `enabled user account: ${userId}`;
+
+    await logAction(user.id, action, {
+      email: user.email,
+      userId,
+      newStatus: currentIsVerified? "Inactive" : "Active",
+    });
+
+      // Refresh UI or update local state as needed
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.id === userId
+            ? { ...user, is_verified: !currentIsVerified }
+            : user
+        )
+      );
+    } catch (error) {
+      console.error("Error updating verification:", error);
+    }
+  };
 
   const handleTabChange = (value: string) => {
-    setActiveTab(value)
-  }
+    setActiveTab(value);
+  };
 
   if (loading) {
     return (
@@ -102,7 +157,7 @@ export default function SuperAdminUsersPage() {
           <p className="mt-4 text-lg">Loading users data...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -111,12 +166,14 @@ export default function SuperAdminUsersPage() {
         <Sidebar role="super-admin" />
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="text-center max-w-md p-6 bg-red-50 rounded-lg">
-            <h2 className="text-xl font-semibold text-red-700 mb-2">Error Loading Data</h2>
+            <h2 className="text-xl font-semibold text-red-700 mb-2">
+              Error Loading Data
+            </h2>
             <p className="text-red-600">{error}</p>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -138,15 +195,25 @@ export default function SuperAdminUsersPage() {
 
             <Tabs defaultValue="all" onValueChange={handleTabChange}>
               <TabsList className="mb-6">
-                <TabsTrigger value="all">All Users ({users.length})</TabsTrigger>
-                <TabsTrigger value="doctor">Doctors ({users.filter((u) => u.role === "doctor").length})</TabsTrigger>
-                <TabsTrigger value="patient">Patients ({users.filter((u) => u.role === "patient").length})</TabsTrigger>
-                <TabsTrigger value="pharmacist">
-                  Pharmacists ({users.filter((u) => u.role === "pharmacist").length})
+                <TabsTrigger value="all">
+                  All Users ({users.length})
                 </TabsTrigger>
-                <TabsTrigger value="nurse">Nurses ({users.filter((u) => u.role === "nurse").length})</TabsTrigger>
+                <TabsTrigger value="doctor">
+                  Doctors ({users.filter((u) => u.role === "doctor").length})
+                </TabsTrigger>
+                <TabsTrigger value="patient">
+                  Patients ({users.filter((u) => u.role === "patient").length})
+                </TabsTrigger>
+                <TabsTrigger value="pharmacist">
+                  Pharmacists (
+                  {users.filter((u) => u.role === "pharmacist").length})
+                </TabsTrigger>
+                <TabsTrigger value="nurse">
+                  Nurses ({users.filter((u) => u.role === "nurse").length})
+                </TabsTrigger>
                 <TabsTrigger value="super-admin">
-                  Admins ({users.filter((u) => u.role === "super-admin").length})
+                  Admins ({users.filter((u) => u.role === "super-admin").length}
+                  )
                 </TabsTrigger>
               </TabsList>
 
@@ -154,7 +221,12 @@ export default function SuperAdminUsersPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle>
-                      {activeTab === "all" ? "All Users" : `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}s`}
+                      {activeTab === "all"
+                        ? "All Users"
+                        : `${
+                            activeTab.charAt(0).toUpperCase() +
+                            activeTab.slice(1)
+                          }s`}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -173,8 +245,13 @@ export default function SuperAdminUsersPage() {
                         <tbody>
                           {filteredUsers.length > 0 ? (
                             filteredUsers.map((user) => (
-                              <tr key={user.id} className="bg-white border-b hover:bg-gray-50">
-                                <td className="px-6 py-4 font-medium">{user.name}</td>
+                              <tr
+                                key={user.id}
+                                className="bg-white border-b hover:bg-gray-50"
+                              >
+                                <td className="px-6 py-4 font-medium">
+                                  {user.name}
+                                </td>
                                 <td className="px-6 py-4">{user.email}</td>
                                 <td className="px-6 py-4">
                                   <span
@@ -182,34 +259,62 @@ export default function SuperAdminUsersPage() {
                                       user.role === "doctor"
                                         ? "bg-blue-100 text-blue-800"
                                         : user.role === "patient"
-                                          ? "bg-green-100 text-green-800"
-                                          : user.role === "pharmacist"
-                                            ? "bg-purple-100 text-purple-800"
-                                            : user.role === "nurse"
-                                              ? "bg-yellow-100 text-yellow-800"
-                                              : user.role === "super-admin"
-                                                ? "bg-red-100 text-red-800"
-                                                : "bg-gray-100 text-gray-800"
+                                        ? "bg-green-100 text-green-800"
+                                        : user.role === "pharmacist"
+                                        ? "bg-purple-100 text-purple-800"
+                                        : user.role === "nurse"
+                                        ? "bg-yellow-100 text-yellow-800"
+                                        : user.role === "super-admin"
+                                        ? "bg-red-100 text-red-800"
+                                        : "bg-gray-100 text-gray-800"
                                     }`}
                                   >
                                     {user.role}
                                   </span>
                                 </td>
-                                <td className="px-6 py-4">{user.createdAt.toLocaleDateString()}</td>
                                 <td className="px-6 py-4">
-                                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    Active
-                                  </span>
+                                  {user.createdAt.toLocaleDateString()}
                                 </td>
                                 <td className="px-6 py-4">
+                                  {user.is_verified ? (
+                                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                      Active
+                                    </span>
+                                  ) : (
+                                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                      Inactive
+                                    </span>
+                                  )}
+                                </td>
+
+                                <td className="px-6 py-4">
                                   <div className="flex space-x-2">
-                                    <Button variant="ghost" size="sm">
-                                      <UserCheck className="h-4 w-4 mr-1" />
-                                      Edit
-                                    </Button>
-                                    <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-800">
-                                      <UserX className="h-4 w-4 mr-1" />
-                                      Disable
+                                    <Button
+                                      onClick={() =>
+                                        handleToggleVerification(
+                                          user.id,
+                                          user.is_verified
+                                        )
+                                      }
+                                      variant="ghost"
+                                      size="sm"
+                                      className={`${
+                                        user.is_verified
+                                          ? "text-red-600 hover:text-red-800"
+                                          : "text-green-600 hover:text-green-800"
+                                      }`}
+                                    >
+                                      {user.is_verified ? (
+                                        <>
+                                          <UserX className="h-4 w-4 mr-1" />
+                                          Disable
+                                        </>
+                                      ) : (
+                                        <>
+                                          <UserCheck className="h-4 w-4 mr-1" />
+                                          Enable
+                                        </>
+                                      )}
                                     </Button>
                                   </div>
                                 </td>
@@ -233,5 +338,5 @@ export default function SuperAdminUsersPage() {
         </main>
       </div>
     </div>
-  )
+  );
 }
