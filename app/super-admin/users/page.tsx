@@ -68,7 +68,7 @@ export default function SuperAdminUsersPage() {
             user.user_metadata?.name ||
             "Unknown",
           role: user.user_metadata?.role || "Unknown",
-          is_verified: user.user_metadata?.is_verified || false,
+          is_active: user.user_metadata?.is_active || false,
           createdAt: new Date(user.created_at),
           updatedAt: new Date(user.updated_at),
         }));
@@ -94,9 +94,9 @@ export default function SuperAdminUsersPage() {
       setFilteredUsers(users.filter((user) => user.role === activeTab));
     }
   }, [activeTab, users]);
-  const handleToggleVerification = async (
+  const handleToggleActive = async (
     userId: string,
-    currentIsVerified: boolean
+    currentIsActive: boolean
   ) => {
     const { data: sessionData } = await supabase.auth.getSession();
         const token = sessionData?.session?.access_token;
@@ -111,7 +111,7 @@ export default function SuperAdminUsersPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ is_verified: !currentIsVerified }),
+        body: JSON.stringify({ is_active: !currentIsActive }),
       });
 
       const result = await response.json();
@@ -121,21 +121,21 @@ export default function SuperAdminUsersPage() {
         );
       }
       //log action
-      const action = currentIsVerified
+      const action = currentIsActive
       ? `disabled user account: ${userId}`
       : `enabled user account: ${userId}`;
 
     await logAction(user.id, action, {
       email: user.email,
       userId,
-      newStatus: currentIsVerified? "Inactive" : "Active",
+      newStatus: currentIsActive? "Inactive" : "Active",
     });
 
       // Refresh UI or update local state as needed
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.id === userId
-            ? { ...user, is_verified: !currentIsVerified }
+            ? { ...user, is_active: !currentIsActive }
             : user
         )
       );
@@ -276,7 +276,7 @@ export default function SuperAdminUsersPage() {
                                   {user.createdAt.toLocaleDateString()}
                                 </td>
                                 <td className="px-6 py-4">
-                                  {user.is_verified ? (
+                                  {user.is_active ? (
                                     <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                       Active
                                     </span>
@@ -291,20 +291,20 @@ export default function SuperAdminUsersPage() {
                                   <div className="flex space-x-2">
                                     <Button
                                       onClick={() =>
-                                        handleToggleVerification(
+                                        handleToggleActive(
                                           user.id,
-                                          user.is_verified
+                                          user.is_active
                                         )
                                       }
                                       variant="ghost"
                                       size="sm"
                                       className={`${
-                                        user.is_verified
+                                        user.is_active
                                           ? "text-red-600 hover:text-red-800"
                                           : "text-green-600 hover:text-green-800"
                                       }`}
                                     >
-                                      {user.is_verified ? (
+                                      {user.is_active ? (
                                         <>
                                           <UserX className="h-4 w-4 mr-1" />
                                           Disable

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabase"
+import { is } from "date-fns/locale"
 
 export async function POST(request: Request) {
   try {
@@ -17,7 +18,7 @@ export async function POST(request: Request) {
 
     if (role == "patient" || role == "Patient") {
       const { error: metadataError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-        user_metadata: { role, profile_completed: false, is_verified: true },
+        user_metadata: { role, profile_completed: false, is_verified: true, is_active: true },
       })
       if (metadataError) {
         console.error("Error updating user metadata:", metadataError)
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
     }
     else {
       const { error: metadataError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-        user_metadata: { role, profile_completed: false, is_verified: false },
+        user_metadata: { role, profile_completed: false, is_verified: false, is_active: true },
       })
       if (metadataError) {
         console.error("Error updating user metadata:", metadataError)

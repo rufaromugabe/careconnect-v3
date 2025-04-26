@@ -20,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/contexts/auth-context"
 import { getPatientProfile, getPatientPrescriptions, getPatientHealthRecords, getAllDoctors } from "@/lib/data-service"
 import { supabase } from "@/lib/supabase"
+import { logAction } from "@/lib/logging"
 
 export default function PatientDashboard() {
   const { user } = useAuth()
@@ -80,7 +81,17 @@ export default function PatientDashboard() {
       const { error } = await supabase.from("patients").update({ doctor_id: doctorId }).eq("id", patientProfile.id)
 
       if (error) throw error
-
+      // log action
+      await logAction(
+        patientProfile.user_id,
+        `changed doctor from ${patientProfile.doctor_id} to ${doctorId}`,
+        {
+          email: user.email,
+          status: "success",
+          action: "Change Doctor",
+          Patient: patientProfile.name,
+        }
+      )
       // Update local state
       const selectedDoctor = doctors.find((d) => d.id === doctorId)
       setCurrentDoctor(selectedDoctor)

@@ -63,6 +63,7 @@ export async function GET(request: NextRequest) {
           console.warn(`Could not fetch user info for doctor ${doctor.id}: ${userError?.message || "No user data"}`)
           return {
             id: doctor.id,
+            user_id: doctor.user_id,
             name: "Unknown",
             email: "No email",
             license_number: doctor.license_number,
@@ -70,6 +71,7 @@ export async function GET(request: NextRequest) {
             hospital_id: doctor.hospital_id,
             hospital_name: doctor.hospitals?.name || "Not Assigned",
             created_at: doctor.created_at,
+            is_verified: false,
           }
         }
 
@@ -77,6 +79,7 @@ export async function GET(request: NextRequest) {
         
         return {
           id: doctor.id,
+          user_id: doctor.user_id,
           name: doctorUser.user_metadata?.full_name || doctorUser.user_metadata?.name || "Unknown",
           email: doctorUser.email || "No email",
           license_number: doctor.license_number,
@@ -84,10 +87,11 @@ export async function GET(request: NextRequest) {
           hospital_id: doctor.hospital_id,
           hospital_name: doctor.hospitals?.name || "Not Assigned",
           created_at: doctor.created_at,
+          is_verified: doctorUser.user_metadata?.is_verified || false,
         }
       })
     )
-
+    console.log("Doctors with user info:", doctorsWithUserInfo)
     return NextResponse.json(doctorsWithUserInfo)
   } catch (error: any) {
     console.error("Error in GET /api/admin/doctors:", error)

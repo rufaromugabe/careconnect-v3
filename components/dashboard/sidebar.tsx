@@ -18,6 +18,8 @@ import {
   AlertCircle,
   Thermometer,
   Building,
+  FlaskRound,
+  Stethoscope,
 } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 
@@ -50,10 +52,12 @@ export function Sidebar({ role }: SidebarProps) {
     ],
     "super-admin": [
       { href: "/super-admin/dashboard", label: "Dashboard", icon: Home },
-      { href: "/super-admin/doctors", label: "Manage Doctors", icon: UserPlus },
+      { href: "/super-admin/doctors", label: "Manage Doctors", icon: Stethoscope },
+      { href: "/super-admin/pharmacists", label: "Manage Pharmacists", icon: FlaskRound },
+      { href: "/super-admin/nurses", label: "Manage Nurses", icon: Thermometer },
       { href: "/super-admin/pharmacies", label: "Manage Pharmacies", icon: Store },
-      { href: "/super-admin/users", label: "Manage Users", icon: Users },
       { href: "/super-admin/hospitals", label: "Manage Hospitals", icon: Building }, // Fixed the label
+      { href: "/super-admin/users", label: "Manage Users", icon: Users },
       { href: "/super-admin/alerts", label: "System Alerts", icon: AlertCircle },
       { href: "/super-admin/system-logs", label: "System Logs", icon: Activity },
     ],

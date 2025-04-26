@@ -128,11 +128,15 @@ export async function middleware(req: NextRequest) {
   // Check for the role cookie
   const roleCookie = getCookie(req, "user_role")
   const is_verified = getCookie(req, "is_verified")
+  const is_active = getCookie(req, "is_active")
 
   // If there's a role cookie, check access
   if (roleCookie) {
     if (is_verified !== "true") {
       return NextResponse.redirect(new URL(`/${roleCookie}/verify`, req.url))
+    }
+    if (is_active !== "true") {
+      return NextResponse.redirect(new URL(`/${roleCookie}/in-active`, req.url))
     }
     // Check if the user has access to the requested route
     if (!hasAccessToPath(roleCookie, path)) {
@@ -165,6 +169,7 @@ export async function middleware(req: NextRequest) {
   if (session.user.user_metadata?.role) {
     const role = session.user.user_metadata.role
     const is_verified = session.user.user_metadata.is_verified
+    const is_active = session.user.user_metadata.is_active
     // Set the role cookie
     res.cookies.set("user_role", role, {
       path: "/",
@@ -174,6 +179,13 @@ export async function middleware(req: NextRequest) {
     })
     // Set the is_verified cookie
     res.cookies.set("is_verified", is_verified, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      httpOnly: false,
+      sameSite: "lax",
+    })
+    // Set the is_active cookie
+    res.cookies.set("is_active", is_active, {
       path: "/",
       maxAge: 60 * 60 * 24 * 7, // 7 days
       httpOnly: false,
@@ -200,6 +212,10 @@ export async function middleware(req: NextRequest) {
       !path.includes("/verify")
     ) {
       return NextResponse.redirect(new URL(`/${role}/verify`, req.url))
+    }
+    if (session?.user?.user_metadata && session.user.user_metadata.is_active !== true && !path.includes("/in-active")) {
+      return NextResponse.redirect(new URL(`/${role}/in-active`, req.url))
+
     }
 
     // User has access, continue

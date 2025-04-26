@@ -18,13 +18,13 @@ import { supabase } from "@/lib/supabase"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { logAction } from "@/lib/logging"
 
-interface Doctor {
+interface Nurse {
   id: string
   user_id: string
   name: string
   email: string
-  specialization: string
   license_number: string
+  department: string
   hospital_id: string | null
   hospital_name?: string
   created_at: string
@@ -36,24 +36,18 @@ interface Hospital {
   name: string
 }
 
-export default function SuperAdminDoctorsPage() {
+export default function SuperAdminNursesPage() {
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [doctors, setDoctors] = useState<Doctor[]>([])
+  const [nurses, setNurses] = useState<Nurse[]>([])
   const [hospitals, setHospitals] = useState<Hospital[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isVerifyDialogOpen, setIsVerifyDialogOpen] = useState(false)
-  const [currentDoctor, setCurrentDoctor] = useState<Doctor | null>(null)
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    specialization: "",
-    license_number: "",
-    hospital_id: "",
-  })
+  const [currentNurse, setCurrentNurse] = useState<Nurse | null>(null)
+
   const [token, setToken] = useState<string | null>(null)
 
   // Get the auth token
@@ -68,7 +62,7 @@ export default function SuperAdminDoctorsPage() {
     getToken()
   }, [])
 
-  // Load doctors and hospitals data
+  // Load nurses and hospitals data
   useEffect(() => {
     async function loadData() {
       if (!user || !token) return
@@ -83,8 +77,8 @@ export default function SuperAdminDoctorsPage() {
           throw new Error("Unauthorized: User is not a super admin")
         }
 
-        // Fetch doctors using the admin API endpoint
-        const doctorsResponse = await fetch("/api/admin/doctors", {
+        // Fetch nurses using the admin API endpoint
+        const nursesResponse = await fetch("/api/admin/nurses", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -92,14 +86,14 @@ export default function SuperAdminDoctorsPage() {
           },
         })
 
-        if (!doctorsResponse.ok) {
-          const errorData = await doctorsResponse.json().catch(() => ({}))
-          console.error("API response error:", doctorsResponse.status, errorData)
-          throw new Error(errorData.error || `API error: ${doctorsResponse.status}`)
+        if (!nursesResponse.ok) {
+          const errorData = await nursesResponse.json().catch(() => ({}))
+          console.error("API response error:", nursesResponse.status, errorData)
+          throw new Error(errorData.error || `API error: ${nursesResponse.status}`)
         }
 
-        const doctorsData = await doctorsResponse.json()
-        setDoctors(doctorsData)
+        const nursesData = await nursesResponse.json()
+        setNurses(nursesData)
 
         // Fetch hospitals for the dropdown
         const hospitalsResponse = await fetch("/api/admin/hospitals", {
@@ -129,29 +123,20 @@ export default function SuperAdminDoctorsPage() {
     loadData()
   }, [user, token])
 
-  // Filter doctors based on search term
-  const filteredDoctors = doctors.filter(
-    (doctor) =>
-      (doctor.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-      (doctor.specialization?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-      (doctor.email?.toLowerCase() || "").includes(searchTerm.toLowerCase()),
+  // Filter nurses based on search term
+  const filteredNurses = nurses.filter(
+    (nurse) =>
+      (nurse.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (nurse.department?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (nurse.email?.toLowerCase() || "").includes(searchTerm.toLowerCase()),
   )
 
 
-
-  // Handle select input changes
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
-
-
-  // Handle verify doctor
-  const handleVerifyDoctor = async (userId: string) => {
+  // Handle verify nurse
+  const handleVerifyNurse = async (userId: string) => {
     if (!token) return
     try {
+      console.log("Verifying nurse with user_id:", userId)
       const response = await fetch(`/api/admin/usersVerification/${userId}`, {
         method: "PUT",
         headers: {
@@ -163,48 +148,49 @@ export default function SuperAdminDoctorsPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || "Failed to update doctor verification status")
+        throw new Error(errorData.error || "Failed to update nurse verification status")
       }
 
-      const updatedDoctor = await response.json()
-      //log action
-      await logAction (user?.id, "verify-doctor", {
-        doctor_id: userId,
-        doctor_name: currentDoctor?.name,
-        doctor_email: currentDoctor?.email,
-        doctor_specialization: currentDoctor?.specialization,
-      })
-      //Refresh UI or update local state as needed
-      setDoctors((prev) => 
-        prev.map((doctor) =>
-          doctor.user_id === userId ? { ...doctor, is_verified: true } : doctor,
-        ),
-      )
+      const updatedNurse = await response.json()
+
+      // Update the nurses UI list
+      setNurses((prev) => 
+        prev.map((nurse) =>
+            nurse.user_id === userId ? { ...nurse, is_verified: updatedNurse.updated_is_verified } : nurse,
+            ),
+        )
+
+    // log action
+    await logAction(user.id, "verify_nurse", {
+        nurse_id: userId,
+        nurse_name: currentNurse?.name,
+        nurse_email: currentNurse?.email,
+    })
 
       // Close the dialog
       setIsVerifyDialogOpen(false)
-      setCurrentDoctor(null)
+      setCurrentNurse(null)
 
       toast({
         title: "Success",
-        description: `Doctor ${updatedDoctor.name} has been verified successfully.`,
+        description: `Nurse ${currentNurse?.name} has been verified successfully.`,
       })
     } catch (err: any) {
-      console.error("Error updating doctor verification:", err)
+      console.error("Error updating nurse verification:", err)
       toast({
         title: "Error",
-        description: err.message || "Failed to update doctor verification status",
+        description: err.message || "Failed to update nurse verification status",
         variant: "destructive",
       })
     }
   }
 
-  // Handle delete doctor
-  const handleDeleteDoctor = async () => {
-    if (!currentDoctor || !token) return
+  // Handle delete nurse
+  const handleDeleteNurse = async () => {
+    if (!currentNurse || !token) return
 
     try {
-      const response = await fetch(`/api/admin/doctors/${currentDoctor.id}`, {
+      const response = await fetch(`/api/admin/nurses/${currentNurse.id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -214,39 +200,39 @@ export default function SuperAdminDoctorsPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || "Failed to delete doctor")
+        throw new Error(errorData.error || "Failed to delete nurse")
       }
 
-      // Update the doctors list
-      setDoctors((prev) => prev.filter((doctor) => doctor.id !== currentDoctor.id))
+      // Update the nurses list
+      setNurses((prev) => prev.filter((nurse) => nurse.id !== currentNurse.id))
 
       // Reset and close dialog
-      setCurrentDoctor(null)
+      setCurrentNurse(null)
       setIsDeleteDialogOpen(false)
 
       toast({
         title: "Success",
-        description: "Doctor deleted successfully",
+        description: "Nurse deleted successfully",
       })
     } catch (err: any) {
-      console.error("Error deleting doctor:", err)
+      console.error("Error deleting nurse:", err)
       toast({
         title: "Error",
-        description: err.message || "Failed to delete doctor",
+        description: err.message || "Failed to delete nurse",
         variant: "destructive",
       })
     }
   }
 
-  // Open verify dialog with doctor data
-  const openVerifyDialog = (doctor: Doctor) => {
-    setCurrentDoctor(doctor)
+  // Open verify dialog with nurse data
+  const openVerifyDialog = (nurse: Nurse) => {
+    setCurrentNurse(nurse)
     setIsVerifyDialogOpen(true)
   }
 
-  // Open delete dialog with doctor data
-  const openDeleteDialog = (doctor: Doctor) => {
-    setCurrentDoctor(doctor)
+  // Open delete dialog with nurse data
+  const openDeleteDialog = (nurse: Nurse) => {
+    setCurrentNurse(nurse)
     setIsDeleteDialogOpen(true)
   }
 
@@ -256,7 +242,7 @@ export default function SuperAdminDoctorsPage() {
         <Sidebar role="super-admin" />
         <div className="flex-1 flex flex-col items-center justify-center">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p className="mt-4 text-lg">Loading doctors data...</p>
+          <p className="mt-4 text-lg">Loading nurses data...</p>
         </div>
       </div>
     )
@@ -280,17 +266,17 @@ export default function SuperAdminDoctorsPage() {
     <div className="flex h-screen bg-gradient-to-br from-slate-50 to-blue-100">
       <Sidebar role="super-admin" />
       <div className="flex-1 flex flex-col">
-        <Header title="Doctor Management" />
+        <Header title="Nurse Management" />
         <main className="flex-1 overflow-y-auto p-6">
           <div className="container mx-auto">
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-bold">Doctors</h1>
+              <h1 className="text-2xl font-bold">Nurses</h1>
               <div className="flex gap-4">
                 <div className="relative">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
                   <Input
                     type="search"
-                    placeholder="Search doctors..."
+                    placeholder="Search nurses..."
                     className="pl-8 w-64"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -301,7 +287,7 @@ export default function SuperAdminDoctorsPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>All Doctors</CardTitle>
+                <CardTitle>All Nurses</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -309,34 +295,34 @@ export default function SuperAdminDoctorsPage() {
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Email</TableHead>
-                      <TableHead>Specialization</TableHead>
                       <TableHead>License Number</TableHead>
+                      <TableHead>Department</TableHead>
                       <TableHead>Hospital</TableHead>
                       <TableHead>Verification</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredDoctors.length > 0 ? (
-                      filteredDoctors.map((doctor) => (
-                        <TableRow key={doctor.id}>
+                    {filteredNurses.length > 0 ? (
+                      filteredNurses.map((nurse) => (
+                        <TableRow key={nurse.id}>
                           <TableCell className="font-medium">
                             <div className="flex items-center">
                               <UserMd className="h-4 w-4 mr-2 text-blue-500" />
-                              {doctor.name}
+                              {nurse.name}
                             </div>
                           </TableCell>
-                          <TableCell>{doctor.email}</TableCell>
-                          <TableCell>{doctor.specialization}</TableCell>
-                          <TableCell>{doctor.license_number}</TableCell>
-                          <TableCell>{doctor.hospital_name || "Not Assigned"}</TableCell>
+                          <TableCell>{nurse.email}</TableCell>
+                          <TableCell>{nurse.license_number}</TableCell>
+                          <TableCell>{nurse.department}</TableCell>
+                          <TableCell>{nurse.hospital_name || "Not Assigned"}</TableCell>
                           <TableCell className="text-right">
-                            {doctor.is_verified ? (
+                            {nurse.is_verified ? (
                               <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-medium">
                                 Verified
                               </span>
                             ) : (
-                              <Button variant="outline" size="sm" onClick={() => openVerifyDialog(doctor)}>
+                              <Button variant="outline" size="sm" onClick={() => openVerifyDialog(nurse)}>
                                 Verify
                               </Button>
                             )}
@@ -347,7 +333,7 @@ export default function SuperAdminDoctorsPage() {
                                 variant="ghost"
                                 size="sm"
                                 className="text-red-600 hover:text-red-800"
-                                onClick={() => openDeleteDialog(doctor)}
+                                onClick={() => openDeleteDialog(nurse)}
                               >
                                 <Trash2 className="h-4 w-4 mr-1" />
                                 Delete
@@ -359,7 +345,7 @@ export default function SuperAdminDoctorsPage() {
                     ) : (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center py-6 text-gray-500">
-                          {searchTerm ? "No doctors match your search" : "No doctors found"}
+                          {searchTerm ? "No nurses match your search" : "No nurses found"}
                         </TableCell>
                       </TableRow>
                     )}
@@ -368,46 +354,46 @@ export default function SuperAdminDoctorsPage() {
               </CardContent>
             </Card>
 
-            {/* Delete Doctor Dialog */}
+            {/* Delete Nurse Dialog */}
             <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Confirm Deletion</DialogTitle>
                 </DialogHeader>
                 <div className="py-4">
-                  <p>Are you sure you want to delete Dr. {currentDoctor?.name}?</p>
+                  <p>Are you sure you want to delete Nurse {currentNurse?.name}?</p>
                   <p className="text-sm text-gray-500 mt-2">This action cannot be undone.</p>
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button variant="destructive" onClick={handleDeleteDoctor}>
+                  <Button variant="destructive" onClick={handleDeleteNurse}>
                     Delete
                   </Button>
                 </div>
               </DialogContent>
             </Dialog>
 
-            {/* Verify Doctor Dialog */}
+            {/* Verify Nurse Dialog */}
             <Dialog open={isVerifyDialogOpen} onOpenChange={setIsVerifyDialogOpen}>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Verify Doctor</DialogTitle>
+                  <DialogTitle>Verify Nurse</DialogTitle>
                 </DialogHeader>
                 <div className="py-4">
                   <p>
-                    Are you sure you want to verify doctor <strong>{currentDoctor?.name}</strong>?
+                    Are you sure you want to verify nurse <strong>{currentNurse?.name}</strong>?
                   </p>
                   <p className="text-sm text-gray-500 mt-2">
-                    This will grant them access to perform doctor-specific tasks.
+                    This will grant them access to perform nurse-specific tasks.
                   </p>
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" onClick={() => setIsVerifyDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button onClick={() => (currentDoctor?.user_id ? handleVerifyDoctor(currentDoctor.user_id) : null)}>
+                  <Button onClick={() => (currentNurse?.user_id ? handleVerifyNurse(currentNurse.user_id) : null)}>
                     Verify
                   </Button>
                 </div>

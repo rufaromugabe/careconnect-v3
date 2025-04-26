@@ -165,8 +165,16 @@ export function AuthProvider({
         setCookie("supabase-auth-session-active", "true");
         setCookie("sb-user-id", session.user.id);
         const isVerified = session.user.user_metadata?.is_verified;
-        if (typeof isVerified === "boolean") {
-          setCookie("is_verified", isVerified.toString());
+        const isActive = session.user.user_metadata?.is_active;
+        if (isActive) {
+          setCookie("is_active", "true");
+        } else {
+          setCookie("is_active", "false");
+        }
+        if (isVerified) {
+          setCookie("is_verified", "true");
+        } else {
+          setCookie("is_verified", "false");
         }
 
         // Get role if not already in state
@@ -287,6 +295,7 @@ export function AuthProvider({
         // Clear existing role data
         clearCookie("user_role");
         clearCookie("is_verified")
+        clearCookie("is_active")
         setUserRole(null);
 
         if (session) {
@@ -304,6 +313,7 @@ export function AuthProvider({
         clearCookie("user_role");
         clearCookie("sb-user-id");
         clearCookie("is_verified");
+        clearCookie("is_active")
       } else if (_event === "TOKEN_REFRESHED") {
         // Just update the session
         if (session) {
@@ -348,6 +358,7 @@ export function AuthProvider({
         clearCookie("supabase-auth-session-active");
         clearCookie("user_role");
         clearCookie("is_verified");
+        clearCookie("is_active")
         clearCookie("sb-user-id");
         setUserRole(null);
 
@@ -462,6 +473,7 @@ export function AuthProvider({
       clearCookie("supabase-auth-session-active");
       clearCookie("user_role");
       clearCookie("is_verified")
+      clearCookie("is_active")
       clearCookie("sb-user-id");
 
       router.push("/");
@@ -513,6 +525,7 @@ export function AuthProvider({
       // Clear existing role cookie
       clearCookie("user_role");
       clearCookie("is_verified")
+      clearCookie("is_active")
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",

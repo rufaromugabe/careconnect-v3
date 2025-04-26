@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
-// PUT handler to toggle is_active directly on user_metadata
+// PUT handler to toggle is_verified directly on user_metadata
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
     try {
       const token = request.headers.get("authorization")?.split("Bearer ")[1]
@@ -23,23 +23,23 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       }
   
       const body = await request.json()
-      const { is_active } = body
+      const { is_verified } = body
   
-      if (typeof is_active !== "boolean") {
-        return NextResponse.json({ error: "Missing or invalid is_active" }, { status: 400 })
+      if (typeof is_verified !== "boolean") {
+        return NextResponse.json({ error: "Missing or invalid is_verified" }, { status: 400 })
       }
   
       const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(params.id, {
         user_metadata: {
-          is_active,
+          is_verified,
         },
       })
   
       if (updateError) {
-        return NextResponse.json({ error: "Failed to update user metadata" }, { status: 500 })
+        return NextResponse.json({ error: updateError.message || "Failed to update user metadata" }, { status: 500 })
       }
   
-      return NextResponse.json({ success: true, updated_is_active: is_active })
+      return NextResponse.json({ success: true, updated_is_verified: is_verified })
     } catch (err: any) {
       console.error("PUT error:", err)
       return NextResponse.json({ error: err.message }, { status: 500 })

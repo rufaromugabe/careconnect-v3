@@ -24,6 +24,7 @@ import {
   AnimatedGradientText,
 } from "@/components/ui/animated-beam";
 import { motion } from "framer-motion";
+import { logAction } from "@/lib/logging";
 
 export default function Home() {
   const [email, setEmail] = useState<string>("");
@@ -106,6 +107,8 @@ export default function Home() {
         });
 
         setIsLoading(false);
+        //log action
+
         return;
       }
 
@@ -133,6 +136,7 @@ export default function Home() {
       // Get values from cookies
       const roleCookie = getCookieValue("user_role");
       const isVerifiedCookie = getCookieValue("is_verified");
+      const isActiveCookie = getCookieValue("is_active");
 
       if (roleCookie) {
         console.log("Login page - Found role in cookie:", roleCookie);
@@ -144,25 +148,39 @@ export default function Home() {
           router.push(`/${roleCookie}/verify`);
           return;
         }
+        if (isActiveCookie !== "true") {
+          console.log(
+            "Login page - User not active (cookie), redirecting to inactive page"
+          );
+          router.push(`/${roleCookie}/in-active`);
+          return;
+        }
 
         console.log(
           "Login page - Redirecting to dashboard for role:",
           roleCookie
         );
         router.push(`/${roleCookie}/dashboard`);
-        return;
       }
 
       // If no cookie, check user metadata (second fastest)
       if (session.user.user_metadata?.role) {
         const role = session.user.user_metadata.role;
         const isVerified = session.user.user_metadata?.is_verified;
+        const isActive = session.user.user_metadata?.is_active;
 
         if (isVerified !== true) {
           console.log(
             "Login page - User is not verified, redirecting to verification"
           );
           router.push(`/${role}/verify`);
+          return;
+        }
+        if (isActive !== true) {
+          console.log(
+            "Login page - User is not active, redirecting to inactive page"
+          );
+          router.push(`/${role}/in-active`);
           return;
         }
 
@@ -176,6 +194,9 @@ export default function Home() {
           60 * 60 * 24 * 7
         }; SameSite=Lax`;
         document.cookie = `is_verified=${isVerified}; path=/; max-age=${
+          60 * 60 * 24 * 7
+        }; SameSite=Lax`;
+        document.cookie = `is_active=${isActive}; path=/; max-age=${
           60 * 60 * 24 * 7
         }; SameSite=Lax`;
 

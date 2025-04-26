@@ -40,6 +40,7 @@ import { supabase } from "@/lib/supabase"
 import { QRScanner } from "@/components/qr-scanner"
 import { toast } from "@/components/ui/use-toast"
 import { AnimatedBeam } from "@/components/ui/animated-beam"
+import { logAction } from "@/lib/logging"
 
 // Define TypeScript interfaces
 interface UserMetadata {
@@ -296,7 +297,17 @@ export default function PharmacistPrescriptionsPage() {
       const { error } = await supabase.from("prescriptions").update(updates).eq("id", prescriptionId)
 
       if (error) throw error
+      // log action
+      await logAction(
+        pharmacistProfile.user_id,
+        `filled prescription: ${prescriptionId}`,
+        {
+          email: user.email,
+          Pharmacist: pharmacistProfile.users?.user_metadata?.full_name || pharmacistProfile.users?.user_metadata?.name,
+          
 
+        }
+      )
       // Update local state
       if (scannedPrescription && scannedPrescription.id === prescriptionId) {
         setScannedPrescription({
