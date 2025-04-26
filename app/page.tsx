@@ -37,7 +37,6 @@ export default function Home() {
     isSupabaseInitialized,
     refreshSession,
     getUserRole,
-    signOut,
   } = useAuth();
   const searchParams = useSearchParams();
 
@@ -55,6 +54,23 @@ export default function Home() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Clear all cookies before attempting to sign in
+    const clearAllCookies = () => {
+      const cookies = document.cookie.split(";");
+      
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i];
+        const eqPos = cookie.indexOf("=");
+        const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
+        document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
+      }
+      
+      console.log("Login page - All cookies cleared");
+    };
+
+    // Clear all cookies
+    clearAllCookies();
+
     if (!isSupabaseInitialized) {
       toast.error("The authentication system is not properly configured. Please contact support.");
       return;
@@ -68,7 +84,7 @@ export default function Home() {
     setIsLoading(true);
 
     try {
-      await signOut(); 
+      
       console.log("Login page - Attempting to sign in:", email);
       const { error, session } = await signIn(email, password);
 
@@ -348,6 +364,23 @@ export default function Home() {
                       disabled={!isSupabaseInitialized}
                       onClick={async () => {
                         try {
+                          // Clear all cookies before attempting to sign in with Google
+                          const clearAllCookies = () => {
+                            const cookies = document.cookie.split(";");
+                            
+                            for (let i = 0; i < cookies.length; i++) {
+                              const cookie = cookies[i];
+                              const eqPos = cookie.indexOf("=");
+                              const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
+                              document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
+                            }
+                            
+                            console.log("Login page - All cookies cleared before Google sign-in");
+                          };
+
+                          // Clear all cookies
+                          clearAllCookies();
+                          
                           const { error } = await signInWithGoogle();
                           if (error) {
                             toast.error(error.message);
