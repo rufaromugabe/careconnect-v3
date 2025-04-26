@@ -161,7 +161,7 @@ export default function SuperAdminNursesPage() {
         )
 
     // log action
-    await logAction(user.id, "verify_nurse", {
+    await logAction(user.id, "verify-nurse", {
         nurse_id: userId,
         nurse_name: currentNurse?.name,
         nurse_email: currentNurse?.email,
