@@ -37,6 +37,7 @@ export default function Home() {
     isSupabaseInitialized,
     refreshSession,
     getUserRole,
+    signOut,
   } = useAuth();
   const searchParams = useSearchParams();
 
@@ -67,6 +68,7 @@ export default function Home() {
     setIsLoading(true);
 
     try {
+      await signOut(); 
       console.log("Login page - Attempting to sign in:", email);
       const { error, session } = await signIn(email, password);
 
