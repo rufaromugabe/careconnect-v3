@@ -38,7 +38,7 @@ import { useAuth } from "@/contexts/auth-context"
 import { getPharmacistProfile, getPrescriptionById } from "@/lib/data-service"
 import { supabase } from "@/lib/supabase"
 import { QRScanner } from "@/components/qr-scanner"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "react-toastify"
 import { AnimatedBeam } from "@/components/ui/animated-beam"
 import { logAction } from "@/lib/logging"
 
@@ -241,11 +241,7 @@ export default function PharmacistPrescriptionsPage() {
       }
     } catch (err: any) {
       console.error("Error loading prescriptions:", err)
-      toast({
-        title: "Error",
-        description: "Failed to load prescriptions",
-        variant: "destructive",
-      })
+      toast.error("Failed to load prescriptions")
     }
   }
 
@@ -298,7 +294,7 @@ export default function PharmacistPrescriptionsPage() {
 
       if (error) throw error
       // Log the action
-      await logAction(user?.id, `filled prescription ${prescriptionId}`, {
+      await logAction(user?.id||"", `filled prescription ${prescriptionId}`, {
         prescription_id: prescriptionId,
         status: newStatus,
         pharmacist_id: pharmacistProfile?.user_id,
@@ -318,17 +314,12 @@ export default function PharmacistPrescriptionsPage() {
       // Refresh prescriptions list
       await loadPrescriptions(pharmacistProfile?.id || "")
 
-      toast({
-        title: "Success",
-        description: `Prescription ${newStatus === "filled" ? "filled" : "canceled"} successfully`,
-      })
+      toast.success(
+        `Prescription ${newStatus === "filled" ? "filled" : "canceled"} successfully`,
+      )
     } catch (err: any) {
       console.error("Error updating prescription status:", err)
-      toast({
-        title: "Error",
-        description: "Failed to update prescription status",
-        variant: "destructive",
-      })
+      toast.error("Failed to update prescription status",)
     } finally {
       setIsProcessing(false)
     }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, ChangeEvent, FormEvent } from "react"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -20,16 +20,37 @@ import { Label } from "@/components/ui/label"
 import { useAuth } from "@/contexts/auth-context"
 import { getPharmacistProfile, getPharmacyInventory } from "@/lib/data-service"
 import { supabase } from "@/lib/supabase"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "react-toastify"
+
+// Define interfaces for the type safety
+interface InventoryItem {
+  id: string
+  name: string
+  description: string | null
+  quantity: number
+  price: number
+  pharmacy_id: string
+}
+
+interface PharmacistProfile {
+  id: string
+  pharmacy_id: string | null
+  [key: string]: any
+}
+
+interface InventoryItemFormProps {
+  item?: InventoryItem | null
+  onSubmit: (item: Partial<InventoryItem>) => void
+}
 
 export default function InventoryPage() {
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [pharmacistProfile, setPharmacistProfile] = useState<any>(null)
-  const [inventory, setInventory] = useState<any[]>([])
+  const [pharmacistProfile, setPharmacistProfile] = useState<PharmacistProfile | null>(null)
+  const [inventory, setInventory] = useState<InventoryItem[]>([])
   const [searchTerm, setSearchTerm] = useState("")
-  const [editingItem, setEditingItem] = useState<any>(null)
+  const [editingItem, setEditingItem] = useState<InventoryItem | null>(null)
 
   useEffect(() => {
     async function loadData() {
@@ -64,14 +85,10 @@ export default function InventoryPage() {
       (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase())),
   )
 
-  const handleAddItem = async (newItem) => {
+  const handleAddItem = async (newItem: Partial<InventoryItem>) => {
     try {
       if (!pharmacistProfile?.pharmacy_id) {
-        toast({
-          title: "Error",
-          description: "You are not associated with a pharmacy",
-          variant: "destructive",
-        })
+        toast.error("You are not associated with a pharmacy")
         return
       }
 
@@ -80,10 +97,10 @@ export default function InventoryPage() {
         .from("inventory_items")
         .insert({
           pharmacy_id: pharmacistProfile.pharmacy_id,
-          name: newItem.name,
-          description: newItem.description,
-          quantity: Number.parseInt(newItem.quantity),
-          price: Number.parseFloat(newItem.price),
+          name: newItem.name || "",
+          description: newItem.description || null,
+          quantity: Number(newItem.quantity || 0),
+          price: Number(newItem.price || 0),
         })
         .select()
 
@@ -92,55 +109,50 @@ export default function InventoryPage() {
       // Update local state
       setInventory([...inventory, data[0]])
 
-      toast({
-        title: "Success",
-        description: "Inventory item added successfully",
-      })
+      toast.success("Inventory item added successfully")
     } catch (err) {
       console.error("Error adding inventory item:", err)
-      toast({
-        title: "Error",
-        description: "Failed to add inventory item",
-        variant: "destructive",
-      })
+      toast.error("Failed to add inventory item")
     }
   }
 
-  const handleEditItem = async (updatedItem) => {
+  // Modified handleEditItem function
+  const handleEditItem = async (updatedItem: Partial<InventoryItem>) => {
     try {
+      if (!updatedItem.id) {
+        throw new Error("Item ID is required for updates");
+      }
+      
       // Update inventory item
       const { error } = await supabase
         .from("inventory_items")
         .update({
           name: updatedItem.name,
           description: updatedItem.description,
-          quantity: Number.parseInt(updatedItem.quantity),
-          price: Number.parseFloat(updatedItem.price),
+          quantity: Number.parseInt(String(updatedItem.quantity)),
+          price: Number.parseFloat(String(updatedItem.price)),
         })
         .eq("id", updatedItem.id)
 
       if (error) throw error
 
-      // Update local state
-      setInventory(inventory.map((item) => (item.id === updatedItem.id ? updatedItem : item)))
+      // Update local state with full item data preserving pharmacy_id
+      const existingItem = inventory.find(item => item.id === updatedItem.id);
+      if (existingItem) {
+        const mergedItem = { ...existingItem, ...updatedItem };
+        setInventory(inventory.map((item) => (item.id === updatedItem.id ? mergedItem : item)));
+      }
 
       setEditingItem(null)
 
-      toast({
-        title: "Success",
-        description: "Inventory item updated successfully",
-      })
+      toast.success("Inventory item updated successfully")
     } catch (err) {
       console.error("Error updating inventory item:", err)
-      toast({
-        title: "Error",
-        description: "Failed to update inventory item",
-        variant: "destructive",
-      })
+      toast.error("Failed to update inventory item")
     }
   }
 
-  const handleDeleteItem = async (itemId) => {
+  const handleDeleteItem = async (itemId: string) => {
     try {
       // Delete inventory item
       const { error } = await supabase.from("inventory_items").delete().eq("id", itemId)
@@ -150,17 +162,10 @@ export default function InventoryPage() {
       // Update local state
       setInventory(inventory.filter((item) => item.id !== itemId))
 
-      toast({
-        title: "Success",
-        description: "Inventory item deleted successfully",
-      })
+      toast.success("Inventory item deleted successfully")
     } catch (err) {
       console.error("Error deleting inventory item:", err)
-      toast({
-        title: "Error",
-        description: "Failed to delete inventory item",
-        variant: "destructive",
-      })
+      toast.error("Failed to delete inventory item" )
     }
   }
 
@@ -270,7 +275,7 @@ export default function InventoryPage() {
         </main>
       </div>
 
-      <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
+      <Dialog open={!!editingItem} onOpenChange={(open) => !open && setEditingItem(null)}>
         <DialogContent>
           <InventoryItemForm item={editingItem} onSubmit={handleEditItem} />
         </DialogContent>
@@ -279,22 +284,21 @@ export default function InventoryPage() {
   )
 }
 
-function InventoryItemForm({ item, onSubmit }) {
-  const [formData, setFormData] = useState(
-    item || {
-      name: "",
-      description: "",
-      quantity: 0,
-      price: 0,
-    },
-  )
+function InventoryItemForm({ item, onSubmit }: InventoryItemFormProps) {
+  const [formData, setFormData] = useState({
+    id: item?.id || "",
+    name: item?.name || "",
+    description: item?.description || "",
+    quantity: item?.quantity || 0,
+    price: item?.price || 0,
+  })
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     onSubmit(formData)
   }
