@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { Header } from "@/components/layout/header"
-import { UserPlus, Store, Users, AlertCircle, Loader2 } from "lucide-react"
+import { UserPlus, Store, Users, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useAuth } from "@/contexts/auth-context"
@@ -116,13 +116,6 @@ export default function SuperAdminDashboard() {
       icon: Users,
       href: "/super-admin/users",
       color: "bg-blue-500",
-    },
-    {
-      label: "System Alerts",
-      value: 0, // Default to 0 when no alerts
-      icon: AlertCircle,
-      href: "/super-admin/alerts",
-      color: "bg-rose-500",
     },
   ]
 

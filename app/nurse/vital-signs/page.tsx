@@ -24,6 +24,8 @@ import {
   createHealthRecord,
   getHealthRecords,
 } from "@/lib/data-service"
+import { logAction } from "@/lib/logging"
+import { he } from "date-fns/locale"
 
 // Define interfaces for our data types
 interface NurseProfile {
@@ -177,7 +179,11 @@ export default function VitalSignsPage() {
         const updatedVitalSigns = await getVitalSigns({ recorded_by: user.id })
         setVitalSigns(updatedVitalSigns)
       }
-
+      // log action
+      await logAction(user.id, `added vital signs for patient ${newVitalSigns.patientId}`, {
+        health_record_id: healthRecordId,
+        nurse_email: user.email,
+      } )
       setIsAddVitalSignsOpen(false)
       toast({
         title: "Vital Signs Added",

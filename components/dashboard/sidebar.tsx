@@ -15,7 +15,6 @@ import {
   Activity,
   UserPlus,
   Store,
-  AlertCircle,
   Thermometer,
   Building,
   FlaskRound,
@@ -58,7 +57,6 @@ export function Sidebar({ role }: SidebarProps) {
       { href: "/super-admin/pharmacies", label: "Manage Pharmacies", icon: Store },
       { href: "/super-admin/hospitals", label: "Manage Hospitals", icon: Building }, // Fixed the label
       { href: "/super-admin/users", label: "Manage Users", icon: Users },
-      { href: "/super-admin/alerts", label: "System Alerts", icon: AlertCircle },
       { href: "/super-admin/system-logs", label: "System Logs", icon: Activity },
     ],
     nurse: [

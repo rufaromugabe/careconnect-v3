@@ -295,26 +295,6 @@ export default function Home() {
           >
             <Card className="w-full p-8 shadow-xl backdrop-blur-sm bg-white/90 dark:bg-gray-950/90 border border-gray-200/50 dark:border-gray-800/50">
               <div className="space-y-6">
-                <div className="flex justify-center">
-                  <div className="grid grid-cols-4 gap-4">
-                    {roleIcons.map(({ Icon, label, delay }, index) => (
-                      <motion.div
-                        key={label}
-                        className="flex flex-col items-center"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: delay, duration: 0.5 }}
-                        whileHover={{ scale: 1.05 }}
-                      >
-                        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                          <Icon className="h-6 w-6" />
-                        </div>
-                        <span className="text-xs mt-1">{label}</span>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-
                 <form onSubmit={handleLogin} className="space-y-4">
                   <motion.div
                     className="space-y-2"
