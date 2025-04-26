@@ -17,7 +17,6 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
-import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AnimatedBeam,
@@ -25,6 +24,7 @@ import {
 } from "@/components/ui/animated-beam";
 import { motion } from "framer-motion";
 import { logAction } from "@/lib/logging";
+import { toast } from 'react-toastify';
 
 export default function Home() {
   const [email, setEmail] = useState<string>("");
@@ -38,26 +38,15 @@ export default function Home() {
     refreshSession,
     getUserRole,
   } = useAuth();
-  const { toast } = useToast();
   const searchParams = useSearchParams();
 
   // Check for error parameters in the URL
   useEffect(() => {
     const error = searchParams.get("error");
     if (error === "role_assignment_failed") {
-      toast({
-        title: "Authentication error",
-        description:
-          "Failed to assign a role to your account. Please try again or contact support.",
-        variant: "destructive",
-      });
+      toast.error("Failed to assign a role to your account. Please try again or contact support.");
     } else if (error === "patient_creation_failed") {
-      toast({
-        title: "Authentication error",
-        description:
-          "Failed to create your patient profile. Please try again or contact support.",
-        variant: "destructive",
-      });
+      toast.error("Failed to create your patient profile. Please try again or contact support.");
     }
   }, [searchParams, toast]);
 
@@ -66,21 +55,12 @@ export default function Home() {
     e.preventDefault();
 
     if (!isSupabaseInitialized) {
-      toast({
-        title: "Configuration Error",
-        description:
-          "The authentication system is not properly configured. Please contact support.",
-        variant: "destructive",
-      });
+      toast.error("The authentication system is not properly configured. Please contact support.");
       return;
     }
 
     if (!email || !password) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
+      toast.error("Please fill in all fields");
       return;
     }
 
@@ -97,14 +77,14 @@ export default function Home() {
           .toLowerCase()
           .includes("invalid login credentials");
 
-        toast({
-          title: "Login failed",
-          description: isInvalidCredentials
+        toast.error(
+          isInvalidCredentials
             ? "Incorrect email or password. Please try again."
             : error.message || "An error occurred. Please try again later.",
-          variant: "destructive",
-          duration: 4000,
-        });
+          {
+            autoClose: 4000,
+          }
+        );
 
         setIsLoading(false);
         //log action
@@ -114,11 +94,7 @@ export default function Home() {
 
       if (!session) {
         console.error("Login page - No session after login");
-        toast({
-          title: "Login failed",
-          description: "Failed to establish a session. Please try again.",
-          variant: "destructive",
-        });
+        toast.error("Failed to establish a session. Please try again.");
         setIsLoading(false);
         return;
       }
@@ -218,11 +194,7 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Login page - Login error:", error);
-      toast({
-        title: "Login failed",
-        description: "An unexpected error occurred",
-        variant: "destructive",
-      });
+      toast.error("An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -376,19 +348,11 @@ export default function Home() {
                         try {
                           const { error } = await signInWithGoogle();
                           if (error) {
-                            toast({
-                              title: "Login failed",
-                              description: error.message,
-                              variant: "destructive",
-                            });
+                            toast.error(error.message);
                           }
                         } catch (error) {
                           console.error("Google login error:", error);
-                          toast({
-                            title: "Login failed",
-                            description: "An unexpected error occurred",
-                            variant: "destructive",
-                          });
+                          toast.error("An unexpected error occurred");
                         }
                       }}
                     >

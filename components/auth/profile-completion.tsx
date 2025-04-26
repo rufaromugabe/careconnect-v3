@@ -10,9 +10,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/lib/supabase"
 import { Loader2 } from "lucide-react"
+import { toast } from 'react-toastify';
 
 interface ProfileCompletionProps {
   role: "doctor" | "patient" | "pharmacist" | "nurse" | "super-admin"
@@ -20,7 +20,6 @@ interface ProfileCompletionProps {
 
 export function ProfileCompletion({ role }: ProfileCompletionProps) {
   const router = useRouter()
-  const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [hospitals, setHospitals] = useState<{ id: string; name: string }[]>([])
   const [pharmacies, setPharmacies] = useState<{ id: string; name: string }[]>([])
@@ -87,18 +86,14 @@ export function ProfileCompletion({ role }: ProfileCompletionProps) {
         }
       } catch (error) {
         console.error("Error fetching affiliations:", error)
-        toast({
-          title: "Error",
-          description: "Failed to load affiliations. Please try again.",
-          variant: "destructive",
-        })
+        toast.error("Failed to load affiliations. Please try again.")
       } finally {
         setLoadingAffiliations(false)
       }
     }
 
     fetchAffiliations()
-  }, [role, toast])
+  }, [role])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -116,7 +111,8 @@ export function ProfileCompletion({ role }: ProfileCompletionProps) {
     try {
       const { data: sessionData } = await supabase.auth.getSession()
       if (!sessionData?.session?.user) {
-        throw new Error("User not authenticated")
+        toast.error("You must be logged in to complete your profile")
+        return
       }
 
       const userId = sessionData.session.user.id
@@ -191,20 +187,13 @@ export function ProfileCompletion({ role }: ProfileCompletionProps) {
         if (profileError) throw profileError
       }
 
-      toast({
-        title: "Profile Completed",
-        description: "Your profile has been successfully completed.",
-      })
+      toast.success("Profile updated successfully!")
 
       // Redirect to the appropriate dashboard
       router.push(`/${role}/dashboard`)
     } catch (error: any) {
       console.error("Error completing profile:", error)
-      toast({
-        title: "Error",
-        description: error.message || "Failed to complete profile. Please try again.",
-        variant: "destructive",
-      })
+      toast.error(error.message)
     } finally {
       setLoading(false)
     }

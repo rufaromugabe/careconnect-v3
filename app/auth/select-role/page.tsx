@@ -8,35 +8,26 @@ import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRouter } from "next/navigation"
 import { Heart } from "lucide-react"
-import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/contexts/auth-context"
+import { toast } from 'react-toastify';
 
 export default function SelectRole() {
   const [role, setRole] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const { toast } = useToast()
   const { user } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!role) {
-      toast({
-        title: "Please select a role",
-        description: "You need to select a role to continue",
-        variant: "destructive",
-      })
+      toast.error("Please select a role")
       return
     }
 
     if (!user) {
-      toast({
-        title: "Not authenticated",
-        description: "Please sign in again",
-        variant: "destructive",
-      })
+      toast.error("You must be logged in to select a role")
       router.push("/")
       return
     }
@@ -82,13 +73,10 @@ export default function SelectRole() {
 
       // Redirect to the appropriate dashboard
       router.push(`/${role}/dashboard`)
-    } catch (error) {
+      toast.success("Role updated successfully!")
+    } catch (error: any) {
       console.error("Error setting role:", error)
-      toast({
-        title: "Error",
-        description: "Failed to set your role. Please try again.",
-        variant: "destructive",
-      })
+      toast.error(error.message)
     } finally {
       setIsLoading(false)
     }

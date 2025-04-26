@@ -28,8 +28,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       if (typeof is_active !== "boolean") {
         return NextResponse.json({ error: "Missing or invalid is_active" }, { status: 400 })
       }
-  
-      const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(params.id, {
+      
+      // Ensure params.id is properly awaited
+      const userId = await params.id
+      
+      const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
         user_metadata: {
           is_active,
         },
@@ -45,5 +48,4 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ error: err.message }, { status: 500 })
     }
   }
-  
-  
+

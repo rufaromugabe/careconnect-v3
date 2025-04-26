@@ -16,26 +16,69 @@ import { useAuth } from "@/contexts/auth-context"
 import { getDoctorProfile, getPrescriptions } from "@/lib/data-service"
 import QRCode from "react-qr-code"
 
+// Define interfaces for type safety
+interface Medication {
+  id: string;
+  name: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+}
+
+interface UserMetadata {
+  full_name?: string;
+  name?: string;
+}
+
+interface User {
+  user_metadata: UserMetadata;
+}
+
+interface Patient {
+  users: User;
+}
+
+interface Prescription {
+  id: string;
+  status: "pending" | "filled" | "canceled";
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  doctor_id: string;
+  patient_id: string;
+  medications: Medication[];
+  patients?: Patient;
+}
+
+interface DoctorProfile {
+  id: string;
+  license_number: string;
+  specialization: string;
+  hospital_id: string;
+  user_id: string;
+  users?: User;
+}
+
 export default function PrescriptionsPage() {
   const router = useRouter()
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [doctorProfile, setDoctorProfile] = useState(null)
-  const [prescriptions, setPrescriptions] = useState([])
+  const [error, setError] = useState<string | null>(null)
+  const [doctorProfile, setDoctorProfile] = useState<DoctorProfile | null>(null)
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
-  const [selectedPrescription, setSelectedPrescription] = useState(null)
+  const [selectedPrescription, setSelectedPrescription] = useState<Prescription | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
 
   // Function to load prescriptions data
-  const loadPrescriptions = async (doctorId) => {
+  const loadPrescriptions = async (doctorId: string) => {
     if (!doctorId || isRefreshing) return
 
     try {
       setIsRefreshing(true)
       const data = await getPrescriptions({ doctor_id: doctorId })
-      setPrescriptions(data)
+      setPrescriptions(data as Prescription[])
     } catch (err) {
       console.error("Error refreshing prescriptions:", err)
     } finally {
@@ -52,15 +95,15 @@ export default function PrescriptionsPage() {
 
         // Get doctor profile
         const profile = await getDoctorProfile(user.id)
-        setDoctorProfile(profile)
+        setDoctorProfile(profile as DoctorProfile)
 
         if (profile) {
           // Get prescriptions using the existing getPrescriptions function
           await loadPrescriptions(profile.id)
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error("Error loading prescriptions data:", err)
-        setError(err.message || "Failed to load prescriptions data")
+        setError(err instanceof Error ? err.message : "Failed to load prescriptions data")
       } finally {
         setLoading(false)
       }
@@ -72,7 +115,7 @@ export default function PrescriptionsPage() {
   const filteredPrescriptions = prescriptions.filter((prescription) => {
     // Check if any medication name matches the search term
     const medicationMatches =
-      prescription.medications?.some((med) => med.name.toLowerCase().includes(searchTerm.toLowerCase())) || false
+      prescription.medications?.some((med: Medication) => med.name.toLowerCase().includes(searchTerm.toLowerCase())) || false
 
     const patientName =
       prescription.patients?.users?.user_metadata?.full_name || prescription.patients?.users?.user_metadata?.name || ""
@@ -203,7 +246,7 @@ export default function PrescriptionsPage() {
                               prescription.status === "pending"
                                 ? "default"
                                 : prescription.status === "filled"
-                                  ? "success"
+                                  ? "secondary"
                                   : "destructive"
                             }
                           >

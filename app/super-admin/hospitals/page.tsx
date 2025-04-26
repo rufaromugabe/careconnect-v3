@@ -12,10 +12,10 @@ import { useAuth } from "@/contexts/auth-context"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { toast } from "@/components/ui/use-toast"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { supabase } from "@/lib/supabase"
 import { logAction } from "@/lib/logging"
+import { toast } from 'react-toastify';
 
 interface Hospital {
   id: string
@@ -116,11 +116,7 @@ export default function SuperAdminHospitalsPage() {
     e.preventDefault()
 
     if (!token) {
-      toast({
-        title: "Error",
-        description: "Authentication token not available",
-        variant: "destructive",
-      })
+      toast.error("Authentication token not available")
       return
     }
 
@@ -140,37 +136,24 @@ export default function SuperAdminHospitalsPage() {
       }
 
       const newHospital = await response.json()
-      //logging action
       await logAction(
-        user.id,
-        `created hospital: ${newHospital.name}`,
+        user?.id || "",
+        "created new hospital",
         {
-          email: user.email,
+          email: user?.email || "",
           status: "created",
           hospital_name: newHospital.name,
           hospital_location: newHospital.location,
-
-
         }
       )
-      // Update the hospitals list
       setHospitals((prev) => [...prev, newHospital])
-
-      // Reset form and close dialog
       setFormData({ name: "", location: "" })
       setIsAddDialogOpen(false)
 
-      toast({
-        title: "Success",
-        description: "Hospital created successfully",
-      })
+      toast.success("Hospital created successfully")
     } catch (err: any) {
       console.error("Error creating hospital:", err)
-      toast({
-        title: "Error",
-        description: err.message || "Failed to create hospital",
-        variant: "destructive",
-      })
+      toast.error(err.message || "Failed to create hospital")
     }
   }
 
@@ -196,39 +179,25 @@ export default function SuperAdminHospitalsPage() {
       }
 
       const updatedHospital = await response.json()
-      //logging action
       await logAction(
-        user.id,
-        `updated hospital: ${currentHospital.name} to ${updatedHospital.name}`,
+        user?.id || "",
+        "updated hospital",
         {
-          email: user.email,
+          email: user?.email || "",
           status: "updated",
           hospital_name: updatedHospital.name,
           hospital_location: updatedHospital.location,
-
-
         }
       )
-
-      // Update the hospitals list
       setHospitals((prev) => prev.map((hospital) => (hospital.id === updatedHospital.id ? updatedHospital : hospital)))
-
-      // Reset form and close dialog
       setCurrentHospital(null)
       setFormData({ name: "", location: "" })
       setIsEditDialogOpen(false)
 
-      toast({
-        title: "Success",
-        description: "Hospital updated successfully",
-      })
+      toast.success("Hospital updated successfully")
     } catch (err: any) {
       console.error("Error updating hospital:", err)
-      toast({
-        title: "Error",
-        description: err.message || "Failed to update hospital",
-        variant: "destructive",
-      })
+      toast.error(err.message || "Failed to update hospital")
     }
   }
 
@@ -249,35 +218,25 @@ export default function SuperAdminHospitalsPage() {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.error || "Failed to delete hospital")
       }
-      //logging action
+
       await logAction(
-        user.id,
-        `deleted hospital: ${currentHospital.name}`,
+        user?.id || "",
+        "deleted hospital",
         {
-          email: user.email,
+          email: user?.email || "",
           status: "deleted",
           hospital_name: currentHospital.name,
           hospital_location: currentHospital.location,
         }
       )
-      // Update the hospitals list
       setHospitals((prev) => prev.filter((hospital) => hospital.id !== currentHospital.id))
-
-      // Reset and close dialog
       setCurrentHospital(null)
       setIsDeleteDialogOpen(false)
 
-      toast({
-        title: "Success",
-        description: "Hospital deleted successfully",
-      })
+      toast.success("Hospital deleted successfully")
     } catch (err: any) {
       console.error("Error deleting hospital:", err)
-      toast({
-        title: "Error",
-        description: err.message || "Failed to delete hospital",
-        variant: "destructive",
-      })
+      toast.error(err.message || "Failed to delete hospital")
     }
   }
 

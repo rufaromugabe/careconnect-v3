@@ -5,12 +5,13 @@ import "./globals.css"
 import { AuthProvider } from "@/contexts/auth-context"
 import { cookies } from "next/headers"
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
+import { ToastContainer } from 'react-toastify';
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "CareConnect",
-  description: "A comprehensive healthcare management system",
+  description: "A comprehensive healthycare management system",
   generator: 'v0.dev'
 }
 
@@ -69,7 +70,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} min-h-screen bg-gradient-to-br from-slate-50 to-blue-100`}>
-        <AuthProvider initialRole={userRole}>{children}</AuthProvider>
+        <AuthProvider initialRole={userRole}>{children}</AuthProvider>   <ToastContainer />
       </body>
     </html>
   )

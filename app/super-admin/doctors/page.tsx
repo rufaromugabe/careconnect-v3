@@ -12,11 +12,11 @@ import { useAuth } from "@/contexts/auth-context"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { toast } from "@/components/ui/use-toast"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { supabase } from "@/lib/supabase"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { logAction } from "@/lib/logging"
+import { toast } from 'react-toastify';
 
 interface Doctor {
   id: string
@@ -137,8 +137,6 @@ export default function SuperAdminDoctorsPage() {
       (doctor.email?.toLowerCase() || "").includes(searchTerm.toLowerCase()),
   )
 
-
-
   // Handle select input changes
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({
@@ -147,67 +145,55 @@ export default function SuperAdminDoctorsPage() {
     }))
   }
 
-
   // Handle verify doctor
   const handleVerifyDoctor = async (userId: string) => {
     if (!token) return
+
     try {
-      const response = await fetch(`/api/admin/usersVerification/${userId}`, {
+      const response = await fetch(`/api/admin/doctors/${userId}/verify`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ is_verified: true }),
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || "Failed to update doctor verification status")
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to verify doctor")
       }
 
       const updatedDoctor = await response.json()
-      //log action
-      await logAction (user?.id, "verify-doctor", {
-        doctor_id: userId,
-        doctor_name: currentDoctor?.name,
-        doctor_email: currentDoctor?.email,
-        doctor_specialization: currentDoctor?.specialization,
-      })
-      //Refresh UI or update local state as needed
-      setDoctors((prev) => 
-        prev.map((doctor) =>
-          doctor.user_id === userId ? { ...doctor, is_verified: true } : doctor,
-        ),
-      )
 
+      //log action
+      await logAction(user.id, "verify-doctor", {
+        doctor_id: userId,
+        doctor_name: updatedDoctor.name,
+        doctor_email: updatedDoctor.email,
+      })
+
+      //Refresh UI or update local state as needed
+      setDoctors((prev) =>
+          prev.map((doctor) =>
+              doctor.user_id === userId ? { ...doctor, is_verified: true } : doctor,
+          ),
+      )
       // Close the dialog
       setIsVerifyDialogOpen(false)
       setCurrentDoctor(null)
 
-      toast({
-        title: "Success",
-        description: `Doctor ${updatedDoctor.name} has been verified successfully.`,
-      })
+      toast.success(`Doctor ${updatedDoctor.name} has been verified successfully.`)
     } catch (err: any) {
       console.error("Error updating doctor verification:", err)
-      toast({
-        title: "Error",
-        description: err.message || "Failed to update doctor verification status",
-        variant: "destructive",
-      })
+      toast.error(err.message || "Failed to update doctor verification status")
     }
   }
-
-
 
   // Open verify dialog with doctor data
   const openVerifyDialog = (doctor: Doctor) => {
     setCurrentDoctor(doctor)
     setIsVerifyDialogOpen(true)
   }
-
-
 
   if (loading) {
     return (

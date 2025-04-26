@@ -11,12 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRouter } from "next/navigation"
 import { Heart, AlertTriangle } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
-import { useToast } from "@/components/ui/use-toast"
 import Link from "next/link"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AnimatedBeam, AnimatedGradientText } from "@/components/ui/animated-beam"
 import { motion } from "framer-motion"
 import { supabase } from "@/lib/supabase"
+import { toast } from 'react-toastify';
 
 export default function Register() {
   const [name, setName] = useState("")
@@ -27,35 +27,22 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { signUp, signIn, signInWithGoogle, isSupabaseInitialized, refreshSession } = useAuth()
-  const { toast } = useToast()
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!isSupabaseInitialized) {
-      toast({
-        title: "Configuration Error",
-        description: "The authentication system is not properly configured. Please contact support.",
-        variant: "destructive",
-      })
+      toast.error("The authentication system is not properly configured. Please contact support.");
       return
     }
 
     if (!name || !email || !password || !confirmPassword || !role) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      })
+      toast.error("Please fill in all fields");
       return
     }
 
     if (password !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match",
-        variant: "destructive",
-      })
+      toast.error("Passwords don't match. Please make sure your passwords match");
       return
     }
 
@@ -71,11 +58,7 @@ export default function Register() {
 
       if (error) {
         console.error("Register page - Registration error:", error)
-        toast({
-          title: "Registration failed",
-          description: error.message || "An unexpected error occurred during registration",
-          variant: "destructive",
-        })
+        toast.error(error.message || "An unexpected error occurred during registration");
         setIsLoading(false)
         return
       }
@@ -131,20 +114,18 @@ export default function Register() {
 
         if (signInError) {
           console.error("Register page - Sign in error after registration:", signInError)
-          toast({
-            title: "Registration successful",
-            description: "Your account has been created, but we couldn't sign you in automatically. Please log in.",
-          })
+          toast.success(
+            "Your account has been created, but we couldn't sign you in automatically. Please log in.",
+            )
           router.push("/")
           return
         }
 
         if (!session) {
           console.error("Register page - No session after sign in")
-          toast({
-            title: "Registration successful",
-            description: "Your account has been created, but we couldn't sign you in automatically. Please log in.",
-          })
+          toast.success(
+            "Your account has been created, no session found please log in.",
+            )
           router.push("/")
           return
         }
@@ -163,10 +144,7 @@ export default function Register() {
           console.error("Register page - Error updating user metadata:", metadataError)
         }
 
-        toast({
-          title: "Registration successful",
-          description: "Your account has been created and you're now signed in.",
-        })
+        toast.success("Your account has been created and you're now signed in.")
 
         console.log("Register page - Redirecting to dashboard:", role)
 
@@ -178,20 +156,14 @@ export default function Register() {
       } else {
         // This shouldn't happen if there's no error, but just in case
         console.log("Register page - No user data returned after registration")
-        toast({
-          title: "Registration issue",
-          description:
-            "Your account was created, but we couldn't retrieve your user information. Please try logging in.",
-        })
+        toast.error(
+          "Your account was created, but we couldn't retrieve your user information. Please try logging in.",
+          )
         router.push("/")
       }
     } catch (error) {
       console.error("Register page - Registration error:", error)
-      toast({
-        title: "Registration failed",
-        description: "An unexpected error occurred",
-        variant: "destructive",
-      })
+      toast.error("An unexpected error occurred")
     } finally {
       setIsLoading(false)
     }
@@ -397,19 +369,11 @@ export default function Register() {
                         try {
                           const { error } = await signInWithGoogle()
                           if (error) {
-                            toast({
-                              title: "Registration failed",
-                              description: error.message,
-                              variant: "destructive",
-                            })
+                            toast.error(error.message);
                           }
                         } catch (error) {
                           console.error("Google registration error:", error)
-                          toast({
-                            title: "Registration failed",
-                            description: "An unexpected error occurred",
-                            variant: "destructive",
-                          })
+                          toast.error("An unexpected error occurred")
                         }
                       }}
                     >

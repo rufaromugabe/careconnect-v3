@@ -9,10 +9,10 @@ import { Loader2, Trash2, Search, UserIcon as UserMd } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { toast } from "@/components/ui/use-toast"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { supabase } from "@/lib/supabase"
 import { logAction } from "@/lib/logging"
+import { toast } from 'react-toastify';
 
 interface Pharmacist {
   id: string
@@ -126,51 +126,44 @@ export default function SuperAdminPharmacistsPage() {
 
   const handleVerifyPharmacist = async (userId: string) => {
     if (!token) return
+
     try {
-      const response = await fetch(`/api/admin/usersVerification/${userId}`, {
+      const response = await fetch(`/api/admin/pharmacists/${userId}/verify`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ is_verified: true }),
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || "Failed to update pharmacist verification status")
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to verify pharmacist")
       }
 
       const updatedPharmacist = await response.json()
 
       //log action
-      await logAction (user.id, "verify-pharmacist", {
+      await logAction(user.id, "verify-pharmacist", {
         pharmacist_id: userId,
         pharmacist_name: updatedPharmacist.name,
         pharmacist_email: updatedPharmacist.email,
       })
 
-      //Refresh UI or update local state as neede
-        setPharmacists((prev) =>
-            prev.map((pharmacist) =>
-            pharmacist.user_id === userId ? { ...pharmacist, is_verified: true } : pharmacist,
-            ),
-        )
+      //Refresh UI or update local state as needed
+      setPharmacists((prev) =>
+          prev.map((pharmacist) =>
+          pharmacist.user_id === userId ? { ...pharmacist, is_verified: true } : pharmacist,
+          ),
+      )
       // Close the dialog
       setIsVerifyDialogOpen(false)
       setcurrentPharmacist(null)
 
-      toast({
-        title: "Success",
-        description: `Pharmacist ${updatedPharmacist.name} has been verified successfully.`,
-      })
+      toast.success(`Pharmacist ${updatedPharmacist.name} has been verified successfully.`)
     } catch (err: any) {
       console.error("Error updating pharmacist verification:", err)
-      toast({
-        title: "Error",
-        description: err.message || "Failed to update pharmacist verification status",
-        variant: "destructive",
-      })
+      toast.error(err.message || "Failed to update pharmacist verification status")
     }
   }
 

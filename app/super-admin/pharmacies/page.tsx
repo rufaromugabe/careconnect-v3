@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/auth-context"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from 'react-toastify'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { supabase } from "@/lib/supabase"
 import { logAction } from "@/lib/logging"
@@ -86,12 +86,11 @@ export default function SuperAdminPharmaciesPage() {
         setPharmacies(data)
         // log action
         await logAction(
-          user.id,
+          user?.id || "",
           "accessed pharmacies list",
           {
-            email: user.email,
+            email: user?.email || "",
             status: "ok",
-            
           }
         )
       } catch (err: any) {
@@ -126,11 +125,7 @@ export default function SuperAdminPharmaciesPage() {
     e.preventDefault()
 
     if (!token) {
-      toast({
-        title: "Error",
-        description: "Authentication token not available",
-        variant: "destructive",
-      })
+      toast.error("Authentication token not available")
       return
     }
 
@@ -150,35 +145,24 @@ export default function SuperAdminPharmaciesPage() {
       }
 
       const newPharmacy = await response.json()
-      // log action
       await logAction(
-        user.id,
+        user?.id || "",
         `created new pharmacy: ${newPharmacy.name}`,
         {
-          email: user.email,
+          email: user?.email || "",
           status: "created",
           pharmacy_name: newPharmacy.name,
           pharmacy_location: newPharmacy.location,
         }
       )
-      // Update the pharmacies list
       setPharmacies((prev) => [...prev, newPharmacy])
-
-      // Reset form and close dialog
       setFormData({ name: "", location: "" })
       setIsAddDialogOpen(false)
 
-      toast({
-        title: "Success",
-        description: "Pharmacy created successfully",
-      })
+      toast.success("Pharmacy created successfully")
     } catch (err: any) {
       console.error("Error creating pharmacy:", err)
-      toast({
-        title: "Error",
-        description: err.message || "Failed to create pharmacy",
-        variant: "destructive",
-      })
+      toast.error(err.message || "Failed to create pharmacy")
     }
   }
 
@@ -204,37 +188,25 @@ export default function SuperAdminPharmaciesPage() {
       }
 
       const updatedPharmacy = await response.json()
-      // log action
       await logAction(
-        user.id,
+        user?.id || "",
         `updated pharmacy: ${currentPharmacy.name}`,
         {
-          email: user.email,
+          email: user?.email || "",
           status: "created",
           pharmacy_name: updatedPharmacy.name,
           pharmacy_location: updatedPharmacy.location,
-
         }
       )
-      // Update the pharmacies list
       setPharmacies((prev) => prev.map((pharmacy) => (pharmacy.id === updatedPharmacy.id ? updatedPharmacy : pharmacy)))
-
-      // Reset form and close dialog
       setCurrentPharmacy(null)
       setFormData({ name: "", location: "" })
       setIsEditDialogOpen(false)
 
-      toast({
-        title: "Success",
-        description: "Pharmacy updated successfully",
-      })
+      toast.success("Pharmacy updated successfully")
     } catch (err: any) {
       console.error("Error updating pharmacy:", err)
-      toast({
-        title: "Error",
-        description: err.message || "Failed to update pharmacy",
-        variant: "destructive",
-      })
+      toast.error(err.message || "Failed to update pharmacy")
     }
   }
 
@@ -255,37 +227,25 @@ export default function SuperAdminPharmaciesPage() {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.error || "Failed to delete pharmacy")
       }
-      // log action
+
       await logAction(
-        user.id,
+        user?.id || "",
         `deleted pharmacy: ${currentPharmacy.name}`,
         {
-          email: user.email,
+          email: user?.email || "",
           status: "deleted",
           pharmacy_name: currentPharmacy.name,
           pharmacy_location: currentPharmacy.location,
         }
       )
-
-
-      // Update the pharmacies list
       setPharmacies((prev) => prev.filter((pharmacy) => pharmacy.id !== currentPharmacy.id))
-
-      // Reset and close dialog
       setCurrentPharmacy(null)
       setIsDeleteDialogOpen(false)
 
-      toast({
-        title: "Success",
-        description: "Pharmacy deleted successfully",
-      })
+      toast.success("Pharmacy deleted successfully")
     } catch (err: any) {
       console.error("Error deleting pharmacy:", err)
-      toast({
-        title: "Error",
-        description: err.message || "Failed to delete pharmacy",
-        variant: "destructive",
-      })
+      toast.error(err.message || "Failed to delete pharmacy")
     }
   }
 

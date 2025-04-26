@@ -12,11 +12,11 @@ import { useAuth } from "@/contexts/auth-context"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { toast } from "@/components/ui/use-toast"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { supabase } from "@/lib/supabase"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { logAction } from "@/lib/logging"
+import { toast } from 'react-toastify';
 
 interface Nurse {
   id: string
@@ -135,53 +135,44 @@ export default function SuperAdminNursesPage() {
   // Handle verify nurse
   const handleVerifyNurse = async (userId: string) => {
     if (!token) return
+
     try {
-      console.log("Verifying nurse with user_id:", userId)
-      const response = await fetch(`/api/admin/usersVerification/${userId}`, {
+      const response = await fetch(`/api/admin/nurses/${userId}/verify`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ is_verified: true }),
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || "Failed to update nurse verification status")
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to verify nurse")
       }
 
       const updatedNurse = await response.json()
 
-      // Update the nurses UI list
-      setNurses((prev) => 
-        prev.map((nurse) =>
-            nurse.user_id === userId ? { ...nurse, is_verified: updatedNurse.updated_is_verified } : nurse,
-            ),
-        )
-
-    // log action
-    await logAction(user.id, "verify-nurse", {
+      //log action
+      await logAction(user.id, "verify-nurse", {
         nurse_id: userId,
-        nurse_name: currentNurse?.name,
-        nurse_email: currentNurse?.email,
-    })
+        nurse_name: updatedNurse.name,
+        nurse_email: updatedNurse.email,
+      })
 
+      //Refresh UI or update local state as needed
+      setNurses((prev) =>
+          prev.map((nurse) =>
+              nurse.user_id === userId ? { ...nurse, is_verified: true } : nurse,
+          ),
+      )
       // Close the dialog
       setIsVerifyDialogOpen(false)
       setCurrentNurse(null)
 
-      toast({
-        title: "Success",
-        description: `Nurse ${currentNurse?.name} has been verified successfully.`,
-      })
+      toast.success(`Nurse ${updatedNurse.name} has been verified successfully.`)
     } catch (err: any) {
       console.error("Error updating nurse verification:", err)
-      toast({
-        title: "Error",
-        description: err.message || "Failed to update nurse verification status",
-        variant: "destructive",
-      })
+      toast.error(err.message || "Failed to update nurse verification status")
     }
   }
 

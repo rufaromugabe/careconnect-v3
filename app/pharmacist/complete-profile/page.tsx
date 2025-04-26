@@ -9,10 +9,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/contexts/auth-context"
 import { supabase } from "@/lib/supabase"
 import { Loader2 } from "lucide-react"
+import { toast } from 'react-toastify';
 
 interface Pharmacy {
   id: string
@@ -23,7 +23,6 @@ interface Pharmacy {
 export default function PharmacistCompleteProfilePage() {
   const { user, refreshSession } = useAuth() // Changed from refreshUser to refreshSession
   const router = useRouter()
-  const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([])
   const [loadingPharmacies, setLoadingPharmacies] = useState(true)
@@ -47,11 +46,7 @@ export default function PharmacistCompleteProfilePage() {
         setPharmacies(data || [])
       } catch (error: any) {
         console.error("Error fetching pharmacies:", error.message)
-        toast({
-          title: "Error",
-          description: "Failed to load pharmacies. Please try again.",
-          variant: "destructive",
-        })
+        toast.error("Failed to load pharmacies. Please try again.");
       } finally {
         setLoadingPharmacies(false)
       }
@@ -110,11 +105,7 @@ export default function PharmacistCompleteProfilePage() {
     e.preventDefault()
 
     if (!user) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to complete your profile",
-        variant: "destructive",
-      })
+      toast.error("You must be logged in to complete your profile")
       return
     }
 
@@ -160,20 +151,13 @@ export default function PharmacistCompleteProfilePage() {
       // Refresh session to update user metadata
       await refreshSession()
 
-      toast({
-        title: "Profile Completed",
-        description: "Your pharmacist profile has been set up successfully.",
-      })
+      toast.success("Profile updated successfully!")
 
       // Redirect to dashboard
       router.push("/pharmacist/verify")
     } catch (error: any) {
       console.error("Error completing profile:", error.message)
-      toast({
-        title: "Error",
-        description: error.message || "Failed to complete profile. Please try again.",
-        variant: "destructive",
-      })
+      toast.error(error.message);
     } finally {
       setLoading(false)
     }

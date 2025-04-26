@@ -13,8 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/components/ui/use-toast"
+import { Textarea } from "@/components/ui/textarea" 
+import { toast } from 'react-toastify';
 import { useAuth } from "@/contexts/auth-context"
 import {
   getNurseProfile,
@@ -111,7 +111,13 @@ export default function VitalSignsPage() {
 
           // Get vital signs recorded by this nurse
           const vitalSignsData = await getVitalSigns({ recorded_by: user.id })
-          setVitalSigns(vitalSignsData)
+          // Map to ensure health_record_id is present at the top level for type safety
+          setVitalSigns(
+            vitalSignsData.map((vs: any) => ({
+              ...vs,
+              health_record_id: vs.health_record_id || (vs.health_record ? vs.health_record.id : undefined),
+            }))
+          )
         }
       } catch (err: any) {
         console.error("Error loading vital signs data:", err)
@@ -177,7 +183,12 @@ export default function VitalSignsPage() {
 
       if (user) {
         const updatedVitalSigns = await getVitalSigns({ recorded_by: user.id })
-        setVitalSigns(updatedVitalSigns)
+        setVitalSigns(
+          updatedVitalSigns.map((vs: any) => ({
+            ...vs,
+            health_record_id: vs.health_record_id || (vs.health_record ? vs.health_record.id : undefined),
+          }))
+        )
       }
       // log action
       await logAction(user.id, `added vital signs for patient ${newVitalSigns.patientId}`, {
@@ -185,17 +196,11 @@ export default function VitalSignsPage() {
         nurse_email: user.email,
       } )
       setIsAddVitalSignsOpen(false)
-      toast({
-        title: "Vital Signs Added",
-        description: "New vital signs have been successfully recorded.",
-      })
+      toast.success("Vital Signs Added" )
+      
     } catch (err) {
       console.error("Error adding vital signs:", err)
-      toast({
-        title: "Error",
-        description: "Failed to record vital signs. Please try again.",
-        variant: "destructive",
-      })
+      toast.error("Failed to record vital signs" )
     }
   }
 

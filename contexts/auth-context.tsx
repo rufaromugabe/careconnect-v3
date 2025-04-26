@@ -13,7 +13,7 @@ import {
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from 'react-toastify';
 
 // Add the signInWithGoogle function to the AuthContextType interface
 type AuthContextType = {
@@ -80,7 +80,6 @@ export function AuthProvider({
   const [initAuth, setInitAuth] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
   const router = useRouter();
-  const { toast } = useToast();
 
   // Optimized function to refresh role cookie with caching
   const refreshRoleCookie = useCallback(
@@ -234,12 +233,7 @@ export function AuthProvider({
           console.error("Auth context - Session error:", error);
           if (error.message.includes("supabaseUrl is required")) {
             setIsSupabaseInitialized(false);
-            toast({
-              title: "Configuration Error",
-              description:
-                "The application is not properly configured. Please check environment variables.",
-              variant: "destructive",
-            });
+            toast.error("Failed to initialize Supabase client")
           }
           setIsLoading(false);
           return;
@@ -333,7 +327,6 @@ export function AuthProvider({
       clearInterval(refreshInterval);
     };
   }, [
-    toast,
     initialRole,
     persistSession,
     refreshRoleCookie,
@@ -365,13 +358,11 @@ export function AuthProvider({
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
-          options: {
-            redirectTo: `${window.location.origin}/dashboard`,
-          },
         });
 
         if (error) {
           console.error("Auth context - Sign in error:", error);
+          toast.error(error.message)
           return { error, session: null };
         }
 
@@ -400,6 +391,7 @@ export function AuthProvider({
         return { error: null, session: data.session };
       } catch (error) {
         console.error("Auth context - Sign in error:", error);
+        toast.error(error instanceof Error ? error.message : 'An unknown error occurred');
         return { error, session: null };
       }
     },

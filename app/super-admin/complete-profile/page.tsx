@@ -6,16 +6,15 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/contexts/auth-context"
 import { supabase } from "@/lib/supabase"
 import { Loader2 } from "lucide-react"
+import { toast } from 'react-toastify';
 
 export default function SuperAdminProfileCompletion() {
   const { user, refreshSession } = useAuth()
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const { toast } = useToast()
 
   const [formData, setFormData] = useState({
     name: user?.user_metadata?.full_name || user?.user_metadata?.name || "",
@@ -23,18 +22,19 @@ export default function SuperAdminProfileCompletion() {
     is_verified: true,
   })
 
-  const handleChange = (e) => {
+  const handleChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault()
     setLoading(true)
 
     try {
       if (!user) {
-        throw new Error("User not authenticated")
+        toast.error("You must be logged in to complete your profile")
+        return
       }
 
       // Update user metadata
@@ -52,20 +52,13 @@ export default function SuperAdminProfileCompletion() {
       // Refresh session to update user metadata
       await refreshSession()
 
-      toast({
-        title: "Profile Completed",
-        description: "Your super admin profile has been successfully updated.",
-      })
+      toast.success("Profile updated successfully!")
 
       // Redirect to dashboard
       router.push(`/super-admin/dashboard`)
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error completing profile:", error)
-      toast({
-        title: "Error",
-        description: "Failed to complete your profile. Please try again.",
-        variant: "destructive",
-      })
+      toast.error(error.message || 'An unknown error occurred')
     } finally {
       setLoading(false)
     }

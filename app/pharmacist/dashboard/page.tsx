@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/auth-context"
 import { getPharmacistProfile, getPharmacyInventory, getPrescriptions } from "@/lib/data-service"
 import { supabase } from "@/lib/supabase"
 import { QRScanner } from "@/components/qr-scanner"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from 'react-toastify';
 
 export default function PharmacistDashboard() {
   const { user } = useAuth()
@@ -104,11 +104,8 @@ export default function PharmacistDashboard() {
         if (error) throw error
 
         if (!data) {
-          toast({
-            title: "Prescription Not Found",
-            description: "No prescription found with the scanned ID",
-            variant: "destructive",
-          })
+          toast("Pescription Not Found")
+           
           return
         }
 
@@ -135,18 +132,12 @@ export default function PharmacistDashboard() {
 
       // Show the prescription details
       setScannedPrescription(prescription)
-
-      toast({
-        title: "Prescription Found",
-        description: `Prescription #${prescriptionId} loaded successfully`,
-      })
+      toast.error('Prescription  loaded successfully')
+     
     } catch (err) {
       console.error("Error processing QR code:", err)
-      toast({
-        title: "Error",
-        description: "Failed to process the QR code",
-        variant: "destructive",
-      })
+      toast.error("Failed to process the QR code")
+     
     } finally {
       setLoading(false)
     }
@@ -159,18 +150,12 @@ export default function PharmacistDashboard() {
       // Update local state
       setPrescriptions(prescriptions.filter((p) => p.id !== id))
       setScannedPrescription(null)
-
-      toast({
-        title: "Success",
-        description: `Prescription ${status === "filled" ? "filled" : "canceled"} successfully`,
-      })
+      toast(`Prescription ${status === "filled" ? "filled" : "canceled"} successfully`)
+      
     } catch (err) {
       console.error("Error updating prescription status:", err)
-      toast({
-        title: "Error",
-        description: "Failed to update prescription status",
-        variant: "destructive",
-      })
+      toast("Failed to update prescription status")
+      
     }
   }
 

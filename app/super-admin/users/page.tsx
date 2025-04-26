@@ -10,6 +10,7 @@ import { Loader2, UserPlus, UserX, UserCheck, Filter } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { supabase } from "@/lib/supabase";
 import { logAction } from "@/lib/logging";
+import { toast } from 'react-toastify';
 
 export default function SuperAdminUsersPage() {
   const { user } = useAuth();
@@ -125,11 +126,13 @@ export default function SuperAdminUsersPage() {
       ? `disabled user account: ${userId}`
       : `enabled user account: ${userId}`;
 
-    await logAction(user.id, action, {
-      email: user.email,
-      userId,
-      newStatus: currentIsActive? "Inactive" : "Active",
-    });
+      if (user) {
+        await logAction(user.id, action, {
+          email: user.email,
+          userId,
+          newStatus: currentIsActive ? "Inactive" : "Active",
+        });
+      }
 
       // Refresh UI or update local state as needed
       setUsers((prevUsers) =>
@@ -139,8 +142,16 @@ export default function SuperAdminUsersPage() {
             : user
         )
       );
+      
+      // Display success toast notification
+      toast.success(`User ${currentIsActive ? 'disabled' : 'enabled'} successfully`, {
+      });
     } catch (error) {
       console.error("Error updating verification:", error);
+      
+      // Display error toast notification
+      toast.error(`Failed to ${currentIsActive ? 'disable' : 'enable'} user: ${error instanceof Error ? error.message : 'Unknown error'}`, {
+      });
     }
   };
 

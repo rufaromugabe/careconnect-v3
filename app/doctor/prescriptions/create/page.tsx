@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, FormEvent, ChangeEvent } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -14,23 +14,57 @@ import { Label } from "@/components/ui/label"
 import { useAuth } from "@/contexts/auth-context"
 import { getDoctorProfile, getDoctorPatients } from "@/lib/data-service"
 import { supabase } from "@/lib/supabase"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from 'react-toastify'
 import { encrypt } from "@/lib/encryption" // Import encrypt directly
 import { logAction } from "@/lib/logging"
+
+// Define types
+interface Medication {
+  id: number;
+  name: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+}
+
+interface User {
+  email?: string;
+  user_metadata?: {
+    full_name?: string;
+    name?: string;
+  };
+}
+
+interface Patient {
+  id: string;
+  users?: User;
+  dob?: string;
+  blood_type?: string;
+  allergies?: string;
+}
+
+interface DoctorProfile {
+  id: string;
+  user_id: string;
+  license_number: string;
+  specialization: string;
+  hospital_id: string;
+  users?: User;
+}
 
 export default function CreatePrescriptionPage() {
   const router = useRouter()
   const { user } = useAuth()
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [doctorProfile, setDoctorProfile] = useState(null)
-  const [patients, setPatients] = useState([])
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formError, setFormError] = useState(null)
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
+  const [doctorProfile, setDoctorProfile] = useState<DoctorProfile | null>(null)
+  const [patients, setPatients] = useState<Patient[]>([])
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+  const [formError, setFormError] = useState<string | null>(null)
 
-  const [selectedPatient, setSelectedPatient] = useState(null)
-  const [notes, setNotes] = useState("")
-  const [medications, setMedications] = useState([{ id: 1, name: "", dosage: "", frequency: "", duration: "" }])
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
+  const [notes, setNotes] = useState<string>("")
+  const [medications, setMedications] = useState<Medication[]>([{ id: 1, name: "", dosage: "", frequency: "", duration: "" }])
 
   useEffect(() => {
     async function loadData() {
@@ -41,16 +75,16 @@ export default function CreatePrescriptionPage() {
 
         // Get doctor profile
         const profile = await getDoctorProfile(user.id)
-        setDoctorProfile(profile)
+        setDoctorProfile(profile as DoctorProfile)
 
         if (profile) {
           // Get patients for the prescription form
           const patientData = await getDoctorPatients(profile.id)
-          setPatients(patientData)
+          setPatients(patientData as Patient[])
         }
       } catch (err) {
         console.error("Error loading data:", err)
-        setError(err.message || "Failed to load data")
+     
       } finally {
         setLoading(false)
       }
@@ -59,12 +93,12 @@ export default function CreatePrescriptionPage() {
     loadData()
   }, [user])
 
-  const handlePatientChange = (patientId) => {
+  const handlePatientChange = (patientId: string) => {
     const patient = patients.find((p) => p.id === patientId)
-    setSelectedPatient(patient)
+    setSelectedPatient(patient || null)
   }
 
-  const handleMedicationChange = (index, field, value) => {
+  const handleMedicationChange = (index: number, field: keyof Omit<Medication, 'id'>, value: string) => {
     const updatedMedications = [...medications]
     updatedMedications[index][field] = value
     setMedications(updatedMedications)
@@ -74,7 +108,7 @@ export default function CreatePrescriptionPage() {
     setMedications([...medications, { id: medications.length + 1, name: "", dosage: "", frequency: "", duration: "" }])
   }
 
-  const removeMedication = (index) => {
+  const removeMedication = (index: number) => {
     if (medications.length === 1) {
       return // Don't remove the last medication
     }
@@ -100,7 +134,7 @@ export default function CreatePrescriptionPage() {
   }
 
   // Update the handleSubmit function to handle encryption
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     if (!validateForm()) return
@@ -112,6 +146,10 @@ export default function CreatePrescriptionPage() {
       const encryptedNotes = notes ? encrypt(notes) : ""
 
       console.log("Creating prescription with encrypted notes:", encryptedNotes ? "ENCRYPTED" : "")
+
+      if (!doctorProfile || !selectedPatient || !user) {
+        throw new Error("Missing required data: doctor profile, patient, or user")
+      }
 
       const { data: prescriptionData, error: prescriptionError } = await supabase
         .from("prescriptions")
@@ -152,10 +190,7 @@ export default function CreatePrescriptionPage() {
           }
         )
         
-        toast({
-          title: "Success",
-          description: "Prescription created successfully",
-        })
+        toast.success("Prescription created successfully" )
 
         
 
@@ -164,13 +199,8 @@ export default function CreatePrescriptionPage() {
       }
     } catch (err) {
       console.error("Error creating prescription:", err)
-      setFormError(err.message || "Failed to create prescription")
-
-      toast({
-        title: "Error",
-        description: "Failed to create prescription",
-        variant: "destructive",
-      })
+      toast.success("Failed to create prescription" )
+    
     } finally {
       setIsSubmitting(false)
     }
