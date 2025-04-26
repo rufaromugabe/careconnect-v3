@@ -20,7 +20,7 @@ import {
   createHealthRecord,
   getHealthRecords,
 } from "@/lib/data-service"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "react-toastify"
 
 // Define interfaces for type safety
 interface VitalSigns {
@@ -134,19 +134,18 @@ export default function NursePatientsPage() {
         notes: vitalSigns.notes,
       })
 
-      toast({
-        title: "Success",
-        description: "Vital signs recorded successfully",
-      })
+      toast.success(
+        "Vital signs recorded successfully",
+    )
 
       setSelectedPatient(null)
     } catch (err) {
       console.error("Error recording vital signs:", err)
-      toast({
-        title: "Error",
-        description: "Failed to record vital signs",
-        variant: "destructive",
-      })
+      toast.error(
+      
+      "Failed to record vital signs",
+     
+      )
     }
   }
 

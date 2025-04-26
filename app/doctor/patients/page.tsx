@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, ChangeEvent, FormEvent } from "react"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -9,10 +9,28 @@ import { Header } from "@/components/layout/header"
 import { Search, Plus, Edit, Trash, Loader2 } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "react-toastify"
 import { useAuth } from "@/contexts/auth-context"
 import { getDoctorProfile, getDoctorPatients } from "@/lib/data-service"
 import { supabase } from "@/lib/supabase"
+
+// Define patient type
+interface Patient {
+  id?: string
+  name?: string
+  email: string
+  bloodType?: string
+  allergies?: string
+}
+
+// Define props for PatientFormDialog
+interface PatientFormDialogProps {
+  isOpen: boolean
+  onClose: () => void
+  onSubmit: (patient: Patient) => void
+  title: string
+  patient?: Patient | null
+}
 
 export default function PatientsPage() {
   const { user } = useAuth()
@@ -79,11 +97,9 @@ export default function PatientsPage() {
       const existingUser = existingUsers?.users.find((u) => u.email === newPatient.email)
 
       if (!existingUser) {
-        toast({
-          title: "User Not Found",
-          description: "No user with this email exists in the system. They must register first.",
-          variant: "destructive",
-        })
+        toast(
+           "User Not Found",
+        )
         return
       }
 
@@ -109,26 +125,21 @@ export default function PatientsPage() {
         const patientData = await getDoctorPatients(doctorProfile.id)
         setPatients(patientData)
 
-        toast({
-          title: "Patient Added",
-          description: "Patient has been successfully added to your care.",
-        })
+        toast.success(
+          "Patient Added"
+          )
       } else {
-        toast({
-          title: "Not a Patient",
-          description: "This user exists but is not registered as a patient.",
-          variant: "destructive",
-        })
+        toast(
+          "Not a Patient",
+        )
       }
 
       setIsAddPatientOpen(false)
     } catch (err: any) {
       console.error("Error adding patient:", err)
-      toast({
-        title: "Error",
-        description: err.message || "Failed to add patient",
-        variant: "destructive",
-      })
+      toast.error(
+         err.message || "Failed to add patient",
+      )
     }
   }
 
@@ -153,17 +164,15 @@ export default function PatientsPage() {
       setPatients(patientData)
 
       setEditingPatient(null)
-      toast({
-        title: "Patient Updated",
-        description: "Patient information has been successfully updated.",
-      })
+      toast.success(
+         "Patient Updated",
+    )
     } catch (err: any) {
       console.error("Error updating patient:", err)
-      toast({
-        title: "Error",
-        description: err.message || "Failed to update patient",
-        variant: "destructive",
-      })
+      toast.error(
+         err.message || "Failed to update patient",
+       
+      )
     }
   }
 
@@ -180,17 +189,15 @@ export default function PatientsPage() {
       const patientData = await getDoctorPatients(doctorProfile.id)
       setPatients(patientData)
 
-      toast({
-        title: "Patient Removed",
-        description: "Patient has been successfully removed from your care.",
-      })
+      toast.success(
+         "Patient Removed",
+        )
     } catch (err: any) {
       console.error("Error removing patient:", err)
-      toast({
-        title: "Error",
-        description: err.message || "Failed to remove patient",
-        variant: "destructive",
-      })
+      toast(
+        err.message || "Failed to remove patient",
+        
+      )
     }
   }
 
@@ -327,8 +334,8 @@ export default function PatientsPage() {
   )
 }
 
-function PatientFormDialog({ isOpen, onClose, onSubmit, title, patient = null }) {
-  const [formData, setFormData] = useState(
+function PatientFormDialog({ isOpen, onClose, onSubmit, title, patient = null }: PatientFormDialogProps) {
+  const [formData, setFormData] = useState<Patient>(
     patient || {
       name: "",
       email: "",
@@ -350,12 +357,12 @@ function PatientFormDialog({ isOpen, onClose, onSubmit, title, patient = null })
     }
   }, [patient])
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     onSubmit(formData)
   }

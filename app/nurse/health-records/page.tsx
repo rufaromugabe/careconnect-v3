@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, ChangeEvent, FormEvent } from "react"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -12,19 +12,79 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "react-toastify"
 import { useAuth } from "@/contexts/auth-context"
 import { getNurseProfile, getHealthRecords, addVitalSigns } from "@/lib/data-service"
+
+// Type definitions
+interface UserMetadata {
+  full_name?: string;
+  name?: string;
+}
+
+interface User {
+  id: string;
+  email?: string;
+  user_metadata?: UserMetadata;
+}
+
+interface Patient {
+  id: string;
+  users?: User;
+}
+
+interface VitalSign {
+  id?: string;
+  recorded_at: string;
+  temperature: number;
+  systolic: number;
+  diastolic: number;
+  notes?: string;
+  users?: User;
+}
+
+interface HealthRecord {
+  id: string;
+  diagnosis_name: string;
+  diagnosis_severity: 'low' | 'medium' | 'high';
+  visit_date: string;
+  patients?: Patient;
+  vital_signs?: VitalSign[];
+  showVitalSigns?: boolean;
+}
+
+interface NurseProfile {
+  id: string;
+  user_id: string;
+  hospital_id: string;
+  specialization?: string;
+  is_verified?: boolean;
+  license_number?: string;
+  department?: string;
+  users?: User;
+}
+
+interface VitalSignsFormData {
+  temperature: string;
+  systolic: string;
+  diastolic: string;
+  notes: string;
+}
+
+interface VitalSignsFormProps {
+  onSubmit: (data: VitalSignsFormData) => void;
+  setIsAddVitalSignsOpen: (isOpen: boolean) => void;
+}
 
 export default function NurseHealthRecordsPage() {
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [nurseProfile, setNurseProfile] = useState<any>(null)
-  const [healthRecords, setHealthRecords] = useState<any[]>([])
+  const [nurseProfile, setNurseProfile] = useState<NurseProfile | null>(null)
+  const [healthRecords, setHealthRecords] = useState<HealthRecord[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [isAddVitalSignsOpen, setIsAddVitalSignsOpen] = useState(false)
-  const [selectedRecord, setSelectedRecord] = useState<any>(null)
+  const [selectedRecord, setSelectedRecord] = useState<HealthRecord | null>(null)
 
   useEffect(() => {
     async function loadData() {
@@ -63,9 +123,9 @@ export default function NurseHealthRecordsPage() {
     )
   })
 
-  const handleAddVitalSigns = async (newVitalSigns) => {
+  const handleAddVitalSigns = async (newVitalSigns: VitalSignsFormData) => {
     try {
-      if (!selectedRecord) return
+      if (!selectedRecord || !user) return
 
       // Add vital signs to the selected health record
       await addVitalSigns({
@@ -85,17 +145,15 @@ export default function NurseHealthRecordsPage() {
       setIsAddVitalSignsOpen(false)
       setSelectedRecord(null)
 
-      toast({
-        title: "Vital Signs Added",
-        description: "Vital signs have been added to the health record.",
-      })
+      toast.success(
+         "Vital Signs Added",
+      )
     } catch (err) {
       console.error("Error adding vital signs:", err)
-      toast({
-        title: "Error",
-        description: "Failed to add vital signs. Please try again.",
-        variant: "destructive",
-      })
+      toast.error(
+         "Failed to add vital signs. Please try again.",
+       
+      )
     }
   }
 
@@ -175,7 +233,7 @@ export default function NurseHealthRecordsPage() {
                               record.diagnosis_severity === "low"
                                 ? "default"
                                 : record.diagnosis_severity === "medium"
-                                  ? "warning"
+                                  ? "secondary"
                                   : "destructive"
                             }
                           >
@@ -294,20 +352,20 @@ export default function NurseHealthRecordsPage() {
   )
 }
 
-function VitalSignsForm({ onSubmit, setIsAddVitalSignsOpen }) {
-  const [formData, setFormData] = useState({
+function VitalSignsForm({ onSubmit, setIsAddVitalSignsOpen }: VitalSignsFormProps) {
+  const [formData, setFormData] = useState<VitalSignsFormData>({
     temperature: "",
     systolic: "",
     diastolic: "",
     notes: "",
   })
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     onSubmit(formData)
   }
