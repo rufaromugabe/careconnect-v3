@@ -38,17 +38,10 @@ export default function SuperAdminPharmacistsPage() {
   const [pharmacists, setPharmacists] = useState<Pharmacist[]>([])
   const [pharmacy, setPharmacy] = useState<Pharmacy[]>([])
   const [searchTerm, setSearchTerm] = useState("")
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [currentPharmacist, setcurrentPharmacist] = useState<Pharmacist | null>(null)
   const [isVerifyDialogOpen, setIsVerifyDialogOpen] = useState(false)
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    license_number: "",
-    pharmacy_id: "",
-  })
+
   const [token, setToken] = useState<string | null>(null)
 
   // Get the auth token
@@ -181,51 +174,6 @@ export default function SuperAdminPharmacistsPage() {
     }
   }
 
-  // Handle delete pharmacist
-  const handleDeletepharmacist = async () => {
-    if (!currentPharmacist || !token) return
-
-    try {
-      const response = await fetch(`/api/admin/pharmacists/${currentPharmacist.id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || "Failed to delete pharmacist")
-      }
-
-      // Update the pharmacists list
-      setPharmacists((prev) => prev.filter((pharmacist) => pharmacist.id !== currentPharmacist.id))
-
-      // Reset and close dialog
-      setcurrentPharmacist(null)
-      setIsDeleteDialogOpen(false)
-
-      toast({
-        title: "Success",
-        description: "pharmacist deleted successfully",
-      })
-    } catch (err: any) {
-      console.error("Error deleting pharmacist:", err)
-      toast({
-        title: "Error",
-        description: err.message || "Failed to delete pharmacist",
-        variant: "destructive",
-      })
-    }
-  }
-
-  // Open delete dialog with pharmacist data
-  const openDeleteDialog = (pharmacist: Pharmacist) => {
-    setcurrentPharmacist(pharmacist)
-    setIsDeleteDialogOpen(true)
-  }
-
   const openVerifyDialog = (pharmacist: Pharmacist) => {
     setcurrentPharmacist(pharmacist)
     setIsVerifyDialogOpen(true)
@@ -292,8 +240,7 @@ export default function SuperAdminPharmacistsPage() {
                       <TableHead>Email</TableHead>
                       <TableHead>License Number</TableHead>
                       <TableHead>Pharmacy</TableHead>
-                      <TableHead>Verification</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead className="text-right">Verification</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -320,19 +267,6 @@ export default function SuperAdminPharmacistsPage() {
                               </Button>
                             )}
                           </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-red-600 hover:text-red-800"
-                                onClick={() => openDeleteDialog(pharmacist)}
-                              >
-                                <Trash2 className="h-4 w-4 mr-1" />
-                                Delete
-                              </Button>
-                            </div>
-                          </TableCell>
                         </TableRow>
                       ))
                     ) : (
@@ -346,27 +280,6 @@ export default function SuperAdminPharmacistsPage() {
                 </Table>
               </CardContent>
             </Card>
-
-            {/* Delete pharmacist Dialog */}
-            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Confirm Deletion</DialogTitle>
-                </DialogHeader>
-                <div className="py-4">
-                  <p>Are you sure you want to delete Pharmacist. {currentPharmacist?.name}?</p>
-                  <p className="text-sm text-gray-500 mt-2">This action cannot be undone.</p>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button variant="destructive" onClick={handleDeletepharmacist}>
-                    Delete
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
             <Dialog open={isVerifyDialogOpen} onOpenChange={setIsVerifyDialogOpen}>
               <DialogContent>
                 <DialogHeader>

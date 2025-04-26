@@ -297,17 +297,13 @@ export default function PharmacistPrescriptionsPage() {
       const { error } = await supabase.from("prescriptions").update(updates).eq("id", prescriptionId)
 
       if (error) throw error
-      // log action
-      await logAction(
-        pharmacistProfile.user_id,
-        `filled prescription: ${prescriptionId}`,
-        {
-          email: user.email,
-          Pharmacist: pharmacistProfile.users?.user_metadata?.full_name || pharmacistProfile.users?.user_metadata?.name,
-          
-
-        }
-      )
+      // Log the action
+      await logAction(user?.id, `filled prescription ${prescriptionId}`, {
+        prescription_id: prescriptionId,
+        status: newStatus,
+        pharmacist_id: pharmacistProfile?.user_id,
+        
+      })
       // Update local state
       if (scannedPrescription && scannedPrescription.id === prescriptionId) {
         setScannedPrescription({

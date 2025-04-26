@@ -185,44 +185,7 @@ export default function SuperAdminNursesPage() {
     }
   }
 
-  // Handle delete nurse
-  const handleDeleteNurse = async () => {
-    if (!currentNurse || !token) return
 
-    try {
-      const response = await fetch(`/api/admin/nurses/${currentNurse.id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || "Failed to delete nurse")
-      }
-
-      // Update the nurses list
-      setNurses((prev) => prev.filter((nurse) => nurse.id !== currentNurse.id))
-
-      // Reset and close dialog
-      setCurrentNurse(null)
-      setIsDeleteDialogOpen(false)
-
-      toast({
-        title: "Success",
-        description: "Nurse deleted successfully",
-      })
-    } catch (err: any) {
-      console.error("Error deleting nurse:", err)
-      toast({
-        title: "Error",
-        description: err.message || "Failed to delete nurse",
-        variant: "destructive",
-      })
-    }
-  }
 
   // Open verify dialog with nurse data
   const openVerifyDialog = (nurse: Nurse) => {
@@ -230,11 +193,6 @@ export default function SuperAdminNursesPage() {
     setIsVerifyDialogOpen(true)
   }
 
-  // Open delete dialog with nurse data
-  const openDeleteDialog = (nurse: Nurse) => {
-    setCurrentNurse(nurse)
-    setIsDeleteDialogOpen(true)
-  }
 
   if (loading) {
     return (
@@ -298,8 +256,7 @@ export default function SuperAdminNursesPage() {
                       <TableHead>License Number</TableHead>
                       <TableHead>Department</TableHead>
                       <TableHead>Hospital</TableHead>
-                      <TableHead>Verification</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead className="text-right">Verification</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -327,19 +284,6 @@ export default function SuperAdminNursesPage() {
                               </Button>
                             )}
                           </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-red-600 hover:text-red-800"
-                                onClick={() => openDeleteDialog(nurse)}
-                              >
-                                <Trash2 className="h-4 w-4 mr-1" />
-                                Delete
-                              </Button>
-                            </div>
-                          </TableCell>
                         </TableRow>
                       ))
                     ) : (
@@ -353,27 +297,6 @@ export default function SuperAdminNursesPage() {
                 </Table>
               </CardContent>
             </Card>
-
-            {/* Delete Nurse Dialog */}
-            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Confirm Deletion</DialogTitle>
-                </DialogHeader>
-                <div className="py-4">
-                  <p>Are you sure you want to delete Nurse {currentNurse?.name}?</p>
-                  <p className="text-sm text-gray-500 mt-2">This action cannot be undone.</p>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button variant="destructive" onClick={handleDeleteNurse}>
-                    Delete
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
 
             {/* Verify Nurse Dialog */}
             <Dialog open={isVerifyDialogOpen} onOpenChange={setIsVerifyDialogOpen}>

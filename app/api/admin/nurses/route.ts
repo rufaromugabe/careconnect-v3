@@ -91,8 +91,6 @@ export async function GET(request: NextRequest) {
         }
       }),
     )
-
-    console.log("nursesWithUserInfo", nursesWithUserInfo)
     return NextResponse.json(nursesWithUserInfo)
   } catch (error: any) {
     console.error("Error in GET /api/admin/nurses:", error)

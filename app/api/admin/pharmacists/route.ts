@@ -90,8 +90,6 @@ export async function GET(request: NextRequest) {
         }
       }),
     )
-
-    console.log("pharmacistsWithUserInfo", pharmacistsWithUserInfo)
     return NextResponse.json(pharmacistsWithUserInfo)
   } catch (error: any) {
     console.error("Error in GET /api/admin/pharmacists:", error)
