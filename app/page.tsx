@@ -213,14 +213,15 @@ export default function Home() {
       {/* Hero Section - adjusted padding for header */}
       <section className="relative z-10 pt-24 md:pt-32">
         <div className="container mx-auto px-4 max-w-7xl">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+          {/* Modified to stack vertically on mobile and center all items */}
+          <div className="flex flex-col items-center justify-center gap-12">
             <motion.div 
-              className="flex-1"
+              className="w-full text-center"
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <div className="mb-6 flex items-center">
+              <div className="mb-6 flex items-center justify-center">
                 <Heart className="h-12 w-12 text-primary mr-4" />
                 <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
                   <AnimatedGradientText>CareConnect</AnimatedGradientText>
@@ -229,11 +230,11 @@ export default function Home() {
               <h2 className="text-3xl md:text-4xl font-bold mb-6">
                 Healthcare Management Reimagined
               </h2>
-              <p className="text-xl text-muted-foreground mb-8 max-w-2xl">
+              <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
                 A comprehensive platform connecting healthcare professionals and patients
                 for seamless, efficient, and personalized healthcare delivery.
               </p>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-4 justify-center">
                 <Button 
                   size="lg" 
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
@@ -251,14 +252,14 @@ export default function Home() {
               </div>
             </motion.div>
             
-            {/* Healthcare Connection Beams visible on all screen sizes */}
+            {/* Healthcare Connection Beams in full width section */}
             <motion.div
-              className="flex-1"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
+              className="w-full flex items-center justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              <HealthcareConnectionBeams />
+              <HealthcareConnectionBeams className="max-w-4xl mx-auto" />
             </motion.div>
           </div>
         </div>

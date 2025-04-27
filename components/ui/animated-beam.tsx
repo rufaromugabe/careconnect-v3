@@ -93,6 +93,7 @@ export function HealthcareConnectionBeams({ className }: HealthcareConnectionBea
   const pharmacistRef = useRef<HTMLDivElement>(null);
   
   const [ready, setReady] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   
   // Define connection beams
   const connections: ConnectionBeam[] = [
@@ -101,6 +102,22 @@ export function HealthcareConnectionBeams({ className }: HealthcareConnectionBea
     { id: "patient-center", from: "patient", to: "center", color: "purple", delay: 0.6, duration: 4.2, curvature: 50 },
     { id: "pharmacist-center", from: "pharmacist", to: "center", color: "orange", delay: 0.8, duration: 3.8, curvature: 50 },
   ];
+  
+  // Check if we're on mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // 768px is standard md breakpoint in Tailwind
+    };
+    
+    // Check on mount
+    checkMobile();
+    
+    // Check on window resize
+    window.addEventListener('resize', checkMobile);
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
   
   // Get the reference based on the name
   const getRefFromName = (name: string) => {
@@ -133,11 +150,8 @@ export function HealthcareConnectionBeams({ className }: HealthcareConnectionBea
 
   return (
     <div 
-      ref={containerRef} 
-      className={cn(
-        "relative h-[400px] w-full overflow-hidden", 
-        className
-      )}
+      className={cn("relative w-full flex items-center justify-center h-[300px] md:h-[400px] mr-20")}
+      ref={containerRef}
     >
       {/* SVG container for beams */}
       {ready && (
@@ -156,8 +170,8 @@ export function HealthcareConnectionBeams({ className }: HealthcareConnectionBea
                 gradientStartColor={colors.start}
                 gradientStopColor={colors.end}
                 pathColor={`${colors.start}33`}
-                pathWidth={3}
-                curvature={conn.curvature}
+                pathWidth={isMobile ? 2 : 3}
+                curvature={isMobile ? conn.curvature * 0.7 : conn.curvature}
                 delay={conn.delay}
                 duration={conn.duration}
               />
@@ -180,7 +194,7 @@ export function HealthcareConnectionBeams({ className }: HealthcareConnectionBea
           <div className="absolute -inset-3 rounded-full bg-gradient-to-r from-blue-400/40 to-purple-400/40 blur-md"></div>
           
           <MagicCard
-            className="rounded-full w-20 h-20 flex items-center justify-center shadow-[0_0_15px_rgba(79,70,229,0.45)]"
+            className="rounded-full w-14 h-14 md:w-20 md:h-20 flex items-center justify-center shadow-[0_0_15px_rgba(79,70,229,0.45)]"
             gradientSize={120}
             gradientFrom="#3b82f6"
             gradientTo="#8b5cf6"
@@ -194,9 +208,9 @@ export function HealthcareConnectionBeams({ className }: HealthcareConnectionBea
                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
               >
                 <div className="absolute inset-0 rounded-full border-3 border-blue-300/30 border-dashed"></div>
-                <div className="absolute h-12 w-12 rounded-full bg-gradient-to-br from-blue-500/40 to-purple-500/40 blur-md"></div>
-                <div className="relative h-10 w-10 rounded-full flex items-center justify-center bg-white dark:bg-gray-800 shadow-inner">
-                  <svg viewBox="0 0 24 24" className="h-6 w-6 text-blue-600" fill="currentColor">
+                <div className="absolute h-8 w-8 md:h-12 md:w-12 rounded-full bg-gradient-to-br from-blue-500/40 to-purple-500/40 blur-md"></div>
+                <div className="relative h-6 w-6 md:h-10 md:w-10 rounded-full flex items-center justify-center bg-white dark:bg-gray-800 shadow-inner">
+                  <svg viewBox="0 0 24 24" className="h-4 w-4 md:h-6 md:w-6 text-blue-600" fill="currentColor">
                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                   </svg>
                 </div>
@@ -211,8 +225,8 @@ export function HealthcareConnectionBeams({ className }: HealthcareConnectionBea
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
         >
-          <h3 className="font-bold text-lg">CareConnect</h3>
-          <p className="text-xs text-muted-foreground">Central Healthcare Platform</p>
+          <h3 className="font-bold text-sm md:text-lg">CareConnect</h3>
+          <p className="text-[10px] md:text-xs text-muted-foreground">Central Healthcare Platform</p>
         </motion.div>
       </motion.div>
       
@@ -224,17 +238,17 @@ export function HealthcareConnectionBeams({ className }: HealthcareConnectionBea
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <div className="p-4 rounded-full bg-blue-500/10 backdrop-blur-sm border border-blue-500/20 shadow-lg flex items-center justify-center">
-          <div className="p-3 rounded-full bg-white dark:bg-gray-800 shadow-inner">
-            <svg className="h-8 w-8 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <div className="p-2 md:p-4 rounded-full bg-blue-500/10 backdrop-blur-sm border border-blue-500/20 shadow-lg flex items-center justify-center">
+          <div className="p-1 md:p-3 rounded-full bg-white dark:bg-gray-800 shadow-inner">
+            <svg className="h-5 w-5 md:h-8 md:w-8 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M19.5 8.25l-7.5 7.5-7.5-7.5" strokeLinecap="round" strokeLinejoin="round" />
               <path d="M18 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2z" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
         </div>
         <div className="mt-2 text-center">
-          <h3 className="font-medium">Doctors</h3>
-          <p className="text-xs text-muted-foreground">Medical professionals</p>
+          <h3 className="font-medium text-xs md:text-base">Doctors</h3>
+          <p className="text-[8px] md:text-xs text-muted-foreground">Medical professionals</p>
         </div>
       </motion.div>
       
@@ -246,17 +260,17 @@ export function HealthcareConnectionBeams({ className }: HealthcareConnectionBea
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
-        <div className="p-4 rounded-full bg-green-500/10 backdrop-blur-sm border border-green-500/20 shadow-lg flex items-center justify-center">
-          <div className="p-3 rounded-full bg-white dark:bg-gray-800 shadow-inner">
-            <svg className="h-8 w-8 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <div className="p-2 md:p-4 rounded-full bg-green-500/10 backdrop-blur-sm border border-green-500/20 shadow-lg flex items-center justify-center">
+          <div className="p-1 md:p-3 rounded-full bg-white dark:bg-gray-800 shadow-inner">
+            <svg className="h-5 w-5 md:h-8 md:w-8 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
               <path d="M12 3v15" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
         </div>
         <div className="mt-2 text-center">
-          <h3 className="font-medium">Nurses</h3>
-          <p className="text-xs text-muted-foreground">Healthcare staff</p>
+          <h3 className="font-medium text-xs md:text-base">Nurses</h3>
+          <p className="text-[8px] md:text-xs text-muted-foreground">Healthcare staff</p>
         </div>
       </motion.div>
       
@@ -268,17 +282,17 @@ export function HealthcareConnectionBeams({ className }: HealthcareConnectionBea
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, delay: 0.4 }}
       >
-        <div className="p-4 rounded-full bg-purple-500/10 backdrop-blur-sm border border-purple-500/20 shadow-lg flex items-center justify-center">
-          <div className="p-3 rounded-full bg-white dark:bg-gray-800 shadow-inner">
-            <svg className="h-8 w-8 text-purple-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <div className="p-2 md:p-4 rounded-full bg-purple-500/10 backdrop-blur-sm border border-purple-500/20 shadow-lg flex items-center justify-center">
+          <div className="p-1 md:p-3 rounded-full bg-white dark:bg-gray-800 shadow-inner">
+            <svg className="h-5 w-5 md:h-8 md:w-8 text-purple-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
               <path d="M12 6v6l4 2" />
             </svg>
           </div>
         </div>
         <div className="mt-2 text-center">
-          <h3 className="font-medium">Patients</h3>
-          <p className="text-xs text-muted-foreground">Healthcare consumers</p>
+          <h3 className="font-medium text-xs md:text-base">Patients</h3>
+          <p className="text-[8px] md:text-xs text-muted-foreground">Healthcare consumers</p>
         </div>
       </motion.div>
       
@@ -290,17 +304,17 @@ export function HealthcareConnectionBeams({ className }: HealthcareConnectionBea
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, delay: 0.5 }}
       >
-        <div className="p-4 rounded-full bg-orange-500/10 backdrop-blur-sm border border-orange-500/20 shadow-lg flex items-center justify-center">
-          <div className="p-3 rounded-full bg-white dark:bg-gray-800 shadow-inner">
-            <svg className="h-8 w-8 text-orange-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <div className="p-2 md:p-4 rounded-full bg-orange-500/10 backdrop-blur-sm border border-orange-500/20 shadow-lg flex items-center justify-center">
+          <div className="p-1 md:p-3 rounded-full bg-white dark:bg-gray-800 shadow-inner">
+            <svg className="h-5 w-5 md:h-8 md:w-8 text-orange-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M19.5 8.25l-7.5 7.5-7.5-7.5" strokeLinecap="round" strokeLinejoin="round" />
               <path d="M9 13h6m-3-3v6" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
         </div>
         <div className="mt-2 text-center">
-          <h3 className="font-medium">Pharmacists</h3>
-          <p className="text-xs text-muted-foreground">Medication experts</p>
+          <h3 className="font-medium text-xs md:text-base">Pharmacists</h3>
+          <p className="text-[8px] md:text-xs text-muted-foreground">Medication experts</p>
         </div>
       </motion.div>
     </div>
