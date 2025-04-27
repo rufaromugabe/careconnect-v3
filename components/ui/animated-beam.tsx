@@ -1,53 +1,70 @@
-"use client"
+"use client";
 
-import type React from "react"
+import React, { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
-import { useEffect, useState } from "react"
-import { cn } from "@/lib/utils"
-
-export function AnimatedBeam({
-  className,
-  interval = 4000,
-}: {
-  className?: string
-  interval?: number
-}) {
-  const [position, setPosition] = useState({ x: 50, y: 50 })
-
-  useEffect(() => {
-    // Create a smooth random movement for the beam
-    const intervalId = setInterval(() => {
-      setPosition({
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-      })
-    }, interval)
-
-    return () => clearInterval(intervalId)
-  }, [interval])
-
+export function AnimatedBeam() {
   return (
-    <div className={cn("absolute inset-0 overflow-hidden", className)}>
-      <div
-        className="absolute -inset-[100%] opacity-50 blur-[100px] transition-all duration-2000 ease-in-out"
-        style={{
-          background: `radial-gradient(circle at ${position.x}% ${position.y}%, rgba(56, 189, 248, 0.8) 0%, rgba(232, 121, 249, 0.8) 25%, rgba(217, 70, 219, 0.6) 50%, rgba(99, 102, 241, 0.4) 75%, rgba(14, 165, 233, 0.2) 100%)`,
-          transform: `translate(${position.x / 5 - 10}%, ${position.y / 5 - 10}%)`,
-        }}
-      />
+    <div className="pointer-events-none fixed inset-0 z-0 h-full overflow-hidden">
+      <div className="absolute inset-0 z-[-1] opacity-50 dark:opacity-20">
+        {/* Top gradient beam */}
+        <div
+          className="absolute -top-[50%] left-[10%] h-[150%] w-[80%] rotate-[-20deg] bg-gradient-to-r from-indigo-500/30 via-blue-500/40 to-cyan-500/30 blur-3xl"
+          style={{ transform: "translateZ(0)" }}
+        />
+        {/* Bottom gradient beam */}
+        <div
+          className="absolute -bottom-[50%] right-[10%] h-[150%] w-[80%] rotate-[20deg] bg-gradient-to-r from-purple-500/30 via-fuchsia-500/40 to-pink-500/30 blur-3xl"
+          style={{ transform: "translateZ(0)" }}
+        />
+      </div>
     </div>
-  )
+  );
 }
 
-export function AnimatedGradientText({ children, className }: { children: React.ReactNode; className?: string }) {
+interface AnimatedGradientTextProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function AnimatedGradientText({
+  children,
+  className,
+}: AnimatedGradientTextProps) {
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  // Update gradient position based on mouse movement for interactive effect
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (textRef.current) {
+        const rect = textRef.current.getBoundingClientRect();
+        setPosition({
+          x: ((e.clientX - rect.left) / rect.width) * 100,
+          y: ((e.clientY - rect.top) / rect.height) * 100,
+        });
+      }
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
+
   return (
     <span
+      ref={textRef}
       className={cn(
-        "animate-text-gradient bg-gradient-to-r from-primary via-purple-500 to-blue-500 bg-[200%_auto] bg-clip-text text-transparent",
-        className,
+        "relative inline-block bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent transition-all duration-300",
+        className
       )}
+      style={{
+        backgroundImage: `linear-gradient(${position.x}deg, #3b82f6, #8b5cf6, #6366f1)`,
+      }}
     >
       {children}
     </span>
-  )
+  );
 }

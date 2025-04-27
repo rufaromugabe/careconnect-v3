@@ -1,447 +1,323 @@
 "use client";
 
 import type React from "react";
-
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useRouter, useSearchParams } from "next/navigation";
+import LoginComponent from "@/components/auth/login";
+import { useAuth } from "@/contexts/auth-context";
+import { useRouter } from "next/navigation";
 import {
   Stethoscope,
   User,
   FlaskRoundIcon as Flask,
   Thermometer,
   Heart,
-  AlertTriangle,
+  Calendar,
+  Activity,
+  Clock,
+  Shield,
+  BarChart,
 } from "lucide-react";
-import { useAuth } from "@/contexts/auth-context";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  AnimatedBeam,
-  AnimatedGradientText,
-} from "@/components/ui/animated-beam";
+import { AnimatedBeam, AnimatedGradientText } from "@/components/ui/animated-beam";
 import { motion } from "framer-motion";
-import { logAction } from "@/lib/logging";
-import { toast } from 'react-toastify';
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 export default function Home() {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const {
-    signIn,
-    signInWithGoogle,
-    isSupabaseInitialized,
-    refreshSession,
-    getUserRole,
-  } = useAuth();
-  const searchParams = useSearchParams();
+  const { user, session, getUserRole } = useAuth();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Check for error parameters in the URL
   useEffect(() => {
-    const error = searchParams.get("error");
-    if (error === "role_assignment_failed") {
-      toast.error("Failed to assign a role to your account. Please try again or contact support.");
-    } else if (error === "patient_creation_failed") {
-      toast.error("Failed to create your patient profile. Please try again or contact support.");
-    }
-  }, [searchParams, toast]);
-
-  // Update the handleLogin function for better performance
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Clear all cookies before attempting to sign in
-    const clearAllCookies = () => {
-      const cookies = document.cookie.split(";");
-      
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i];
-        const eqPos = cookie.indexOf("=");
-        const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
-        document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
+    const checkSession = async () => {
+      setIsLoading(true);
+      if (session && user) {
+        const role = await getUserRole();
+        if (role) {
+          setIsLoggedIn(true);
+          router.push(`/${role}/dashboard`);
+        }
       }
-      
-      console.log("Login page - All cookies cleared");
+      setIsLoading(false);
     };
 
-    // Clear all cookies
-    clearAllCookies();
+    checkSession();
+  }, [session, user, getUserRole, router]);
 
-    if (!isSupabaseInitialized) {
-      toast.error("The authentication system is not properly configured. Please contact support.");
-      return;
+  const features = [
+    {
+      icon: <Activity className="h-10 w-10 text-blue-500" />,
+      title: "Patient Record Management",
+      description: "Digital health records for secure and efficient storage and retrieval of patient information."
+    },
+    {
+      icon: <Calendar className="h-10 w-10 text-green-500" />,
+      title: "Appointment Scheduling",
+      description: "Streamlined booking system for patients to schedule visits with healthcare providers."
+    },
+    {
+      icon: <Clock className="h-10 w-10 text-purple-500" />,
+      title: "Real-time Notifications",
+      description: "Instant alerts for appointments, medication reminders, and important updates."
+    },
+    {
+      icon: <Shield className="h-10 w-10 text-yellow-500" />,
+      title: "Secure Communication",
+      description: "HIPAA-compliant messaging between patients and healthcare providers."
+    },
+    {
+      icon: <BarChart className="h-10 w-10 text-red-500" />,
+      title: "Analytics Dashboard",
+      description: "Data-driven insights for healthcare providers to monitor patient outcomes."
+    },
+    {
+      icon: <Stethoscope className="h-10 w-10 text-indigo-500" />,
+      title: "Treatment Plans",
+      description: "Customized care plans and progress tracking for improved patient outcomes."
     }
-
-    if (!email || !password) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      
-      console.log("Login page - Attempting to sign in:", email);
-      const { error, session } = await signIn(email, password);
-
-      if (error) {
-        console.error("Login page - Login error:", error);
-
-        const isInvalidCredentials = error.message
-          .toLowerCase()
-          .includes("invalid login credentials");
-
-        toast.error(
-          isInvalidCredentials
-            ? "Incorrect email or password. Please try again."
-            : error.message || "An error occurred. Please try again later.",
-          {
-            autoClose: 4000,
-          }
-        );
-
-        setIsLoading(false);
-        //log action
-
-        return;
-      }
-
-      if (!session) {
-        console.error("Login page - No session after login");
-        toast.error("Failed to establish a session. Please try again.");
-        setIsLoading(false);
-        return;
-      }
-
-      console.log("Login page - Login successful, session established");
-
-      // Helper function to get a cookie by name
-      function getCookieValue(name: string): string | undefined {
-        return document.cookie
-          .split("; ")
-          .find((row) => row.startsWith(`${name}=`))
-          ?.split("=")[1];
-      }
-
-      // Get values from cookies
-      const roleCookie = getCookieValue("user_role");
-      const isVerifiedCookie = getCookieValue("is_verified");
-      const isActiveCookie = getCookieValue("is_active");
-
-      if (roleCookie) {
-        console.log("Login page - Found role in cookie:", roleCookie);
-
-        if (isVerifiedCookie !== "true") {
-          console.log(
-            "Login page - User not verified (cookie), redirecting to verification"
-          );
-          router.push(`/${roleCookie}/verify`);
-          return;
-        }
-        if (isActiveCookie !== "true") {
-          console.log(
-            "Login page - User not active (cookie), redirecting to inactive page"
-          );
-          router.push(`/${roleCookie}/in-active`);
-          return;
-        }
-
-        console.log(
-          "Login page - Redirecting to dashboard for role:",
-          roleCookie
-        );
-        router.push(`/${roleCookie}/dashboard`);
-      }
-
-      // If no cookie, check user metadata (second fastest)
-      if (session.user.user_metadata?.role) {
-        const role = session.user.user_metadata.role;
-        const isVerified = session.user.user_metadata?.is_verified;
-        const isActive = session.user.user_metadata?.is_active;
-
-        if (isVerified !== true) {
-          console.log(
-            "Login page - User is not verified, redirecting to verification"
-          );
-          router.push(`/${role}/verify`);
-          return;
-        }
-        if (isActive !== true) {
-          console.log(
-            "Login page - User is not active, redirecting to inactive page"
-          );
-          router.push(`/${role}/in-active`);
-          return;
-        }
-
-        console.log(
-          "Login page - Found role in metadata, redirecting to:",
-          role
-        );
-
-        // Set both cookies
-        document.cookie = `user_role=${role}; path=/; max-age=${
-          60 * 60 * 24 * 7
-        }; SameSite=Lax`;
-        document.cookie = `is_verified=${isVerified}; path=/; max-age=${
-          60 * 60 * 24 * 7
-        }; SameSite=Lax`;
-        document.cookie = `is_active=${isActive}; path=/; max-age=${
-          60 * 60 * 24 * 7
-        }; SameSite=Lax`;
-
-        router.push(`/${role}/dashboard`);
-        return;
-      }
-
-      // If no metadata, try to get the role from the database or API
-      const role = await getUserRole();
-
-      if (role) {
-        console.log("Login page - Redirecting to role dashboard:", role);
-        router.push(`/${role}/dashboard`);
-      } else {
-        console.log(
-          "Login page - No role found, redirecting to role selection"
-        );
-        router.push("/auth/select-role");
-      }
-    } catch (error) {
-      console.error("Login page - Login error:", error);
-      toast.error("An unexpected error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const roleIcons = [
-    { Icon: Stethoscope, label: "Doctor", delay: 0.1 },
-    { Icon: Thermometer, label: "Nurse", delay: 0.2 },
-    { Icon: User, label: "Patient", delay: 0.3 },
-    { Icon: Flask, label: "Pharmacist", delay: 0.4 },
   ];
 
+  const testimonials = [
+    {
+      quote: "CareConnect has revolutionized how we manage patient care. The integrated system makes coordination between departments seamless.",
+      name: "Dr. Sarah Johnson",
+      role: "Cardiologist"
+    },
+    {
+      quote: "As a nurse, I can now easily access patient information and update vitals in real-time. It's made our workflow so much more efficient.",
+      name: "Mark Williams",
+      role: "Head Nurse"
+    },
+    {
+      quote: "I love being able to schedule appointments and access my medical records from my phone. The reminders for medication are a lifesaver!",
+      name: "Emma Davis",
+      role: "Patient"
+    }
+  ];
+
+  const roleIcons = [
+    { Icon: Stethoscope, label: "Doctor", delay: 0.1, color: "text-blue-500" },
+    { Icon: Thermometer, label: "Nurse", delay: 0.2, color: "text-green-500" },
+    { Icon: User, label: "Patient", delay: 0.3, color: "text-purple-500" },
+    { Icon: Flask, label: "Pharmacist", delay: 0.4, color: "text-orange-500" },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-background to-muted flex flex-col items-center justify-center">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-background to-muted">
       {/* Animated background beam */}
       <AnimatedBeam />
 
-      <div className="container relative z-10 mx-auto px-4 py-16 max-w-6xl">
-        <motion.div
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="flex justify-center items-center mb-4">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{
-                type: "spring",
-                stiffness: 260,
-                damping: 20,
-                delay: 0.2,
-              }}
+      {/* Hero Section */}
+      <section className="relative z-10 py-20 md:py-32">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+            <motion.div 
+              className="flex-1"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <Heart className="h-12 w-12 text-primary mr-3" />
+              <div className="mb-6 flex items-center">
+                <Heart className="h-12 w-12 text-primary mr-4" />
+                <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
+                  <AnimatedGradientText>CareConnect</AnimatedGradientText>
+                </h1>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">
+                Healthcare Management Reimagined
+              </h2>
+              <p className="text-xl text-muted-foreground mb-8 max-w-2xl">
+                A comprehensive platform connecting healthcare professionals and patients
+                for seamless, efficient, and personalized healthcare delivery.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                  onClick={() => router.push("/register")}
+                >
+                  Get Started
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  onClick={() => {
+                    const loginSection = document.getElementById("login-section");
+                    if (loginSection) {
+                      loginSection.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                >
+                  Learn More
+                </Button>
+              </div>
             </motion.div>
-            <h1 className="text-5xl font-bold tracking-tight">
-              <AnimatedGradientText>CareConnect</AnimatedGradientText>
-            </h1>
+            
+            {/* Right side - if not logged in, show login component */}
+            {!isLoggedIn && (
+              <motion.div 
+                className="flex-1 flex justify-center"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                id="login-section"
+              >
+                <LoginComponent />
+              </motion.div>
+            )}
           </div>
-          <motion.p
-            className="text-lg text-muted-foreground max-w-2xl mx-auto mt-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
+        </div>
+      </section>
+
+      {/* Role Icons Section */}
+      <section className="relative z-10 py-16 bg-muted/50">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <motion.h2 
+            className="text-3xl font-bold text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            A comprehensive healthcare management system connecting doctors,
-            nurses, patients, and pharmacists for better healthcare delivery.
-          </motion.p>
-        </motion.div>
+            Connecting Everyone in Healthcare
+          </motion.h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 justify-items-center">
+            {roleIcons.map(({ Icon, label, delay, color }, index) => (
+              <motion.div
+                key={label}
+                className="flex flex-col items-center text-center"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: delay + 0.2, duration: 0.5 }}
+              >
+                <div className={`p-6 rounded-full bg-background shadow-lg mb-4 ${color}`}>
+                  <Icon className="h-12 w-12" />
+                </div>
+                <h3 className="text-xl font-medium">{label}</h3>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-        {!isSupabaseInitialized && (
-          <Alert variant="destructive" className="mb-6 max-w-md mx-auto">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Configuration Error</AlertTitle>
-            <AlertDescription>
-              The application is not properly configured. Please make sure the
-              environment variables are set correctly.
-            </AlertDescription>
-          </Alert>
-        )}
+      {/* Features Section */}
+      <section className="relative z-10 py-20">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Powerful Features</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Everything you need to streamline healthcare delivery and enhance patient outcomes.
+            </p>
+          </motion.div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <motion.div
+                key={feature.title}
+                className="bg-card/50 backdrop-blur-sm p-8 rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-shadow"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1, duration: 0.5 }}
+              >
+                <div className="mb-4">{feature.icon}</div>
+                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                <p className="text-muted-foreground">{feature.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-        <div className="flex justify-center">
+      {/* Testimonials Section */}
+      <section className="relative z-10 py-20 bg-muted/50">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">What Our Users Say</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Hear from healthcare professionals and patients using CareConnect every day.
+            </p>
+          </motion.div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <motion.div
+                key={testimonial.name}
+                className="bg-card/50 backdrop-blur-sm p-8 rounded-2xl border border-border/50 shadow-sm"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 + 0.3, duration: 0.5 }}
+              >
+                <div className="mb-6 text-4xl">"</div>
+                <p className="mb-6 italic text-lg">{testimonial.quote}</p>
+                <div>
+                  <p className="font-semibold">{testimonial.name}</p>
+                  <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="relative z-10 py-20">
+        <div className="container mx-auto px-4 max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="w-full max-w-md"
+            transition={{ duration: 0.5 }}
           >
-            <Card className="w-full p-8 shadow-xl backdrop-blur-sm bg-white/90 dark:bg-gray-950/90 border border-gray-200/50 dark:border-gray-800/50">
-              <div className="space-y-6">
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <motion.div
-                    className="space-y-2"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5, duration: 0.5 }}
-                  >
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      disabled={!isSupabaseInitialized}
-                      className="transition-all duration-300 focus:ring-2 focus:ring-primary/50"
-                    />
-                  </motion.div>
-
-                  <motion.div
-                    className="space-y-2"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.6, duration: 0.5 }}
-                  >
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      disabled={!isSupabaseInitialized}
-                      className="transition-all duration-300 focus:ring-2 focus:ring-primary/50"
-                    />
-                  </motion.div>
-
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.7, duration: 0.5 }}
-                  >
-                    <Button
-                      type="submit"
-                      className="w-full group relative overflow-hidden"
-                      disabled={isLoading || !isSupabaseInitialized}
-                    >
-                      <span className="relative z-10">
-                        {isLoading ? "Logging in..." : "Login"}
-                      </span>
-                      <span className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </Button>
-                  </motion.div>
-
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-background px-2 text-muted-foreground">
-                        Or continue with
-                      </span>
-                    </div>
-                  </div>
-
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.8, duration: 0.5 }}
-                  >
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full group relative overflow-hidden"
-                      disabled={!isSupabaseInitialized}
-                      onClick={async () => {
-                        try {
-                          // Clear all cookies before attempting to sign in with Google
-                          const clearAllCookies = () => {
-                            const cookies = document.cookie.split(";");
-                            
-                            for (let i = 0; i < cookies.length; i++) {
-                              const cookie = cookies[i];
-                              const eqPos = cookie.indexOf("=");
-                              const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
-                              document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
-                            }
-                            
-                            console.log("Login page - All cookies cleared before Google sign-in");
-                          };
-
-                          // Clear all cookies
-                          clearAllCookies();
-                          
-                          const { error } = await signInWithGoogle();
-                          if (error) {
-                            toast.error(error.message);
-                          }
-                        } catch (error) {
-                          console.error("Google login error:", error);
-                          toast.error("An unexpected error occurred");
-                        }
-                      }}
-                    >
-                      <span className="relative z-10 flex items-center">
-                        <svg
-                          className="mr-2 h-4 w-4"
-                          aria-hidden="true"
-                          focusable="false"
-                          data-prefix="fab"
-                          data-icon="google"
-                          role="img"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 488 512"
-                        >
-                          <path
-                            fill="currentColor"
-                            d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"
-                          ></path>
-                        </svg>
-                        Sign in with Google
-                        <span className="ml-2 text-xs text-muted-foreground">
-                          (as Patient)
-                        </span>
-                      </span>
-                      <span className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </Button>
-                  </motion.div>
-                </form>
-
-                <motion.div
-                  className="text-center text-sm text-muted-foreground"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.9, duration: 0.5 }}
-                >
-                  <a
-                    href="#"
-                    className="hover:underline text-primary transition-colors"
-                  >
-                    Forgot password?
-                  </a>
-                  <span className="mx-2">•</span>
-                  <a
-                    href="/register"
-                    className="hover:underline text-primary transition-colors"
-                  >
-                    Create an account
-                  </a>
-                </motion.div>
-              </div>
-            </Card>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Transform Healthcare Delivery?</h2>
+            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Join thousands of healthcare professionals and patients already using CareConnect.
+            </p>
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8"
+              onClick={() => router.push("/register")}
+            >
+              Sign Up Now
+            </Button>
           </motion.div>
         </div>
-      </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 py-12 bg-muted/80 border-t border-border/50">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center mb-6 md:mb-0">
+              <Heart className="h-6 w-6 text-primary mr-2" />
+              <span className="text-xl font-bold">CareConnect</span>
+            </div>
+            <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">
+              <a href="#" className="hover:text-primary">About</a>
+              <a href="#" className="hover:text-primary">Features</a>
+              <a href="#" className="hover:text-primary">Privacy Policy</a>
+              <a href="#" className="hover:text-primary">Terms of Service</a>
+              <a href="#" className="hover:text-primary">Contact</a>
+            </div>
+          </div>
+          <div className="mt-8 text-center text-sm text-muted-foreground">
+            &copy; {new Date().getFullYear()} CareConnect. All rights reserved.
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
