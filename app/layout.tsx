@@ -20,33 +20,26 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  // Check for session cookie - using cookies asynchronously
-  const cookieStore = cookies()
-  // Get cookies asynchronously and safely
-  const sessionActiveValue = (await cookieStore).has("supabase-auth-session-active") ? 
-    (await cookieStore).get("supabase-auth-session-active")!.value : undefined
-  const sessionActive = sessionActiveValue === "true"
-  
-  let userRoleValue = (await cookieStore).has("user_role") ? 
-    (await cookieStore).get("user_role")!.value : undefined
-  let userRole = userRoleValue
+  // Determine if we have the necessary auth data
+  let userRole: string | undefined = undefined
 
-  console.log("Root Layout - Session active cookie:", sessionActive)
-  console.log("Root Layout - User role cookie:", userRole)
+  // Create a Supabase client directly and get session
+  try {
+    // Create a Supabase client
+    const supabase = createServerComponentClient({ cookies })
 
-  // If session is active but role cookie is undefined, try to get it from the database
-  if (sessionActive && !userRole) {
-    try {
-      // Create a Supabase client
-      const supabase = createServerComponentClient({ cookies })
+    // Get the current session
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
 
-      // Get the current session
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (session?.user?.id) {
-        // Fetch the user's role from the database
+    if (session?.user?.id) {
+      // Get role directly from user metadata (most efficient)
+      if (session.user.user_metadata?.role) {
+        userRole = session.user.user_metadata.role
+        console.log("Root Layout - Using role from user metadata:", userRole)
+      } else {
+        // If not in metadata, fetch from database as fallback
         const { data: roleData, error } = await supabase
           .from("user_roles")
           .select("role")
@@ -56,15 +49,11 @@ export default async function RootLayout({
         if (!error && roleData?.role) {
           userRole = roleData.role
           console.log("Root Layout - Fetched role from database:", userRole)
-
-          // Set the role cookie for future requests
-          // Note: We can't set cookies in server components directly,
-          // but we'll ensure it's set in the auth context and middleware
         }
       }
-    } catch (error) {
-      console.error("Root Layout - Error fetching user role:", error)
     }
+  } catch (error) {
+    console.error("Root Layout - Error fetching user role:", error)
   }
 
   return (

@@ -34,36 +34,14 @@ type AuthContextType = {
   signInWithGoogle: () => Promise<{ error: any }>;
   isSupabaseInitialized: boolean;
   refreshSession: () => Promise<Session | null>;
-  persistSession: (session: Session) => void;
   hasRole: (role: string) => Promise<boolean>;
   isProfileCompleted: () => boolean;
-  refreshRoleCookie: (userId: string) => Promise<string | null>;
+  isVerified: () => boolean;
+  isActive: () => boolean;
+  updateUserMetadata: (metadata: Record<string, any>) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Add a utility function for cookie management
-const setCookie = (name: string, value: string, days = 7) => {
-  if (typeof document === "undefined") return;
-  const expires = new Date(Date.now() + days * 864e5).toUTCString();
-  document.cookie = `${name}=${encodeURIComponent(
-    value
-  )}; path=/; expires=${expires}; SameSite=Lax`;
-};
-
-const getCookie = (name: string): string | null => {
-  if (typeof document === "undefined") return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2)
-    return decodeURIComponent(parts.pop()!.split(";").shift()!);
-  return null;
-};
-
-const clearCookie = (name: string) => {
-  if (typeof document === "undefined") return;
-  document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax`;
-};
 
 export function AuthProvider({
   children,
@@ -77,118 +55,8 @@ export function AuthProvider({
   const [isLoading, setIsLoading] = useState(true);
   const [isSupabaseInitialized, setIsSupabaseInitialized] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(initialRole || null);
-  const [initAuth, setInitAuth] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
   const router = useRouter();
-
-  // Optimized function to refresh role cookie with caching
-  const refreshRoleCookie = useCallback(
-    async (userId: string): Promise<string | null> => {
-      console.log("Auth context - Refreshing role for user:", userId);
-
-      // Clear existing role cookie
-      clearCookie("user_role");
-
-      try {
-        // Try to get role from user metadata first (fastest)
-        const { data: userData, error: userError } =
-          await supabase.auth.getUser();
-        if (!userError && userData?.user?.user_metadata?.role) {
-          const metadataRole = userData.user.user_metadata.role;
-          console.log(
-            "Auth context - Got role from user metadata:",
-            metadataRole
-          );
-          setUserRole(metadataRole);
-          setCookie("user_role", metadataRole);
-          return metadataRole;
-        }
-
-        // Then try database with direct query (second fastest)
-        const { data, error } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", userId)
-          .single();
-
-        if (!error && data?.role) {
-          console.log("Auth context - Got role from database:", data.role);
-          setUserRole(data.role);
-          setCookie("user_role", data.role);
-          return data.role;
-        }
-
-        if (error) {
-          console.log("Auth context - Database query error:", error.message);
-
-          // Last resort: API call (slowest but most reliable)
-          try {
-            const response = await fetch("/api/auth/get-role", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ userId }),
-              cache: "no-store",
-            });
-
-            if (response.ok) {
-              const result = await response.json();
-              if (result.role) {
-                console.log("Auth context - Got role from API:", result.role);
-                setUserRole(result.role);
-                setCookie("user_role", result.role);
-                return result.role;
-              }
-            }
-          } catch (apiError) {
-            console.error("Auth context - API fetch error:", apiError);
-          }
-        }
-
-        console.log("Auth context - No role found for user");
-        return null;
-      } catch (error) {
-        console.error("Auth context - Error in refreshRoleCookie:", error);
-        return null;
-      }
-    },
-    []
-  );
-
-  // Optimized function to persist session
-  const persistSession = useCallback(
-    async (session: Session) => {
-      try {
-        console.log("Auth context - Persisting session");
-
-        // Set session cookies
-        setCookie("supabase-auth-session-active", "true");
-        setCookie("sb-user-id", session.user.id);
-        const isVerified = session.user.user_metadata?.is_verified;
-        const isActive = session.user.user_metadata?.is_active;
-        if (isActive) {
-          setCookie("is_active", "true");
-        } else {
-          setCookie("is_active", "false");
-        }
-        if (isVerified) {
-          setCookie("is_verified", "true");
-        } else {
-          setCookie("is_verified", "false");
-        }
-
-        // Get role if not already in state
-        if (!userRole) {
-          return await refreshRoleCookie(session.user.id);
-        }
-
-        return userRole;
-      } catch (error) {
-        console.error("Auth context - Error persisting session:", error);
-        return null;
-      }
-    },
-    [userRole, refreshRoleCookie]
-  );
 
   // Optimized session refresh function
   const refreshSession = useCallback(async () => {
@@ -202,7 +70,11 @@ export function AuthProvider({
       if (data.session) {
         setSession(data.session);
         setUser(data.session.user);
-        await persistSession(data.session);
+        
+        // Update role in state if available in metadata
+        if (data.session.user.user_metadata?.role) {
+          setUserRole(data.session.user.user_metadata.role);
+        }
       }
 
       return data.session;
@@ -210,7 +82,27 @@ export function AuthProvider({
       console.error("Error refreshing session:", error);
       return null;
     }
-  }, [persistSession]);
+  }, []);
+
+  // Update user metadata
+  const updateUserMetadata = useCallback(async (metadata: Record<string, any>) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: metadata
+      });
+
+      if (error) {
+        console.error("Error updating user metadata:", error);
+        throw error;
+      }
+
+      // Refresh the session to get updated metadata
+      await refreshSession();
+    } catch (error) {
+      console.error("Error in updateUserMetadata:", error);
+      throw error;
+    }
+  }, [refreshSession]);
 
   // Initialize auth state
   useEffect(() => {
@@ -248,20 +140,11 @@ export function AuthProvider({
           if (initialRole) {
             setUserRole(initialRole);
             console.log("Auth context - Using initial role:", initialRole);
-            setCookie("user_role", initialRole);
-          } else {
-            // Check for role in cookies first
-            const roleCookie = getCookie("user_role");
-            if (roleCookie) {
-              setUserRole(roleCookie);
-              console.log("Auth context - Using role from cookie:", roleCookie);
-            } else {
-              // Refresh role if not in cookie
-              await refreshRoleCookie(session.user.id);
-            }
+          } else if (session.user.user_metadata?.role) {
+            // Get role from user metadata
+            setUserRole(session.user.user_metadata.role);
+            console.log("Auth context - Using role from metadata:", session.user.user_metadata.role);
           }
-
-          await persistSession(session);
         }
       } catch (error) {
         console.error("Auth context - Error initializing auth:", error);
@@ -272,11 +155,7 @@ export function AuthProvider({
       }
     };
 
-    const setData = () => {
-      initAuth();
-    };
-
-    setData();
+    initAuth();
 
     // Set up auth state change listener
     const {
@@ -285,29 +164,21 @@ export function AuthProvider({
       console.log("Auth context - Auth state changed, event:", _event);
       console.log("Auth context - New session exists:", !!session);
 
-      if (_event === "SIGNED_IN") {
-        // Clear existing role data
-        clearCookie("user_role");
-        clearCookie("is_verified")
-        clearCookie("is_active")
-        setUserRole(null);
-
+      if (_event === "SIGNED_IN" || _event === "USER_UPDATED") {
         if (session) {
           setSession(session);
           setUser(session.user);
-          await refreshRoleCookie(session.user.id);
-          await persistSession(session);
+          
+          // Update role from metadata if available
+          if (session.user.user_metadata?.role) {
+            setUserRole(session.user.user_metadata.role);
+          }
         }
       } else if (_event === "SIGNED_OUT") {
         // Clear all session data
         setSession(null);
         setUser(null);
         setUserRole(null);
-        clearCookie("supabase-auth-session-active");
-        clearCookie("user_role");
-        clearCookie("sb-user-id");
-        clearCookie("is_verified");
-        clearCookie("is_active")
       } else if (_event === "TOKEN_REFRESHED") {
         // Just update the session
         if (session) {
@@ -319,20 +190,10 @@ export function AuthProvider({
       setIsLoading(false);
     });
 
-    // Set up a periodic session refresh
-    const refreshInterval = setInterval(refreshSession, 60 * 60 * 1000); // Refresh every hour
-
     return () => {
       subscription.unsubscribe();
-      clearInterval(refreshInterval);
     };
-  }, [
-    initialRole,
-    persistSession,
-    refreshRoleCookie,
-    refreshSession,
-    hasInitialized,
-  ]);
+  }, [initialRole, hasInitialized]);
 
   // Optimized sign in function
   const signIn = useCallback(
@@ -347,22 +208,14 @@ export function AuthProvider({
       try {
         console.log("Auth context - Signing in user:", email);
 
-        // Clear existing cookies
-        clearCookie("supabase-auth-session-active");
-        clearCookie("user_role");
-        clearCookie("is_verified");
-        clearCookie("is_active")
-        clearCookie("sb-user-id");
-        setUserRole(null);
-
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
         if (error) {
-          console.error("Auth context - Sign in error:", error);
-          toast.error(error.message)
+          console.log("Auth context - Sign in error:", error);
+         
           return { error, session: null };
         }
 
@@ -375,17 +228,11 @@ export function AuthProvider({
           setSession(data.session);
           setUser(data.session.user);
 
-          // Get role from user metadata first (fastest)
+          // Get role from user metadata
           if (data.session.user.user_metadata?.role) {
             const role = data.session.user.user_metadata.role;
             setUserRole(role);
-            setCookie("user_role", role);
-          } else {
-            // Otherwise refresh role
-            await refreshRoleCookie(data.session.user.id);
           }
-
-          await persistSession(data.session);
         }
 
         return { error: null, session: data.session };
@@ -395,7 +242,7 @@ export function AuthProvider({
         return { error, session: null };
       }
     },
-    [isSupabaseInitialized, persistSession, refreshRoleCookie]
+    [isSupabaseInitialized]
   );
 
   // Keep the signUp function but optimize it
@@ -419,6 +266,8 @@ export function AuthProvider({
               full_name: userData.name,
               role: userData.role,
               profile_completed: false,
+              is_verified: false,
+              is_active: false
             },
             emailRedirectTo: `${window.location.origin}/auth/callback`,
           },
@@ -433,7 +282,6 @@ export function AuthProvider({
         // Set the user role if available
         if (userData.role) {
           setUserRole(userData.role);
-          setCookie("user_role", userData.role);
         }
 
         return { data, error: null };
@@ -461,13 +309,6 @@ export function AuthProvider({
       setUser(null);
       setUserRole(null);
 
-      // Clear cookies
-      clearCookie("supabase-auth-session-active");
-      clearCookie("user_role");
-      clearCookie("is_verified")
-      clearCookie("is_active")
-      clearCookie("sb-user-id");
-
       router.push("/");
     } catch (error) {
       console.error("Auth context - Sign out error:", error);
@@ -485,23 +326,42 @@ export function AuthProvider({
       return userRole;
     }
 
-    // Check for role in cookies
-    const roleCookie = getCookie("user_role");
-    if (roleCookie) {
-      console.log("Auth context - Using role from cookie:", roleCookie);
-      setUserRole(roleCookie);
-      return roleCookie;
-    }
-
     // If no user is authenticated, return null
     if (!isSupabaseInitialized || !user) {
       console.log("Auth context - No authenticated user, returning null role");
       return null;
     }
 
-    // Refresh the role
-    return await refreshRoleCookie(user.id);
-  }, [userRole, isSupabaseInitialized, user, refreshRoleCookie]);
+    // Check user metadata first
+    if (user.user_metadata?.role) {
+      const role = user.user_metadata.role;
+      setUserRole(role);
+      return role;
+    }
+
+    // Try to get the role from the database as a fallback
+    try {
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!error && data?.role) {
+        console.log("Auth context - Got role from database:", data.role);
+        
+        // Update user metadata with the role
+        await updateUserMetadata({ role: data.role });
+        
+        setUserRole(data.role);
+        return data.role;
+      }
+    } catch (error) {
+      console.error("Auth context - Database query error:", error);
+    }
+
+    return null;
+  }, [userRole, isSupabaseInitialized, user, updateUserMetadata]);
 
   // Optimized Google sign in
   const signInWithGoogle = useCallback(async () => {
@@ -513,11 +373,6 @@ export function AuthProvider({
 
     try {
       console.log("Auth context - Signing in with Google");
-
-      // Clear existing role cookie
-      clearCookie("user_role");
-      clearCookie("is_verified")
-      clearCookie("is_active")
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
@@ -550,21 +405,8 @@ export function AuthProvider({
       if (!isSupabaseInitialized || !user) return false;
 
       try {
-        // Check if we have the role in a cookie
-        const roleCookie = getCookie("user_role");
-
-        if (roleCookie) {
-          // Update our state with the cookie value
-          setUserRole(roleCookie);
-
-          // For super-admin, allow access to all roles
-          if (roleCookie === "super-admin") return true;
-
-          return roleCookie === requiredRole;
-        }
-
-        // If no cookie, refresh the role
-        const role = await refreshRoleCookie(user.id);
+        // Get the role if we don't have it yet
+        const role = await getUserRole();
 
         // For super-admin, allow access to all roles
         if (role === "super-admin") return true;
@@ -575,12 +417,20 @@ export function AuthProvider({
         return false;
       }
     },
-    [userRole, isSupabaseInitialized, user, refreshRoleCookie]
+    [userRole, isSupabaseInitialized, user, getUserRole]
   );
 
-  // Keep the isProfileCompleted function
+  // Helper functions to check user status directly from metadata
   const isProfileCompleted = useCallback(() => {
     return user?.user_metadata?.profile_completed === true;
+  }, [user]);
+
+  const isVerified = useCallback(() => {
+    return user?.user_metadata?.is_verified === true;
+  }, [user]);
+
+  const isActive = useCallback(() => {
+    return user?.user_metadata?.is_active === true;
   }, [user]);
 
   // Memoize the context value to prevent unnecessary re-renders
@@ -596,10 +446,11 @@ export function AuthProvider({
       signInWithGoogle,
       isSupabaseInitialized,
       refreshSession,
-      persistSession,
       hasRole,
       isProfileCompleted,
-      refreshRoleCookie,
+      isVerified,
+      isActive,
+      updateUserMetadata,
     }),
     [
       user,
@@ -612,10 +463,11 @@ export function AuthProvider({
       signInWithGoogle,
       isSupabaseInitialized,
       refreshSession,
-      persistSession,
       hasRole,
       isProfileCompleted,
-      refreshRoleCookie,
+      isVerified, 
+      isActive,
+      updateUserMetadata,
     ]
   );
 

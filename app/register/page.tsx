@@ -106,8 +106,8 @@ export default function Register() {
           console.log("Register page - Continuing with sign in despite role setup issue")
         }
 
-        // Set the role cookie directly as a backup
-        document.cookie = `user_role=${role}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+        // We don't need to set a role cookie here since it's stored in user metadata
+        // and can be retrieved from there when needed
 
         // Explicitly sign in the user after registration
         const { error: signInError, session } = await signIn(email, password)

@@ -29,24 +29,11 @@ export default function DashboardRedirect() {
         console.log("Dashboard redirect - User authenticated:", user.id)
         setIsRedirecting(true)
 
-        // Try to get the role from cookie first
-        const roleCookie = document.cookie
-          .split("; ")
-          .find((row) => row.startsWith("user_role="))
-          ?.split("=")[1]
-
-        if (roleCookie) {
-          console.log("Dashboard redirect - Using role from cookie:", roleCookie)
-          router.push(`/${roleCookie}/dashboard`)
-          return
-        }
-
-        console.log("Dashboard redirect - No role cookie found, calling getUserRole")
-        // If no cookie, try to get the role from the auth context
-        const role = await getUserRole()
+        // Get the role directly from user metadata or from auth context
+        const role = user.user_metadata?.role || await getUserRole()
 
         if (role) {
-          console.log("Dashboard redirect - Redirecting to role dashboard:", role)
+          console.log("Dashboard redirect - Role found:", role)
           router.push(`/${role}/dashboard`)
         } else {
           console.log("Dashboard redirect - No role found, redirecting to role selection")
@@ -62,55 +49,37 @@ export default function DashboardRedirect() {
         setAttempts((prev) => prev + 1)
 
         // If we've tried multiple times and still failing, check if we can use user metadata
-        if (attempts >= 2 && user?.user_metadata?.role) {
-          console.log(
-            "Dashboard redirect - Using role from user metadata after failed attempts:",
-            user.user_metadata.role,
-          )
+        if (attempts > 2 && user?.user_metadata?.role) {
+          console.log("Dashboard redirect - Using role from metadata after failures:", user.user_metadata.role)
           router.push(`/${user.user_metadata.role}/dashboard`)
         }
       }
     }
 
-    if (!isLoading) {
-      redirectToDashboard()
-    }
-  }, [router, getUserRole, isLoading, user, attempts])
+    redirectToDashboard()
+  }, [router, user, getUserRole, attempts])
 
-  if (error) {
+  if (isRedirecting || isLoading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center">
-        <div className="w-full max-w-md p-6">
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-          <div className="flex justify-between">
-            <Button variant="outline" onClick={() => router.push("/")}>
-              Return to Login
-            </Button>
-            <Button
-              onClick={() => {
-                setError(null)
-                setIsRedirecting(true)
-                router.push("/auth/select-role")
-              }}
-            >
-              Select Role
-            </Button>
-          </div>
-        </div>
+      <div className="flex h-screen flex-col items-center justify-center">
+        <Loader2 className="mb-4 h-12 w-12 animate-spin text-primary" />
+        <p className="text-lg">Redirecting to your dashboard...</p>
       </div>
     )
   }
 
   return (
-    <div className="flex h-screen w-full items-center justify-center">
-      <div className="text-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-        <p className="text-lg">Redirecting to your dashboard...</p>
-        {attempts > 0 && <p className="text-sm text-muted-foreground mt-2">Attempt {attempts + 1}... Please wait</p>}
+    <div className="flex h-screen flex-col items-center justify-center p-4">
+      <Alert variant="destructive" className="max-w-md">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Redirect Error</AlertTitle>
+        <AlertDescription>{error || "An error occurred during redirection"}</AlertDescription>
+      </Alert>
+      <div className="mt-4 flex space-x-4">
+        <Button variant="outline" onClick={() => router.push("/")}>
+          Go back to home
+        </Button>
+        <Button onClick={() => setAttempts((prev) => prev + 1)}>Try again</Button>
       </div>
     </div>
   )

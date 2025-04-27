@@ -5,7 +5,7 @@ export async function validateSuperAdmin(request: Request) {
   try {
     // Get the auth token from cookies
     const cookieStore = cookies()
-    const supabaseAuthToken = cookieStore.get("sb-access-token")?.value
+    const supabaseAuthToken = (await cookieStore).get("sb-access-token")?.value
 
     if (!supabaseAuthToken) {
       console.log("No auth token found in cookies")

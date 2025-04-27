@@ -3,7 +3,9 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 // Define role-based route restrictions
-const roleRouteMap = {
+type UserRole = "doctor" | "nurse" | "patient" | "pharmacist" | "super-admin";
+
+const roleRouteMap: Record<UserRole, string[]> = {
   doctor: ["/doctor/"],
   nurse: ["/nurse/"],
   patient: ["/patient/"],
@@ -14,11 +16,6 @@ const roleRouteMap = {
 // Public routes that don't require authentication
 const publicRoutes = ["/", "/register", "/auth/callback", "/api/auth/", "/api/admin/", "/unauthorized"]
 
-// Helper function to get cookie value
-function getCookie(request: NextRequest, name: string): string | undefined {
-  return request.cookies.get(name)?.value
-}
-
 // Helper function to check if a path is public
 function isPublicPath(path: string): boolean {
   return (
@@ -26,13 +23,8 @@ function isPublicPath(path: string): boolean {
     path.startsWith("/_next/") ||
     path.match(/\.(ico|png|jpg|jpeg|svg|css|js)$/) !== null
   )
-}
 
-// Helper function to check if a user has access to a path based on role
-function hasAccessToPath(role: string, path: string): boolean {
-  const basePath = `/${path.split("/")[1]}/`
-  const allowedPaths = roleRouteMap[role] || []
-  return allowedPaths.some((allowedPath) => basePath.startsWith(allowedPath))
+ 
 }
 
 export async function middleware(req: NextRequest) {
@@ -59,25 +51,9 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL("/", req.url))
     }
 
-    // Check for the role cookie first (fastest path)
-    const roleCookie = getCookie(req, "user_role")
-
-    if (roleCookie) {
-      return NextResponse.redirect(new URL(`/${roleCookie}/dashboard`, req.url))
-    }
-
-    // Check user metadata (second fastest)
+    // Check user metadata (fastest way)
     if (session.user.user_metadata?.role) {
       const role = session.user.user_metadata.role
-
-      // Set the role cookie
-      res.cookies.set("user_role", role, {
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7, // 7 days
-        httpOnly: false,
-        sameSite: "lax",
-      })
-
       return NextResponse.redirect(new URL(`/${role}/dashboard`, req.url))
     }
 
@@ -98,14 +74,6 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL("/auth/select-role", req.url))
       }
 
-      // Set the role cookie for future use
-      res.cookies.set("user_role", roleData.role, {
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7, // 7 days
-        httpOnly: false,
-        sameSite: "lax",
-      })
-
       return NextResponse.redirect(new URL(`/${roleData.role}/dashboard`, req.url))
     } catch (error) {
       // Let the client-side handle it
@@ -125,107 +93,51 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/", req.url))
   }
 
-  // Check for the role cookie
-  const roleCookie = getCookie(req, "user_role")
-  const is_verified = getCookie(req, "is_verified")
-  const is_active = getCookie(req, "is_active")
+  const role = session.user.user_metadata?.role
+  const is_verified = session.user.user_metadata?.is_verified
+  const is_active = session.user.user_metadata?.is_active
 
-  // If there's a role cookie, check access
-  if (roleCookie) {
-    if (is_verified !== "true") {
-      return NextResponse.redirect(new URL(`/${roleCookie}/verify`, req.url))
-    }
-    if (is_active !== "true") {
-      return NextResponse.redirect(new URL(`/${roleCookie}/in-active`, req.url))
-    }
-    // Check if the user has access to the requested route
-    if (!hasAccessToPath(roleCookie, path)) {
-      return NextResponse.redirect(new URL(`/${roleCookie}/dashboard`, req.url))
-    }
-    
-
-    // Check if profile is completed
-    if (
-      session?.user?.user_metadata &&
-      session.user.user_metadata.profile_completed !== true &&
-      !path.includes("/complete-profile")
-    ) {
-      return NextResponse.redirect(new URL(`/${roleCookie}/complete-profile`, req.url))
-    }
-    // Check if the user is verified
-    if (
-      session?.user?.user_metadata &&
-      session.user.user_metadata.is_verified !== true &&
-      !path.includes("/verify")
-    ) {
-      return NextResponse.redirect(new URL(`/${roleCookie}/verify`, req.url))
-    }
-    
-    // User has access, continue
-    return res
+  // Check if the user has access to the requested route
+  if (!hasAccessToPath(role, path)) {
+    return NextResponse.redirect(new URL(`/${role}/dashboard`, req.url))
   }
 
-  // If no role cookie, check user metadata
-  if (session.user.user_metadata?.role) {
-    const role = session.user.user_metadata.role
-    const is_verified = session.user.user_metadata.is_verified
-    const is_active = session.user.user_metadata.is_active
-    // Set the role cookie
-    res.cookies.set("user_role", role, {
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      httpOnly: false,
-      sameSite: "lax",
-    })
-    // Set the is_verified cookie
-    res.cookies.set("is_verified", is_verified, {
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      httpOnly: false,
-      sameSite: "lax",
-    })
-    // Set the is_active cookie
-    res.cookies.set("is_active", is_active, {
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      httpOnly: false,
-      sameSite: "lax",
-    })
+  // Check if profile is completed
+  if (
+    session?.user?.user_metadata &&
+    session.user.user_metadata.profile_completed !== true &&
+    !path.includes("/complete-profile")
+  ) {
+    return NextResponse.redirect(new URL(`/${role}/complete-profile`, req.url))
+  }
+  // Check if the user is verified
+  if (
+    session?.user?.user_metadata &&
+    session.user.user_metadata.is_verified !== true &&
+    !path.includes("/verify")
+  ) {
+    return NextResponse.redirect(new URL(`/${role}/verify`, req.url))
+  }
+  if (session?.user?.user_metadata && session.user.user_metadata.is_active !== true && !path.includes("/in-active")) {
+    return NextResponse.redirect(new URL(`/${role}/in-active`, req.url))
 
-    // Check if the user has access to the requested route
-    if (!hasAccessToPath(role, path)) {
-      return NextResponse.redirect(new URL(`/${role}/dashboard`, req.url))
-    }
-
-    // Check if profile is completed
-    if (
-      session?.user?.user_metadata &&
-      session.user.user_metadata.profile_completed !== true &&
-      !path.includes("/complete-profile")
-    ) {
-      return NextResponse.redirect(new URL(`/${role}/complete-profile`, req.url))
-    }
-    // Check if the user is verified
-    if (
-      session?.user?.user_metadata &&
-      session.user.user_metadata.is_verified !== true &&
-      !path.includes("/verify")
-    ) {
-      return NextResponse.redirect(new URL(`/${role}/verify`, req.url))
-    }
-    if (session?.user?.user_metadata && session.user.user_metadata.is_active !== true && !path.includes("/in-active")) {
-      return NextResponse.redirect(new URL(`/${role}/in-active`, req.url))
-
-    }
-
-    // User has access, continue
-    return res
   }
 
-  // If no role information is available, redirect to dashboard to handle role fetching
-  return NextResponse.redirect(new URL("/dashboard", req.url))
+  // User has access, continue
+  return res
+}
+
+// Helper function to check if a user has access to a path based on role
+function hasAccessToPath(role: string, path: string): boolean {
+  if (!role) return false;
+  
+  const basePath = `/${path.split("/")[1]}/`;
+  const allowedPaths = (role in roleRouteMap ? roleRouteMap[role as UserRole] : []);
+  return allowedPaths.some((allowedPath: string) => basePath.startsWith(allowedPath));
 }
 
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 }
+
+

@@ -22,26 +22,18 @@ export function RoleGuard({ children, requiredRole, fallback }: RoleGuardProps) 
   // Optimized role check function
   const checkAccess = useCallback(async () => {
     try {
-      // First check if we have the role in a cookie (fastest)
-      const roleCookie = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("user_role="))
-        ?.split("=")[1]
-
-      // Quick check with cookie
-      if (roleCookie) {
-        const hasAccess = roleCookie === requiredRole || roleCookie === "super-admin"
-        if (hasAccess) {
-          setAuthorized(true)
-          return
-        }
+     
+      if (user?.user_metadata?.role === requiredRole || user?.user_metadata?.role === "super-admin") {
+        setAuthorized(true)
+        return
       }
 
-      // If no cookie or no access, do a full check
+      // If metadata doesn't have the role or it doesn't match, do a full check
       const hasRequiredRole = await hasRole(requiredRole)
       setAuthorized(hasRequiredRole)
 
       if (!hasRequiredRole) {
+        console.log("User doesn't have required role:", requiredRole)
         router.push("/unauthorized")
       }
     } catch (error) {
@@ -49,7 +41,7 @@ export function RoleGuard({ children, requiredRole, fallback }: RoleGuardProps) 
       // If there's an error checking the role, redirect to login
       router.push("/")
     }
-  }, [hasRole, requiredRole, router])
+  }, [hasRole, requiredRole, router, user])
 
   useEffect(() => {
     // If no user is logged in, redirect to login immediately

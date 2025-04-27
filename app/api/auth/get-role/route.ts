@@ -35,14 +35,7 @@ export async function POST(request: Request) {
       .single()
 
     if (!rlsError && rlsData?.role) {
-      // Set the role cookie for future use
-      cookieStore.set("user_role", rlsData.role, {
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7, // 7 days
-        httpOnly: false,
-        sameSite: "lax",
-      })
-
+     
       return NextResponse.json({ role: rlsData.role })
     }
 
@@ -57,18 +50,11 @@ export async function POST(request: Request) {
       if (adminError) {
         // Check user metadata as fallback
         const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId)
-
+        
         if (!userError && userData?.user?.user_metadata?.role) {
           const metadataRole = userData.user.user_metadata.role
-
-          // Set the role cookie for future use
-          cookieStore.set("user_role", metadataRole, {
-            path: "/",
-            maxAge: 60 * 60 * 24 * 7, // 7 days
-            httpOnly: false,
-            sameSite: "lax",
-          })
-
+          
+  
           return NextResponse.json({ role: metadataRole })
         }
 
@@ -80,14 +66,7 @@ export async function POST(request: Request) {
       }
 
       if (adminData?.role) {
-        // Set the role cookie for future use
-        cookieStore.set("user_role", adminData.role, {
-          path: "/",
-          maxAge: 60 * 60 * 24 * 7, // 7 days
-          httpOnly: false,
-          sameSite: "lax",
-        })
-
+     
         return NextResponse.json({ role: adminData.role })
       }
     }

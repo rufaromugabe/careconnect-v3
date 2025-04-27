@@ -23,7 +23,6 @@ export default function LoginComponent() {
     signIn,
     signInWithGoogle,
     isSupabaseInitialized,
-    refreshSession,
     getUserRole,
   } = useAuth();
   const searchParams = useSearchParams();
@@ -42,23 +41,6 @@ export default function LoginComponent() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Clear all cookies before attempting to sign in
-    const clearAllCookies = () => {
-      const cookies = document.cookie.split(";");
-      
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i];
-        const eqPos = cookie.indexOf("=");
-        const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
-        document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
-      }
-      
-      console.log("Login page - All cookies cleared");
-    };
-
-    // Clear all cookies
-    clearAllCookies();
-
     if (!isSupabaseInitialized) {
       toast.error("The authentication system is not properly configured. Please contact support.");
       return;
@@ -72,13 +54,11 @@ export default function LoginComponent() {
     setIsLoading(true);
 
     try {
-      
       console.log("Login page - Attempting to sign in:", email);
       const { error, session } = await signIn(email, password);
 
       if (error) {
         console.error("Login page - Login error:", error);
-
         const isInvalidCredentials = error.message
           .toLowerCase()
           .includes("invalid login credentials");
@@ -87,113 +67,54 @@ export default function LoginComponent() {
           isInvalidCredentials
             ? "Incorrect email or password. Please try again."
             : error.message || "An error occurred. Please try again later.",
-          {
-            autoClose: 4000,
-          }
+          { autoClose: 4000 }
         );
-
-        setIsLoading(false);
         return;
       }
 
       if (!session) {
         console.error("Login page - No session after login");
         toast.error("Failed to establish a session. Please try again.");
-        setIsLoading(false);
         return;
       }
 
       console.log("Login page - Login successful, session established");
 
-      // Helper function to get a cookie by name
-      function getCookieValue(name: string): string | undefined {
-        return document.cookie
-          .split("; ")
-          .find((row) => row.startsWith(`${name}=`))
-          ?.split("=")[1];
-      }
-
-      // Get values from cookies
-      const roleCookie = getCookieValue("user_role");
-      const isVerifiedCookie = getCookieValue("is_verified");
-      const isActiveCookie = getCookieValue("is_active");
-
-      if (roleCookie) {
-        console.log("Login page - Found role in cookie:", roleCookie);
-
-        if (isVerifiedCookie !== "true") {
-          console.log(
-            "Login page - User not verified (cookie), redirecting to verification"
-          );
-          router.push(`/${roleCookie}/verify`);
-          return;
-        }
-        if (isActiveCookie !== "true") {
-          console.log(
-            "Login page - User not active (cookie), redirecting to inactive page"
-          );
-          router.push(`/${roleCookie}/in-active`);
-          return;
-        }
-
-        console.log(
-          "Login page - Redirecting to dashboard for role:",
-          roleCookie
-        );
-        router.push(`/${roleCookie}/dashboard`);
-      }
-
-      // If no cookie, check user metadata (second fastest)
+      // If metadata has role, use it directly
       if (session.user.user_metadata?.role) {
         const role = session.user.user_metadata.role;
-        const isVerified = session.user.user_metadata?.is_verified;
-        const isActive = session.user.user_metadata?.is_active;
+        const isVerified = session.user.user_metadata?.is_verified === true;
+        const isActive = session.user.user_metadata?.is_active === true;
 
-        if (isVerified !== true) {
-          console.log(
-            "Login page - User is not verified, redirecting to verification"
-          );
+        console.log("Login page - Found role in metadata:", role);
+
+        // Check verification status
+        if (!isVerified) {
+          console.log("Login page - User is not verified, redirecting to verification");
           router.push(`/${role}/verify`);
           return;
         }
-        if (isActive !== true) {
-          console.log(
-            "Login page - User is not active, redirecting to inactive page"
-          );
+        
+        // Check active status
+        if (!isActive) {
+          console.log("Login page - User is not active, redirecting to inactive page");
           router.push(`/${role}/in-active`);
           return;
         }
 
-        console.log(
-          "Login page - Found role in metadata, redirecting to:",
-          role
-        );
-
-        // Set both cookies
-        document.cookie = `user_role=${role}; path=/; max-age=${
-          60 * 60 * 24 * 7
-        }; SameSite=Lax`;
-        document.cookie = `is_verified=${isVerified}; path=/; max-age=${
-          60 * 60 * 24 * 7
-        }; SameSite=Lax`;
-        document.cookie = `is_active=${isActive}; path=/; max-age=${
-          60 * 60 * 24 * 7
-        }; SameSite=Lax`;
-
+        // Redirect to dashboard
+        console.log("Login page - Redirecting to dashboard for role:", role);
         router.push(`/${role}/dashboard`);
         return;
       }
 
-      // If no metadata, try to get the role from the database or API
+      // If no metadata, try to get the role from the database
       const role = await getUserRole();
-
       if (role) {
         console.log("Login page - Redirecting to role dashboard:", role);
         router.push(`/${role}/dashboard`);
       } else {
-        console.log(
-          "Login page - No role found, redirecting to role selection"
-        );
+        console.log("Login page - No role found, redirecting to role selection");
         router.push("/auth/select-role");
       }
     } catch (error) {
@@ -303,23 +224,6 @@ export default function LoginComponent() {
                 disabled={!isSupabaseInitialized}
                 onClick={async () => {
                   try {
-                    // Clear all cookies before attempting to sign in with Google
-                    const clearAllCookies = () => {
-                      const cookies = document.cookie.split(";");
-                      
-                      for (let i = 0; i < cookies.length; i++) {
-                        const cookie = cookies[i];
-                        const eqPos = cookie.indexOf("=");
-                        const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
-                        document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
-                      }
-                      
-                      console.log("Login page - All cookies cleared before Google sign-in");
-                    };
-
-                    // Clear all cookies
-                    clearAllCookies();
-                    
                     const { error } = await signInWithGoogle();
                     if (error) {
                       toast.error(error.message);

@@ -1,21 +1,37 @@
 import { clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { supabase } from "@/lib/supabase"
 
-export function cn(...inputs) {
+export function cn(...inputs: (string | boolean | undefined)[]) {
   return twMerge(clsx(inputs))
 }
 
-export const persistSession = (session) => {
-  // Clear any existing cookies first to ensure we don't have stale data
-  document.cookie = "supabase-auth-session-active=; path=/; max-age=0; SameSite=Lax"
-
-  // Set a cookie to indicate active session
-  document.cookie = `supabase-auth-session-active=true; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-
-  // Store the user ID in a cookie for comparison
-  if (session?.user?.id) {
-    document.cookie = `sb-user-id=${session.user.id}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+export const persistSession = async (session: { user: { id: any; user_metadata: { role: any } } }) => {
+  // Log that we received a session
+  console.log("Persisting session:", session?.user?.id || "No session")
+  
+  
+  if (session?.user?.id && session?.user) {
+    // If the user doesn't have role metadata but has a session,
+    // attempt to get the role from the database
+    if (!session.user.user_metadata?.role) {
+      try {
+        const { data, error } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id)
+          .single()
+        
+        if (!error && data?.role) {
+          // Update the user's metadata with the role
+          await supabase.auth.updateUser({
+            data: { role: data.role }
+          })
+          console.log("Updated user metadata with role:", data.role)
+        }
+      } catch (error) {
+        console.error("Error fetching user role:", error)
+      }
+    }
   }
-
-  console.log("Persisting session:", session)
 }
