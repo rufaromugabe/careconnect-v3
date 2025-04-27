@@ -2,7 +2,6 @@
 
 import type React from "react";
 import { useState, useEffect } from "react";
-import LoginComponent from "@/components/auth/login";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
 import {
@@ -16,17 +15,27 @@ import {
   Clock,
   Shield,
   BarChart,
+  Menu,
+  X,
 } from "lucide-react";
-import { AnimatedBeam, AnimatedGradientText } from "@/components/ui/animated-beam";
-import { motion } from "framer-motion";
+import { AnimatedBeam, AnimatedGradientText, HealthcareConnectionBeams } from "@/components/ui/animated-beam";
+import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   const router = useRouter();
   const { user, session, getUserRole } = useAuth();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const { scrollY } = useScroll();
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setScrolled(latest > 20);
+  });
 
   useEffect(() => {
     const checkSession = async () => {
@@ -95,13 +104,6 @@ export default function Home() {
     }
   ];
 
-  const roleIcons = [
-    { Icon: Stethoscope, label: "Doctor", delay: 0.1, color: "text-blue-500" },
-    { Icon: Thermometer, label: "Nurse", delay: 0.2, color: "text-green-500" },
-    { Icon: User, label: "Patient", delay: 0.3, color: "text-purple-500" },
-    { Icon: Flask, label: "Pharmacist", delay: 0.4, color: "text-orange-500" },
-  ];
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -115,8 +117,98 @@ export default function Home() {
       {/* Animated background beam */}
       <AnimatedBeam />
 
-      {/* Hero Section */}
-      <section className="relative z-10 py-20 md:py-32">
+      {/* Header Navigation */}
+      <motion.header 
+        className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-lg transition-all duration-300 ${
+          scrolled 
+            ? "bg-background/70 shadow-sm border-b border-border/20" 
+            : "bg-transparent"
+        }`}
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="flex items-center justify-between py-4">
+            <motion.div 
+              className="flex items-center"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              <Heart className="h-6 w-6 text-primary mr-2" />
+              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">CareConnect</span>
+            </motion.div>
+            
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <Link href="#features" className="text-sm relative group">
+                <span className="hover:text-primary transition-colors">Features</span>
+                <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+              </Link>
+              <Link href="#testimonials" className="text-sm relative group">
+                <span className="hover:text-primary transition-colors">Testimonials</span>
+                <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+              </Link>
+              <Link href="#about" className="text-sm relative group">
+                <span className="hover:text-primary transition-colors">About</span>
+                <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+              </Link>
+              <Link href="#contact" className="text-sm relative group">
+                <span className="hover:text-primary transition-colors">Contact</span>
+                <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+              </Link>
+              <Link href="/login" className="text-sm relative group">
+                <span className="hover:text-primary transition-colors">Login</span>
+                <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+              </Link>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => router.push("/register")}
+                className="bg-primary/10 hover:bg-primary/20 text-primary font-medium"
+              >
+                Sign Up
+              </Button>
+            </nav>
+            
+            {/* Mobile Menu Button */}
+            <motion.button 
+              className="md:hidden p-2 rounded-full hover:bg-muted/50 transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              whileTap={{ scale: 0.95 }}
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </motion.button>
+          </div>
+          
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <motion.nav 
+              className="md:hidden py-4 flex flex-col space-y-4 pb-6"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Link href="#features" className="hover:text-primary transition-colors px-2 py-1">Features</Link>
+              <Link href="#testimonials" className="hover:text-primary transition-colors px-2 py-1">Testimonials</Link>
+              <Link href="#about" className="hover:text-primary transition-colors px-2 py-1">About</Link>
+              <Link href="#contact" className="hover:text-primary transition-colors px-2 py-1">Contact</Link>
+              <Link href="/login" className="hover:text-primary transition-colors px-2 py-1">Login</Link>
+              <Button 
+                variant="ghost"
+                onClick={() => router.push("/register")}
+                className="w-full bg-primary/10 hover:bg-primary/20 text-primary font-medium"
+              >
+                Sign Up
+              </Button>
+            </motion.nav>
+          )}
+        </div>
+      </motion.header>
+
+      {/* Hero Section - adjusted padding for header */}
+      <section className="relative z-10 pt-24 md:pt-32">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex flex-col md:flex-row items-center justify-between gap-12">
             <motion.div 
@@ -149,66 +241,28 @@ export default function Home() {
                 <Button 
                   size="lg" 
                   variant="outline"
-                  onClick={() => {
-                    const loginSection = document.getElementById("login-section");
-                    if (loginSection) {
-                      loginSection.scrollIntoView({ behavior: "smooth" });
-                    }
-                  }}
+                  onClick={() => router.push("/login")}
                 >
-                  Learn More
+                  Login
                 </Button>
               </div>
             </motion.div>
             
-            {/* Right side - if not logged in, show login component */}
-            {!isLoggedIn && (
-              <motion.div 
-                className="flex-1 flex justify-center"
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                id="login-section"
-              >
-                <LoginComponent />
-              </motion.div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Role Icons Section */}
-      <section className="relative z-10 py-16 bg-muted/50">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <motion.h2 
-            className="text-3xl font-bold text-center mb-16"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            Connecting Everyone in Healthcare
-          </motion.h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 justify-items-center">
-            {roleIcons.map(({ Icon, label, delay, color }, index) => (
-              <motion.div
-                key={label}
-                className="flex flex-col items-center text-center"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: delay + 0.2, duration: 0.5 }}
-              >
-                <div className={`p-6 rounded-full bg-background shadow-lg mb-4 ${color}`}>
-                  <Icon className="h-12 w-12" />
-                </div>
-                <h3 className="text-xl font-medium">{label}</h3>
-              </motion.div>
-            ))}
+            {/* Healthcare Connection Beams visible on all screen sizes */}
+            <motion.div
+              className="flex-1"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+            >
+              <HealthcareConnectionBeams />
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="relative z-10 py-20">
+      <section className="relative z-10 py-20" id="features">
         <div className="container mx-auto px-4 max-w-7xl">
           <motion.div
             className="text-center mb-16"
@@ -240,7 +294,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="relative z-10 py-20 bg-muted/50">
+      <section className="relative z-10 py-20 bg-muted/50" id="testimonials">
         <div className="container mx-auto px-4 max-w-7xl">
           <motion.div
             className="text-center mb-16"
@@ -275,7 +329,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="relative z-10 py-20">
+      <section className="relative z-10 py-20" id="about">
         <div className="container mx-auto px-4 max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -298,7 +352,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 py-12 bg-muted/80 border-t border-border/50">
+      <footer className="relative z-10 py-12 bg-muted/80 border-t border-border/50" id="contact">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-6 md:mb-0">
