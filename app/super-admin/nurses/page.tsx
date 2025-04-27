@@ -153,11 +153,13 @@ export default function SuperAdminNursesPage() {
       const updatedNurse = await response.json()
 
       //log action
-      await logAction(user.id, "verify-nurse", {
-        nurse_id: userId,
-        nurse_name: updatedNurse.name,
-        nurse_email: updatedNurse.email,
-      })
+      if (user) {
+        await logAction(user.id, "verify-nurse", {
+          nurse_id: userId,
+          nurse_name: updatedNurse.name,
+          nurse_email: updatedNurse.email,
+        })
+      }
 
       //Refresh UI or update local state as needed
       setNurses((prev) =>
@@ -291,25 +293,43 @@ export default function SuperAdminNursesPage() {
 
             {/* Verify Nurse Dialog */}
             <Dialog open={isVerifyDialogOpen} onOpenChange={setIsVerifyDialogOpen}>
-              <DialogContent>
+              <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Verify Nurse</DialogTitle>
+                  <DialogTitle>Nurse Details</DialogTitle>
                 </DialogHeader>
-                <div className="py-4">
-                  <p>
-                    Are you sure you want to verify nurse <strong>{currentNurse?.name}</strong>?
-                  </p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    This will grant them access to perform nurse-specific tasks.
-                  </p>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setIsVerifyDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={() => (currentNurse?.user_id ? handleVerifyNurse(currentNurse.user_id) : null)}>
-                    Verify
-                  </Button>
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                  {currentNurse && (
+                    <>
+                      <div className="grid grid-cols-1 gap-2">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Name</p>
+                          <p className="font-medium break-words">{currentNurse.name}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Email</p>
+                          <p className="font-medium break-all">{currentNurse.email}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">License Number</p>
+                          <p className="font-medium break-all">{currentNurse.license_number}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Hospital</p>
+                          <p className="font-medium break-words">{currentNurse.hospital_name || "Not assigned"}</p>
+                        </div>
+                      </div>
+
+                      <div className="pt-4 flex justify-center">
+                        <Button
+                          onClick={() => handleVerifyNurse(currentNurse.user_id)}
+                          className="w-full"
+                          disabled={currentNurse.is_verified}
+                        >
+                          {currentNurse.is_verified ? "Already Verified" : "Verify Nurse"}
+                        </Button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </DialogContent>
             </Dialog>

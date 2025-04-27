@@ -276,27 +276,33 @@ export default function SuperAdminPharmacistsPage() {
               </CardContent>
             </Card>
             <Dialog open={isVerifyDialogOpen} onOpenChange={setIsVerifyDialogOpen}>
-              <DialogContent>
+              <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Verify Pharmacist</DialogTitle>
+                  <DialogTitle>Pharmacist Details</DialogTitle>
                 </DialogHeader>
-                <div className="py-4">
-                  <p>
-                    Are you sure you want to verify pharmacist <strong>{currentPharmacist?.name}</strong>?
-                  </p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    This will grant them access to perform pharmacist-specific tasks.
-                  </p>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setIsVerifyDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={() => currentPharmacist?.user_id? handleVerifyPharmacist(currentPharmacist.user_id) : null}
-                  >
-                    Verify
-                  </Button>
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                  {currentPharmacist && (
+                    <>
+                      <div className="grid grid-cols-1 gap-2">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Name</p>
+                          <p className="font-medium break-words">{currentPharmacist.name}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Email</p>
+                          <p className="font-medium break-all">{currentPharmacist.email}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">License Number</p>
+                          <p className="font-medium break-all">{currentPharmacist.license_number}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Pharmacy</p>
+                          <p className="font-medium break-words">{currentPharmacist.pharmacy_name || "Not assigned"}</p>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </DialogContent>
             </Dialog>

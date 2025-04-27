@@ -33,10 +33,16 @@ export default function SuperAdminPharmaciesPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [currentPharmacy, setCurrentPharmacy] = useState<Pharmacy | null>(null)
   const [formData, setFormData] = useState({
     name: "",
     location: "",
+  })
+  const [newPharmacy, setNewPharmacy] = useState({
+    name: "",
+    address: "",
+    phone: "",
   })
   const [token, setToken] = useState<string | null>(null)
 
@@ -318,32 +324,61 @@ export default function SuperAdminPharmaciesPage() {
                       Add Pharmacy
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                      <DialogTitle>Add New Pharmacy</DialogTitle>
+                      <DialogTitle>Create New Pharmacy</DialogTitle>
                     </DialogHeader>
-                    <form onSubmit={handleCreatePharmacy} className="space-y-4 mt-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Pharmacy Name</Label>
-                        <Input id="name" name="name" value={formData.name} onChange={handleInputChange} required />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="location">Location</Label>
-                        <Input
-                          id="location"
-                          name="location"
-                          value={formData.location}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                      <div className="flex justify-end gap-2 mt-4">
-                        <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                          Cancel
-                        </Button>
-                        <Button type="submit">Create Pharmacy</Button>
-                      </div>
-                    </form>
+                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                      <form onSubmit={handleCreatePharmacy} className="space-y-4">
+                        <div className="space-y-2">
+                          <label htmlFor="name" className="text-sm font-medium">
+                            Pharmacy Name
+                          </label>
+                          <Input
+                            id="name"
+                            value={newPharmacy.name}
+                            onChange={(e) => setNewPharmacy({ ...newPharmacy, name: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label htmlFor="address" className="text-sm font-medium">
+                            Address
+                          </label>
+                          <Input
+                            id="address"
+                            value={newPharmacy.address}
+                            onChange={(e) => setNewPharmacy({ ...newPharmacy, address: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label htmlFor="phone" className="text-sm font-medium">
+                            Phone Number
+                          </label>
+                          <Input
+                            id="phone"
+                            value={newPharmacy.phone}
+                            onChange={(e) => setNewPharmacy({ ...newPharmacy, phone: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                          <Button variant="outline" type="button" onClick={() => setIsDeleteDialogOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating...
+                              </>
+                            ) : (
+                              "Create Pharmacy"
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
                   </DialogContent>
                 </Dialog>
               </div>
@@ -408,43 +443,45 @@ export default function SuperAdminPharmaciesPage() {
 
             {/* Edit Pharmacy Dialog */}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-              <DialogContent>
+              <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle>Edit Pharmacy</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleEditPharmacy} className="space-y-4 mt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-name">Pharmacy Name</Label>
-                    <Input id="edit-name" name="name" value={formData.name} onChange={handleInputChange} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-location">Location</Label>
-                    <Input
-                      id="edit-location"
-                      name="location"
-                      value={formData.location}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  <div className="flex justify-end gap-2 mt-4">
-                    <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-                      Cancel
-                    </Button>
-                    <Button type="submit">Update Pharmacy</Button>
-                  </div>
-                </form>
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                  <form onSubmit={handleEditPharmacy} className="space-y-4 mt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-name">Pharmacy Name</Label>
+                      <Input id="edit-name" name="name" value={formData.name} onChange={handleInputChange} required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-location">Location</Label>
+                      <Input
+                        id="edit-location"
+                        name="location"
+                        value={formData.location}
+                        onChange={handleInputChange}
+                        required
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2 mt-4">
+                      <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button type="submit">Update Pharmacy</Button>
+                    </div>
+                  </form>
+                </div>
               </DialogContent>
             </Dialog>
 
             {/* Delete Pharmacy Dialog */}
             <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-              <DialogContent>
+              <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle>Confirm Deletion</DialogTitle>
                 </DialogHeader>
-                <div className="py-4">
-                  <p>Are you sure you want to delete {currentPharmacy?.name}?</p>
+                <div className="py-4 max-h-[60vh] overflow-y-auto pr-2">
+                  <p className="break-words">Are you sure you want to delete {currentPharmacy?.name}?</p>
                   <p className="text-sm text-gray-500 mt-2">This action cannot be undone.</p>
                 </div>
                 <div className="flex justify-end gap-2">

@@ -24,16 +24,88 @@ import { Activity, Thermometer, Loader2 } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { getDoctorProfile, getHealthRecords, getDoctorPatients } from "@/lib/data-service"
 import { supabase } from "@/lib/supabase"
-import { encrypt } from "@/lib/encryption" // Import encrypt directly
+import { encrypt } from "@/lib/encryption"
+
+// Define type interfaces
+interface DoctorProfile {
+  id: string;
+  [key: string]: any;
+}
+
+interface Patient {
+  id: string;
+  users?: {
+    user_metadata?: {
+      full_name?: string;
+      name?: string;
+    };
+    email?: string;
+  };
+  [key: string]: any;
+}
+
+interface VitalSign {
+  recorded_at: string;
+  temperature: number;
+  systolic: number;
+  diastolic: number;
+  recorded_by: string;
+  notes?: string;
+  users?: {
+    user_metadata?: {
+      full_name?: string;
+      name?: string;
+    };
+  };
+  [key: string]: any;
+}
+
+interface HealthRecord {
+  id: string;
+  patient_id: string;
+  doctor_id: string;
+  diagnosis_name: string;
+  diagnosis_description: string;
+  diagnosis_severity: 'low' | 'medium' | 'high';
+  visit_date: string;
+  notes: string;
+  vital_signs?: VitalSign[];
+  patients?: {
+    users?: {
+      user_metadata?: {
+        full_name?: string;
+        name?: string;
+      };
+      email?: string;
+    };
+  };
+  [key: string]: any;
+}
+
+interface FormData {
+  patientId: string;
+  diagnosisName: string;
+  diagnosisDescription: string;
+  diagnosisSeverity: 'low' | 'medium' | 'high';
+  visitDate: string;
+  notes: string;
+}
+
+interface HealthRecordFormProps {
+  onSubmit: (formData: FormData) => Promise<void>;
+  patients: Patient[];
+  setIsNewRecordDialogOpen: (isOpen: boolean) => void;
+  formError: string | null;
+}
 
 export default function HealthRecordsPage() {
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [doctorProfile, setDoctorProfile] = useState<any>(null)
-  const [healthRecords, setHealthRecords] = useState<any[]>([])
-  const [patients, setPatients] = useState<any[]>([])
-  const [selectedVitalSigns, setSelectedVitalSigns] = useState(null)
+  const [doctorProfile, setDoctorProfile] = useState<DoctorProfile | null>(null)
+  const [healthRecords, setHealthRecords] = useState<HealthRecord[]>([])
+  const [patients, setPatients] = useState<Patient[]>([])
+  const [selectedVitalSigns, setSelectedVitalSigns] = useState<VitalSign[] | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [isNewRecordDialogOpen, setIsNewRecordDialogOpen] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
@@ -85,7 +157,7 @@ export default function HealthRecordsPage() {
   })
 
   // Handle form submission
-  const handleCreateHealthRecord = async (formData) => {
+  const handleCreateHealthRecord = async (formData: FormData) => {
     if (!doctorProfile) return
 
     try {
@@ -209,7 +281,7 @@ export default function HealthRecordsPage() {
                               record.diagnosis_severity === "low"
                                 ? "default"
                                 : record.diagnosis_severity === "medium"
-                                  ? "warning"
+                                  ? "secondary"
                                   : "destructive"
                             }
                           >
@@ -222,7 +294,7 @@ export default function HealthRecordsPage() {
                             <Badge
                               variant="outline"
                               className="bg-green-50 cursor-pointer"
-                              onClick={() => setSelectedVitalSigns(record.vital_signs)}
+                              onClick={() => setSelectedVitalSigns(record.vital_signs || [])}
                             >
                               <Activity className="h-3 w-3 mr-1" /> Recorded
                             </Badge>
@@ -256,7 +328,7 @@ export default function HealthRecordsPage() {
 
       {/* Dialog for viewing vital signs */}
       <Dialog open={!!selectedVitalSigns} onOpenChange={() => setSelectedVitalSigns(null)}>
-        <DialogContent>
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Vital Signs</DialogTitle>
             <DialogDescription>Detailed vital signs information</DialogDescription>
@@ -300,7 +372,7 @@ export default function HealthRecordsPage() {
 
       {/* Dialog for creating new health record */}
       <Dialog open={isNewRecordDialogOpen} onOpenChange={setIsNewRecordDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Health Record</DialogTitle>
             <DialogDescription>Add a new health record for a patient. You can add vital signs later.</DialogDescription>
@@ -317,9 +389,9 @@ export default function HealthRecordsPage() {
   )
 }
 
-function HealthRecordForm({ onSubmit, patients, setIsNewRecordDialogOpen, formError }) {
+function HealthRecordForm({ onSubmit, patients, setIsNewRecordDialogOpen, formError }: HealthRecordFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     patientId: "",
     diagnosisName: "",
     diagnosisDescription: "",
@@ -328,16 +400,16 @@ function HealthRecordForm({ onSubmit, patients, setIsNewRecordDialogOpen, formEr
     notes: "",
   })
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSelectChange = (name, value) => {
+  const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 

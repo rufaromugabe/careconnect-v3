@@ -91,20 +91,29 @@ export default function LoginComponent() {
         // Check verification status
         if (!isVerified) {
           console.log("Login page - User is not verified, redirecting to verification");
-          router.push(`/${role}/verify`);
+          // Use setTimeout to ensure all state updates are complete before navigation
+          setTimeout(() => {
+            router.replace(`/${role}/verify`);
+          }, 100);
           return;
         }
         
         // Check active status
         if (!isActive) {
           console.log("Login page - User is not active, redirecting to inactive page");
-          router.push(`/${role}/in-active`);
+          // Use setTimeout to ensure all state updates are complete before navigation
+          setTimeout(() => {
+            router.replace(`/${role}/in-active`);
+          }, 100);
           return;
         }
 
         // Redirect to dashboard
         console.log("Login page - Redirecting to dashboard for role:", role);
-        router.push(`/${role}/dashboard`);
+        // Use setTimeout to ensure all state updates are complete before navigation
+        setTimeout(() => {
+          router.replace(`/${role}/dashboard`);
+        }, 100);
         return;
       }
 
@@ -112,10 +121,16 @@ export default function LoginComponent() {
       const role = await getUserRole();
       if (role) {
         console.log("Login page - Redirecting to role dashboard:", role);
-        router.push(`/${role}/dashboard`);
+        // Use setTimeout to ensure all state updates are complete before navigation
+        setTimeout(() => {
+          router.replace(`/${role}/dashboard`);
+        }, 100);
       } else {
         console.log("Login page - No role found, redirecting to role selection");
-        router.push("/auth/select-role");
+        // Use setTimeout to ensure all state updates are complete before navigation
+        setTimeout(() => {
+          router.replace("/auth/select-role");
+        }, 100);
       }
     } catch (error) {
       console.error("Login page - Login error:", error);

@@ -166,7 +166,7 @@ export default function SuperAdminDoctorsPage() {
       const updatedDoctor = await response.json()
 
       //log action
-      await logAction(user.id, "verify-doctor", {
+      await logAction(user?.id || "", "verify-doctor", {
         doctor_id: userId,
         doctor_name: updatedDoctor.name,
         doctor_email: updatedDoctor.email,
@@ -302,25 +302,47 @@ export default function SuperAdminDoctorsPage() {
 
             {/* Verify Doctor Dialog */}
             <Dialog open={isVerifyDialogOpen} onOpenChange={setIsVerifyDialogOpen}>
-              <DialogContent>
+              <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Verify Doctor</DialogTitle>
+                  <DialogTitle>Doctor Details</DialogTitle>
                 </DialogHeader>
-                <div className="py-4">
-                  <p>
-                    Are you sure you want to verify doctor <strong>{currentDoctor?.name}</strong>?
-                  </p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    This will grant them access to perform doctor-specific tasks.
-                  </p>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setIsVerifyDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={() => (currentDoctor?.user_id ? handleVerifyDoctor(currentDoctor.user_id) : null)}>
-                    Verify
-                  </Button>
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                  {currentDoctor && (
+                    <>
+                      <div className="grid grid-cols-1 gap-2">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Name</p>
+                          <p className="font-medium break-words">{currentDoctor.name}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Email</p>
+                          <p className="font-medium break-all">{currentDoctor.email}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">License Number</p>
+                          <p className="font-medium break-all">{currentDoctor.license_number}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Hospital</p>
+                          <p className="font-medium break-words">{currentDoctor.hospital_name || "Not assigned"}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Specialization</p>
+                          <p className="font-medium break-words">{currentDoctor.specialization}</p>
+                        </div>
+                      </div>
+
+                      <div className="pt-4 flex justify-center">
+                        <Button
+                          onClick={() => handleVerifyDoctor(currentDoctor.user_id)}
+                          className="w-full"
+                          disabled={currentDoctor.is_verified}
+                        >
+                          {currentDoctor.is_verified ? "Already Verified" : "Verify Doctor"}
+                        </Button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </DialogContent>
             </Dialog>

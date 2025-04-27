@@ -309,32 +309,44 @@ export default function SuperAdminHospitalsPage() {
                       Add Hospital
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                      <DialogTitle>Add New Hospital</DialogTitle>
+                      <DialogTitle>Create New Hospital</DialogTitle>
                     </DialogHeader>
-                    <form onSubmit={handleCreateHospital} className="space-y-4 mt-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Hospital Name</Label>
-                        <Input id="name" name="name" value={formData.name} onChange={handleInputChange} required />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="location">Location</Label>
-                        <Input
-                          id="location"
-                          name="location"
-                          value={formData.location}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                      <div className="flex justify-end gap-2 mt-4">
-                        <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                          Cancel
-                        </Button>
-                        <Button type="submit">Create Hospital</Button>
-                      </div>
-                    </form>
+                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                      <form onSubmit={handleCreateHospital} className="space-y-4">
+                        <div className="space-y-2">
+                          <label htmlFor="name" className="text-sm font-medium">
+                            Hospital Name
+                          </label>
+                          <Input
+                            id="name"
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label htmlFor="location" className="text-sm font-medium">
+                            Location
+                          </label>
+                          <Input
+                            id="location"
+                            value={formData.location}
+                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                          <Button variant="outline" type="button" onClick={() => setIsAddDialogOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button type="submit">
+                            Create Hospital
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
                   </DialogContent>
                 </Dialog>
               </div>
@@ -399,43 +411,45 @@ export default function SuperAdminHospitalsPage() {
 
             {/* Edit Hospital Dialog */}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-              <DialogContent>
+              <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle>Edit Hospital</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleEditHospital} className="space-y-4 mt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-name">Hospital Name</Label>
-                    <Input id="edit-name" name="name" value={formData.name} onChange={handleInputChange} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-location">Location</Label>
-                    <Input
-                      id="edit-location"
-                      name="location"
-                      value={formData.location}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  <div className="flex justify-end gap-2 mt-4">
-                    <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-                      Cancel
-                    </Button>
-                    <Button type="submit">Update Hospital</Button>
-                  </div>
-                </form>
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                  <form onSubmit={handleEditHospital} className="space-y-4 mt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-name">Hospital Name</Label>
+                      <Input id="edit-name" name="name" value={formData.name} onChange={handleInputChange} required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-location">Location</Label>
+                      <Input
+                        id="edit-location"
+                        name="location"
+                        value={formData.location}
+                        onChange={handleInputChange}
+                        required
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2 mt-4">
+                      <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button type="submit">Update Hospital</Button>
+                    </div>
+                  </form>
+                </div>
               </DialogContent>
             </Dialog>
 
             {/* Delete Hospital Dialog */}
             <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-              <DialogContent>
+              <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle>Confirm Deletion</DialogTitle>
                 </DialogHeader>
-                <div className="py-4">
-                  <p>Are you sure you want to delete {currentHospital?.name}?</p>
+                <div className="py-4 max-h-[60vh] overflow-y-auto pr-2">
+                  <p className="break-words">Are you sure you want to delete {currentHospital?.name}?</p>
                   <p className="text-sm text-gray-500 mt-2">This action cannot be undone.</p>
                 </div>
                 <div className="flex justify-end gap-2">
