@@ -20,6 +20,7 @@ import {
   List,
   Receipt,
   ShieldCheck,
+  Lock,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -41,6 +42,7 @@ import { QRScanner } from "@/components/qr-scanner"
 import { toast } from "react-toastify"
 import { AnimatedBeam } from "@/components/ui/animated-beam"
 import { logAction } from "@/lib/logging"
+import { safeDecrypt, isEncrypted } from "@/lib/encryption"
 
 // Define TypeScript interfaces
 interface UserMetadata {
@@ -218,8 +220,17 @@ export default function PharmacistPrescriptionsPage() {
             prescription.filled_by && prescription.pharmacists && prescription.pharmacists.pharmacy_id === pharmacyId,
         )
 
+        // Process prescriptions to decrypt notes if encrypted
+        const processedPrescriptions = validPrescriptions.map((prescription: any) => {
+          // Decrypt notes if they are encrypted
+          if (prescription.notes && isEncrypted(prescription.notes)) {
+            prescription.notes = safeDecrypt(prescription.notes);
+          }
+          return prescription;
+        });
+
         const withUserData = await Promise.all(
-          validPrescriptions.map(async (prescription: any) => {
+          processedPrescriptions.map(async (prescription: any) => {
             if (prescription.patients?.user_id) {
               const { data: patientData } = await supabase.auth.admin.getUserById(prescription.patients.user_id)
               prescription.patients.users = patientData?.user
@@ -256,6 +267,11 @@ export default function PharmacistPrescriptionsPage() {
 
       if (!prescription) {
         throw new Error("Prescription not found")
+      }
+
+      // Decrypt notes if they are encrypted
+      if (prescription.notes && isEncrypted(prescription.notes)) {
+        prescription.notes = safeDecrypt(prescription.notes);
       }
 
       setScannedPrescription(prescription as Prescription)
@@ -567,7 +583,11 @@ export default function PharmacistPrescriptionsPage() {
 
                             {scannedPrescription.notes && (
                               <div>
-                                <h3 className="text-sm font-medium text-muted-foreground mb-1">Notes</h3>
+                                <h3 className="text-sm font-medium text-muted-foreground mb-1 flex items-center">
+                                  Notes <Lock className="ml-1 h-3 w-3 text-green-600" aria-label="Secure notes">
+                                    <title>Secure notes</title>
+                                  </Lock>
+                                </h3>
                                 <p className="text-sm">{scannedPrescription.notes}</p>
                               </div>
                             )}
@@ -750,15 +770,15 @@ export default function PharmacistPrescriptionsPage() {
           </DialogHeader>
 
           {receiptPrescription && (
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
               <div className="border-b pb-2">
                 <p className="text-sm text-muted-foreground">Prescription ID</p>
-                <p className="font-mono text-sm">{receiptPrescription.id}</p>
+                <p className="font-mono text-sm break-all">{receiptPrescription.id}</p>
               </div>
 
               <div className="border-b pb-2">
                 <p className="text-sm text-muted-foreground">Patient</p>
-                <p>
+                <p className="break-words">
                   {receiptPrescription.patients?.users?.user_metadata?.full_name ||
                     receiptPrescription.patients?.users?.user_metadata?.name ||
                     "Unknown Patient"}
@@ -767,7 +787,7 @@ export default function PharmacistPrescriptionsPage() {
 
               <div className="border-b pb-2">
                 <p className="text-sm text-muted-foreground">Prescribed By</p>
-                <p>
+                <p className="break-words">
                   {receiptPrescription.doctors?.users?.user_metadata?.full_name ||
                     receiptPrescription.doctors?.users?.user_metadata?.name ||
                     "Unknown Doctor"}
@@ -776,7 +796,7 @@ export default function PharmacistPrescriptionsPage() {
 
               <div className="border-b pb-2">
                 <p className="text-sm text-muted-foreground">Filled By</p>
-                <p>
+                <p className="break-words">
                   {receiptPrescription.pharmacists?.users?.user_metadata?.full_name ||
                     receiptPrescription.pharmacists?.users?.user_metadata?.name ||
                     "Unknown Pharmacist"}
@@ -785,7 +805,7 @@ export default function PharmacistPrescriptionsPage() {
 
               <div className="border-b pb-2">
                 <p className="text-sm text-muted-foreground">Dates</p>
-                <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                   <div>
                     <span className="text-muted-foreground">Prescribed:</span>{" "}
                     {new Date(receiptPrescription.created_at).toLocaleDateString()}
@@ -804,18 +824,18 @@ export default function PharmacistPrescriptionsPage() {
                 <div className="space-y-2">
                   {receiptPrescription.medications?.map((medication) => (
                     <div key={medication.id} className="p-2 bg-muted rounded-md text-sm">
-                      <p className="font-medium">{medication.name}</p>
-                      <div className="grid grid-cols-2 gap-1 mt-1">
-                        <div>
+                      <p className="font-medium break-words">{medication.name}</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 mt-1">
+                        <div className="break-words">
                           <span className="text-muted-foreground">Dosage:</span> {medication.dosage}
                         </div>
                         {medication.frequency && (
-                          <div>
+                          <div className="break-words">
                             <span className="text-muted-foreground">Frequency:</span> {medication.frequency}
                           </div>
                         )}
                         {medication.duration && (
-                          <div>
+                          <div className="break-words">
                             <span className="text-muted-foreground">Duration:</span> {medication.duration}
                           </div>
                         )}
@@ -827,8 +847,12 @@ export default function PharmacistPrescriptionsPage() {
 
               {receiptPrescription.notes && (
                 <div>
-                  <p className="text-sm text-muted-foreground">Notes</p>
-                  <p className="text-sm">{receiptPrescription.notes}</p>
+                  <p className="text-sm text-muted-foreground flex items-center">
+                    Notes <Lock className="ml-1 h-3 w-3 text-green-600" aria-label="Secure notes">
+                      <title>Secure notes</title>
+                    </Lock>
+                  </p>
+                  <p className="text-sm break-words">{receiptPrescription.notes}</p>
                 </div>
               )}
             </div>

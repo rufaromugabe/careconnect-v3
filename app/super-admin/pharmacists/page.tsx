@@ -144,11 +144,13 @@ export default function SuperAdminPharmacistsPage() {
       const updatedPharmacist = await response.json()
 
       //log action
-      await logAction(user.id, "verify-pharmacist", {
-        pharmacist_id: userId,
-        pharmacist_name: updatedPharmacist.name,
-        pharmacist_email: updatedPharmacist.email,
-      })
+      if (user) {
+        await logAction(user.id, "verify-pharmacist", {
+          pharmacist_id: userId,
+          pharmacist_name: updatedPharmacist.name,
+          pharmacist_email: updatedPharmacist.email,
+        })
+      }
 
       //Refresh UI or update local state as needed
       setPharmacists((prev) =>
