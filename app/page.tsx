@@ -60,6 +60,12 @@ export default function Home() {
       description: "Digital health records for secure and efficient storage and retrieval of patient information."
     },
     {
+      icon: <Flask className="h-10 w-10 text-indigo-500" />,
+      title: "Prescription Management",
+      description: "E-prescribing and medication management for better patient adherence."
+      
+    },
+    {
       icon: <Calendar className="h-10 w-10 text-green-500" />,
       title: "Appointment Scheduling",
       description: "Streamlined booking system for patients to schedule visits with healthcare providers."
@@ -71,35 +77,32 @@ export default function Home() {
     },
     {
       icon: <Shield className="h-10 w-10 text-yellow-500" />,
-      title: "Secure Communication",
-      description: "HIPAA-compliant messaging between patients and healthcare providers."
+      title: "Data Security",
+      description: "Robust encryption and compliance with healthcare regulations to protect sensitive information."
+    
     },
     {
       icon: <BarChart className="h-10 w-10 text-red-500" />,
       title: "Analytics Dashboard",
       description: "Data-driven insights for healthcare providers to monitor patient outcomes."
     },
-    {
-      icon: <Stethoscope className="h-10 w-10 text-indigo-500" />,
-      title: "Treatment Plans",
-      description: "Customized care plans and progress tracking for improved patient outcomes."
-    }
+   
   ];
 
   const testimonials = [
     {
       quote: "CareConnect has revolutionized how we manage patient care. The integrated system makes coordination between departments seamless.",
-      name: "Dr. Sarah Johnson",
+      name: "Dr. Sarah Parirenyatwa",
       role: "Cardiologist"
     },
     {
       quote: "As a nurse, I can now easily access patient information and update vitals in real-time. It's made our workflow so much more efficient.",
-      name: "Mark Williams",
+      name: "Rudo Moyo",
       role: "Head Nurse"
     },
     {
       quote: "I love being able to schedule appointments and access my medical records from my phone. The reminders for medication are a lifesaver!",
-      name: "Emma Davis",
+      name: "Mary Chikanda",
       role: "Patient"
     }
   ];
