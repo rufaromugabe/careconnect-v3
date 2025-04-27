@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { Header } from "@/components/layout/header"
-import { UserPlus, Store, Users, Loader2 } from "lucide-react"
+import { UserPlus, Store, Users, Loader2, Building2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useAuth } from "@/contexts/auth-context"
@@ -18,6 +18,7 @@ export default function SuperAdminDashboard() {
   const [patients, setPatients] = useState<any[]>([])
   const [pharmacists, setPharmacists] = useState<any[]>([])
   const [pharmacies, setPharmacies] = useState<any[]>([])
+  const [hospitals, setHospitals] = useState<any[]>([])
   const [recentUsers, setRecentUsers] = useState<any[]>([])
 
   useEffect(() => {
@@ -40,6 +41,7 @@ export default function SuperAdminDashboard() {
         const patientsPromise = supabase.from("patients").select("id")
         const pharmacistsPromise = supabase.from("pharmacists").select("id")
         const pharmaciesPromise = supabase.from("pharmacies").select("*")
+        const hospitalsPromise = supabase.from("hospitals").select("id")
         
         // Instead of using admin API, use a safer alternative to get users
         // We'll use a server route or user_roles table
@@ -50,12 +52,14 @@ export default function SuperAdminDashboard() {
           { data: patientData, error: patientError },
           { data: pharmacistData, error: pharmacistError },
           { data: pharmacyData, error: pharmacyError },
+          { data: hospitalData, error: hospitalError },
           { data: userRoleData, error: userRoleError },
         ] = await Promise.all([
           doctorsPromise, 
           patientsPromise, 
           pharmacistsPromise, 
-          pharmaciesPromise, 
+          pharmaciesPromise,
+          hospitalsPromise,
           userRolesPromise
         ])
 
@@ -64,6 +68,7 @@ export default function SuperAdminDashboard() {
         if (patientError) console.warn("Error fetching patients:", patientError)
         if (pharmacistError) console.warn("Error fetching pharmacists:", pharmacistError)
         if (pharmacyError) console.warn("Error fetching pharmacies:", pharmacyError)
+        if (hospitalError) console.warn("Error fetching hospitals:", hospitalError)
         if (userRoleError) console.warn("Error fetching user roles:", userRoleError)
         
         // Set empty arrays as fallbacks if data is null
@@ -71,6 +76,7 @@ export default function SuperAdminDashboard() {
         setPatients(patientData || [])
         setPharmacists(pharmacistData || [])
         setPharmacies(pharmacyData || [])
+        setHospitals(hospitalData || [])
         
         // Format user role data to match expected structure for display
         const formattedUsers = (userRoleData || []).map(entry => ({
@@ -109,6 +115,13 @@ export default function SuperAdminDashboard() {
       icon: Store,
       href: "/super-admin/pharmacies",
       color: "bg-emerald-500",
+    },
+    {
+      label: "Total Hospitals",
+      value: hospitals?.length || 0,
+      icon: Building2,
+      href: "/super-admin/hospitals",
+      color: "bg-orange-500",
     },
     {
       label: "Total Users",
