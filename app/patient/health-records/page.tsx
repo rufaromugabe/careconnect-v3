@@ -131,7 +131,7 @@ export default function PatientHealthRecordsPage() {
                               record.diagnosis_severity === "low"
                                 ? "default"
                                 : record.diagnosis_severity === "medium"
-                                  ? "warning"
+                                  ? "secondary"
                                   : "destructive"
                             }
                           >
@@ -216,7 +216,7 @@ export default function PatientHealthRecordsPage() {
             <DialogDescription>Detailed vital signs information</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            {selectedVitalSigns?.map((vs: any, index) => (
+            {selectedVitalSigns?.map((vs: any, index: number) => (
               <div key={index} className="border rounded-lg p-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>

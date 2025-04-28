@@ -26,6 +26,53 @@ import { getDoctorProfile, getAppointments, getDoctorPatients } from "@/lib/data
 import { supabase } from "@/lib/supabase"
 import { logAction } from "@/lib/logging"
 
+// Type definitions
+interface Patient {
+  id: string;
+  users?: {
+    user_metadata?: {
+      full_name?: string;
+      name?: string;
+    };
+    email?: string;
+  };
+}
+
+interface Appointment {
+  id: string;
+  doctor_id: string;
+  patient_id: string;
+  date_time: string;
+  status: "scheduled" | "completed" | "canceled";
+  notes?: string;
+  patients?: {
+    users?: {
+      user_metadata?: {
+        full_name?: string;
+        name?: string;
+      };
+    };
+  };
+}
+
+interface DoctorProfile {
+  id: string;
+}
+
+interface AppointmentFormData {
+  patientId: string;
+  date: string;
+  time: string;
+  notes: string;
+}
+
+interface AppointmentFormProps {
+  onSubmit: (formData: AppointmentFormData) => Promise<void>;
+  patients: Patient[];
+  setIsNewAppointmentOpen: (isOpen: boolean) => void;
+  formError: string | null;
+}
+
 export default function DoctorAppointmentsPage() {
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
@@ -80,7 +127,7 @@ export default function DoctorAppointmentsPage() {
     return matchesSearch && matchesStatus
   })
 
-  const handleCreateAppointment = async (formData) => {
+  const handleCreateAppointment = async (formData: AppointmentFormData) => {
     if (!doctorProfile) return
 
     try {
@@ -105,7 +152,7 @@ export default function DoctorAppointmentsPage() {
         doctorProfile.id,
         `created an appointment for patient: ${newAppointment.patient_id}`,
         {
-          email: user.email,
+          email: user?.email || '',
           status: "created",
           dateTime: newAppointment.date_time,
 
@@ -239,7 +286,7 @@ export default function DoctorAppointmentsPage() {
                               appointment.status === "scheduled"
                                 ? "default"
                                 : appointment.status === "completed"
-                                  ? "success"
+                                  ? "secondary"
                                   : "destructive"
                             }
                           >
@@ -270,25 +317,25 @@ export default function DoctorAppointmentsPage() {
   )
 }
 
-function AppointmentForm({ onSubmit, patients, setIsNewAppointmentOpen, formError }) {
+function AppointmentForm({ onSubmit, patients, setIsNewAppointmentOpen, formError }: AppointmentFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<AppointmentFormData>({
     patientId: "",
     date: "",
     time: "",
     notes: "",
   })
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSelectChange = (name, value) => {
+  const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 

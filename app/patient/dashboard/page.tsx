@@ -86,7 +86,7 @@ export default function PatientDashboard() {
         patientProfile.user_id,
         `changed doctor from ${patientProfile.doctor_id} to ${doctorId}`,
         {
-          email: user.email,
+          email: user?.email || "unknown",
           status: "success",
           action: "Change Doctor",
           Patient: patientProfile.name,
@@ -263,7 +263,7 @@ export default function PatientDashboard() {
                             prescription.status === "pending"
                               ? "default"
                               : prescription.status === "filled"
-                                ? "success"
+                                ? "secondary"
                                 : "destructive"
                           }
                         >
@@ -297,7 +297,7 @@ export default function PatientDashboard() {
                             record.diagnosis_severity === "low"
                               ? "default"
                               : record.diagnosis_severity === "medium"
-                                ? "warning"
+                                ? "secondary"
                                 : "destructive"
                           }
                         >
