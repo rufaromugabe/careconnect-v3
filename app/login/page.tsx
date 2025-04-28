@@ -31,22 +31,22 @@ export default function LoginPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background to-muted p-4">
+    <div className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-black via-slate-950 to-slate-900 text-white p-4">
       {/* Animated background */}
       <AnimatedBeam />
       
       {/* Logo and back link */}
       <div className="absolute top-8 left-8 flex items-center">
         <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
-          <Heart className="h-6 w-6 text-primary mr-2" />
-          <span className="font-bold">CareConnect</span>
+          <Heart className="h-6 w-6 text-blue-400 mr-2" />
+          <span className="font-bold text-blue-400">CareConnect</span>
         </Link>
       </div>
       
@@ -58,14 +58,14 @@ export default function LoginPage() {
         transition={{ duration: 0.5 }}
       >
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold">Welcome Back</h1>
-          <p className="text-muted-foreground mt-2">Login to access your account</p>
+          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Welcome Back</h1>
+          <p className="text-gray-400 mt-2">Login to access your account</p>
         </div>
         <LoginComponent />
         <div className="mt-6 text-center">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-gray-400">
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="text-primary hover:underline">
+            <Link href="/register" className="text-blue-400 hover:underline">
               Sign up
             </Link>
           </p>

@@ -80,38 +80,36 @@ export default function Home() {
     setScrolled(latest > 20);
   });
 
- 
-
   const features = [
     {
-      icon: <Activity className="h-10 w-10 text-blue-500" />,
+      icon: <Activity className="h-10 w-10 text-cyan-400" />,
       title: "Patient Record Management",
       description: "Digital health records for secure and efficient storage and retrieval of patient information."
     },
     {
-      icon: <Flask className="h-10 w-10 text-indigo-500" />,
+      icon: <Flask className="h-10 w-10 text-indigo-400" />,
       title: "Prescription Management",
       description: "E-prescribing and medication management for better patient adherence."
       
     },
     {
-      icon: <Calendar className="h-10 w-10 text-green-500" />,
+      icon: <Calendar className="h-10 w-10 text-emerald-400" />,
       title: "Appointment Scheduling",
       description: "Streamlined booking system for patients to schedule visits with healthcare providers."
     },
     {
-      icon: <Clock className="h-10 w-10 text-purple-500" />,
+      icon: <Clock className="h-10 w-10 text-fuchsia-400" />,
       title: "Real-time Notifications",
       description: "Instant alerts for appointments, medication reminders, and important updates."
     },
     {
-      icon: <Shield className="h-10 w-10 text-yellow-500" />,
+      icon: <Shield className="h-10 w-10 text-amber-400" />,
       title: "Data Security",
       description: "Robust encryption and compliance with healthcare regulations to protect sensitive information."
     
     },
     {
-      icon: <BarChart className="h-10 w-10 text-red-500" />,
+      icon: <BarChart className="h-10 w-10 text-rose-400" />,
       title: "Analytics Dashboard",
       description: "Data-driven insights for healthcare providers to monitor patient outcomes."
     },
@@ -135,10 +133,8 @@ export default function Home() {
     }
   ];
 
-  
-
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-background to-muted">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-black via-slate-950 to-slate-900 text-white">
       {/* Animated background beam */}
       <AnimatedBeam />
 
@@ -146,7 +142,7 @@ export default function Home() {
       <motion.header 
         className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-lg transition-all duration-300 ${
           scrolled 
-            ? "bg-background/70 shadow-sm border-b border-border/20" 
+            ? "bg-black/70 shadow-md shadow-blue-900/20 border-b border-blue-900/30" 
             : "bg-transparent"
         }`}
         initial={{ y: -100 }}
@@ -169,36 +165,36 @@ export default function Home() {
                   className="object-contain"
                 />
               </div>
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">CareConnect</span>
+              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">CareConnect</span>
             </motion.div>
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
               <Link href="#features" className="text-sm relative group">
-                <span className="hover:text-primary transition-colors">Features</span>
-                <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+                <span className="text-gray-300 hover:text-blue-400 transition-colors">Features</span>
+                <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-blue-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
               </Link>
               <Link href="#testimonials" className="text-sm relative group">
-                <span className="hover:text-primary transition-colors">Testimonials</span>
-                <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+                <span className="text-gray-300 hover:text-blue-400 transition-colors">Testimonials</span>
+                <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-blue-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
               </Link>
               <Link href="#about" className="text-sm relative group">
-                <span className="hover:text-primary transition-colors">About</span>
-                <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+                <span className="text-gray-300 hover:text-blue-400 transition-colors">About</span>
+                <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-blue-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
               </Link>
               <Link href="#contact" className="text-sm relative group">
-                <span className="hover:text-primary transition-colors">Contact</span>
-                <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+                <span className="text-gray-300 hover:text-blue-400 transition-colors">Contact</span>
+                <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-blue-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
               </Link>
               <Link href="/login" className="text-sm relative group">
-                <span className="hover:text-primary transition-colors">Login</span>
-                <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+                <span className="text-gray-300 hover:text-blue-400 transition-colors">Login</span>
+                <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-blue-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
               </Link>
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => router.push("/register")}
-                className="bg-primary/10 hover:bg-primary/20 text-primary font-medium"
+                className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 font-medium border border-blue-500/30"
               >
                 Sign Up
               </Button>
@@ -206,7 +202,7 @@ export default function Home() {
             
             {/* Mobile Menu Button */}
             <motion.button 
-              className="md:hidden p-2 rounded-full hover:bg-muted/50 transition-colors"
+              className="md:hidden p-2 rounded-full hover:bg-slate-800/70 transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               whileTap={{ scale: 0.95 }}
             >
@@ -223,15 +219,15 @@ export default function Home() {
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <Link href="#features" className="hover:text-primary transition-colors px-2 py-1">Features</Link>
-              <Link href="#testimonials" className="hover:text-primary transition-colors px-2 py-1">Testimonials</Link>
-              <Link href="#about" className="hover:text-primary transition-colors px-2 py-1">About</Link>
-              <Link href="#contact" className="hover:text-primary transition-colors px-2 py-1">Contact</Link>
-              <Link href="/login" className="hover:text-primary transition-colors px-2 py-1">Login</Link>
+              <Link href="#features" className="text-gray-300 hover:text-blue-400 transition-colors px-2 py-1">Features</Link>
+              <Link href="#testimonials" className="text-gray-300 hover:text-blue-400 transition-colors px-2 py-1">Testimonials</Link>
+              <Link href="#about" className="text-gray-300 hover:text-blue-400 transition-colors px-2 py-1">About</Link>
+              <Link href="#contact" className="text-gray-300 hover:text-blue-400 transition-colors px-2 py-1">Contact</Link>
+              <Link href="/login" className="text-gray-300 hover:text-blue-400 transition-colors px-2 py-1">Login</Link>
               <Button 
                 variant="ghost"
                 onClick={() => router.push("/register")}
-                className="w-full bg-primary/10 hover:bg-primary/20 text-primary font-medium"
+                className="w-full bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 font-medium border border-blue-500/30"
               >
                 Sign Up
               </Button>
@@ -264,17 +260,17 @@ export default function Home() {
                   <AnimatedGradientText>CareConnect</AnimatedGradientText>
                 </h1>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400">
                 Healthcare Management Reimagined
               </h2>
-              <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
                 A comprehensive platform connecting healthcare professionals and patients
                 for seamless, efficient, and personalized healthcare delivery.
               </p>
               <div className="flex flex-wrap gap-4 justify-center">
                 <Button 
                   size="lg" 
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-700/30"
                   onClick={() => router.push("/register")}
                 >
                   Get Started
@@ -283,6 +279,7 @@ export default function Home() {
                   size="lg" 
                   variant="outline"
                   onClick={() => router.push("/login")}
+                  className="border-blue-500/50 text-blue-400 hover:bg-blue-900/20"
                 >
                   Login
                 </Button>
@@ -311,8 +308,8 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Experience CareConnect</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Experience CareConnect</h2>
+            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
               Seamlessly manage healthcare on any device, anywhere.
             </p>
           </motion.div>
@@ -329,7 +326,7 @@ export default function Home() {
               <div className="relative">
                 <MouseParallax strength={0.03}>
                   <div className="relative h-[600px] w-[300px] mx-auto">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/30 to-purple-500/30 rounded-[40px] blur-3xl opacity-30" />
+                    <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/50 to-purple-600/50 rounded-[40px] blur-3xl opacity-40" />
                     <Image
                       src="/iphone.png"
                       alt="CareConnect on Mobile"
@@ -339,7 +336,7 @@ export default function Home() {
                       priority
                     />
                     <motion.div
-                      className="absolute -top-10 -left-10 h-24 w-24 bg-blue-500/40 rounded-full blur-xl"
+                      className="absolute -top-10 -left-10 h-24 w-24 bg-blue-600/50 rounded-full blur-xl"
                       animate={{
                         y: [0, 10, 0],
                         opacity: [0.5, 0.8, 0.5],
@@ -351,7 +348,7 @@ export default function Home() {
                       }}
                     />
                     <motion.div
-                      className="absolute -bottom-8 -right-4 h-20 w-20 bg-purple-500/30 rounded-full blur-xl"
+                      className="absolute -bottom-8 -right-4 h-20 w-20 bg-purple-600/50 rounded-full blur-xl"
                       animate={{
                         y: [0, -15, 0],
                         opacity: [0.3, 0.7, 0.3],
@@ -366,8 +363,8 @@ export default function Home() {
                   </div>
                 </MouseParallax>
                 <div className="mt-6 text-center">
-                  <h3 className="text-xl font-semibold mb-2">Mobile Experience</h3>
-                  <p className="text-muted-foreground">Access your healthcare on the go</p>
+                  <h3 className="text-xl font-semibold mb-2 text-blue-300">Mobile Experience</h3>
+                  <p className="text-gray-400">Access your healthcare on the go</p>
                 </div>
               </div>
             </motion.div>
@@ -383,7 +380,7 @@ export default function Home() {
               <div className="relative">
                 <MouseParallax strength={0.02}>
                   <div className="relative h-[400px] w-[650px] mx-auto">
-                    <div className="absolute inset-0 bg-gradient-to-bl from-primary/20 to-blue-500/20 rounded-[20px] blur-3xl opacity-30" />
+                    <div className="absolute inset-0 bg-gradient-to-bl from-cyan-600/40 to-blue-600/40 rounded-[20px] blur-3xl opacity-40" />
                     <Image
                       src="/laptop.png"
                       alt="CareConnect on Desktop"
@@ -393,7 +390,7 @@ export default function Home() {
                       priority
                     />
                     <motion.div
-                      className="absolute -top-10 -right-10 h-32 w-32 bg-primary/20 rounded-full blur-xl"
+                      className="absolute -top-10 -right-10 h-32 w-32 bg-cyan-600/30 rounded-full blur-xl"
                       animate={{
                         x: [0, 15, 0],
                         opacity: [0.4, 0.6, 0.4],
@@ -405,7 +402,7 @@ export default function Home() {
                       }}
                     />
                     <motion.div
-                      className="absolute -bottom-4 -left-10 h-28 w-28 bg-blue-500/20 rounded-full blur-xl"
+                      className="absolute -bottom-4 -left-10 h-28 w-28 bg-blue-600/30 rounded-full blur-xl"
                       animate={{
                         x: [0, -10, 0],
                         opacity: [0.3, 0.5, 0.3],
@@ -420,8 +417,8 @@ export default function Home() {
                   </div>
                 </MouseParallax>
                 <div className="mt-6 text-center">
-                  <h3 className="text-xl font-semibold mb-2">Desktop Experience</h3>
-                  <p className="text-muted-foreground">Powerful tools for healthcare professionals</p>
+                  <h3 className="text-xl font-semibold mb-2 text-cyan-300">Desktop Experience</h3>
+                  <p className="text-gray-400">Powerful tools for healthcare professionals</p>
                 </div>
               </div>
             </motion.div>
@@ -430,7 +427,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="relative z-10 py-20" id="features">
+      <section className="relative z-10 py-20 bg-gradient-to-b from-slate-950 to-slate-900" id="features">
         <div className="container mx-auto px-4 max-w-7xl">
           <motion.div
             className="text-center mb-16"
@@ -438,8 +435,8 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Powerful Features</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">Powerful Features</h2>
+            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
               Everything you need to streamline healthcare delivery and enhance patient outcomes.
             </p>
           </motion.div>
@@ -447,14 +444,14 @@ export default function Home() {
             {features.map((feature, index) => (
               <motion.div
                 key={feature.title}
-                className="bg-card/50 backdrop-blur-sm p-8 rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-shadow"
+                className="bg-slate-900/80 backdrop-blur-sm p-8 rounded-2xl border border-blue-900/30 shadow-lg shadow-blue-900/10 hover:shadow-blue-900/20 transition-shadow"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
               >
                 <div className="mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground">{feature.description}</p>
+                <h3 className="text-xl font-semibold mb-2 text-white">{feature.title}</h3>
+                <p className="text-gray-400">{feature.description}</p>
               </motion.div>
             ))}
           </div>
@@ -462,7 +459,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="relative z-10 py-20 bg-muted/50" id="testimonials">
+      <section className="relative z-10 py-20 bg-slate-900/50" id="testimonials">
         <div className="container mx-auto px-4 max-w-7xl">
           <motion.div
             className="text-center mb-16"
@@ -470,8 +467,8 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">What Our Users Say</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">What Our Users Say</h2>
+            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
               Hear from healthcare professionals and patients using CareConnect every day.
             </p>
           </motion.div>
@@ -479,16 +476,16 @@ export default function Home() {
             {testimonials.map((testimonial, index) => (
               <motion.div
                 key={testimonial.name}
-                className="bg-card/50 backdrop-blur-sm p-8 rounded-2xl border border-border/50 shadow-sm"
+                className="bg-slate-900/90 backdrop-blur-sm p-8 rounded-2xl border border-purple-900/30 shadow-lg shadow-purple-900/10"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 + 0.3, duration: 0.5 }}
               >
-                <div className="mb-6 text-4xl">"</div>
-                <p className="mb-6 italic text-lg">{testimonial.quote}</p>
+                <div className="mb-6 text-4xl text-purple-400 opacity-70">"</div>
+                <p className="mb-6 italic text-lg text-gray-300">{testimonial.quote}</p>
                 <div>
-                  <p className="font-semibold">{testimonial.name}</p>
-                  <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                  <p className="font-semibold text-white">{testimonial.name}</p>
+                  <p className="text-sm text-blue-400">{testimonial.role}</p>
                 </div>
               </motion.div>
             ))}
@@ -497,20 +494,20 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="relative z-10 py-20" id="about">
+      <section className="relative z-10 py-20 bg-gradient-to-b from-slate-900 to-black" id="about">
         <div className="container mx-auto px-4 max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Transform Healthcare Delivery?</h2>
-            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Ready to Transform Healthcare Delivery?</h2>
+            <p className="text-lg text-gray-400 mb-8 max-w-2xl mx-auto">
               Join thousands of healthcare professionals and patients already using CareConnect.
             </p>
             <Button 
               size="lg" 
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 shadow-lg shadow-purple-900/30"
               onClick={() => router.push("/register")}
             >
               Sign Up Now
@@ -520,7 +517,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 py-12 bg-muted/80 border-t border-border/50" id="contact">
+      <footer className="relative z-10 py-12 bg-black border-t border-blue-900/30" id="contact">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-6 md:mb-0">
@@ -532,17 +529,17 @@ export default function Home() {
                   className="object-contain" 
                 />
               </div>
-              <span className="text-xl font-bold">CareConnect</span>
+              <span className="text-xl font-bold text-blue-400">CareConnect</span>
             </div>
-            <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">
-              <a href="#" className="hover:text-primary">About</a>
-              <a href="#" className="hover:text-primary">Features</a>
-              <a href="#" className="hover:text-primary">Privacy Policy</a>
-              <a href="#" className="hover:text-primary">Terms of Service</a>
-              <a href="#" className="hover:text-primary">Contact</a>
+            <div className="flex flex-wrap gap-6 text-sm text-gray-400">
+              <a href="#" className="hover:text-blue-400 transition-colors">About</a>
+              <a href="#" className="hover:text-blue-400 transition-colors">Features</a>
+              <a href="#" className="hover:text-blue-400 transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-blue-400 transition-colors">Terms of Service</a>
+              <a href="#" className="hover:text-blue-400 transition-colors">Contact</a>
             </div>
           </div>
-          <div className="mt-8 text-center text-sm text-muted-foreground">
+          <div className="mt-8 text-center text-sm text-gray-500">
             &copy; {new Date().getFullYear()} CareConnect. All rights reserved.
           </div>
         </div>

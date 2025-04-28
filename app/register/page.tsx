@@ -170,7 +170,7 @@ export default function Register() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-background to-muted flex flex-col items-center justify-center">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-black via-slate-950 to-slate-900 text-white flex flex-col items-center justify-center">
       {/* Animated background beam */}
       <AnimatedBeam />
 
@@ -187,14 +187,14 @@ export default function Register() {
               animate={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.2 }}
             >
-              <Heart className="h-12 w-12 text-primary mr-3" />
+              <Heart className="h-12 w-12 text-blue-400 mr-3" />
             </motion.div>
             <h1 className="text-5xl font-bold tracking-tight">
               <AnimatedGradientText>CareConnect</AnimatedGradientText>
             </h1>
           </div>
           <motion.p
-            className="text-lg text-muted-foreground max-w-2xl mx-auto mt-4"
+            className="text-lg text-gray-400 max-w-2xl mx-auto mt-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.8 }}
@@ -220,10 +220,10 @@ export default function Register() {
             transition={{ duration: 0.5, delay: 0.4 }}
             className="w-full max-w-md"
           >
-            <Card className="w-full p-8 shadow-xl backdrop-blur-sm bg-white/90 dark:bg-gray-950/90 border border-gray-200/50 dark:border-gray-800/50">
+            <Card className="w-full p-8 shadow-xl backdrop-blur-sm bg-slate-900/80 border border-blue-900/30 shadow-blue-900/10">
               <div className="space-y-6">
                 <motion.h2
-                  className="text-2xl font-bold text-center"
+                  className="text-2xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}
@@ -238,7 +238,7 @@ export default function Register() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.5, duration: 0.5 }}
                   >
-                    <Label htmlFor="name">Full Name</Label>
+                    <Label htmlFor="name" className="text-gray-300">Full Name</Label>
                     <Input
                       id="name"
                       type="text"
@@ -247,7 +247,7 @@ export default function Register() {
                       onChange={(e) => setName(e.target.value)}
                       required
                       disabled={!isSupabaseInitialized}
-                      className="transition-all duration-300 focus:ring-2 focus:ring-primary/50"
+                      className="transition-all duration-300 focus:ring-2 focus:ring-blue-500/50 bg-slate-800/80 border-slate-700 placeholder:text-gray-500"
                     />
                   </motion.div>
 
@@ -257,7 +257,7 @@ export default function Register() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.6, duration: 0.5 }}
                   >
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email" className="text-gray-300">Email</Label>
                     <Input
                       id="email"
                       type="email"
@@ -266,7 +266,7 @@ export default function Register() {
                       onChange={(e) => setEmail(e.target.value)}
                       required
                       disabled={!isSupabaseInitialized}
-                      className="transition-all duration-300 focus:ring-2 focus:ring-primary/50"
+                      className="transition-all duration-300 focus:ring-2 focus:ring-blue-500/50 bg-slate-800/80 border-slate-700 placeholder:text-gray-500"
                     />
                   </motion.div>
 
@@ -276,7 +276,7 @@ export default function Register() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.7, duration: 0.5 }}
                   >
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password" className="text-gray-300">Password</Label>
                     <Input
                       id="password"
                       type="password"
@@ -285,7 +285,7 @@ export default function Register() {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       disabled={!isSupabaseInitialized}
-                      className="transition-all duration-300 focus:ring-2 focus:ring-primary/50"
+                      className="transition-all duration-300 focus:ring-2 focus:ring-blue-500/50 bg-slate-800/80 border-slate-700 placeholder:text-gray-500"
                     />
                   </motion.div>
 
@@ -295,7 +295,7 @@ export default function Register() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.8, duration: 0.5 }}
                   >
-                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                    <Label htmlFor="confirmPassword" className="text-gray-300">Confirm Password</Label>
                     <Input
                       id="confirmPassword"
                       type="password"
@@ -304,7 +304,7 @@ export default function Register() {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                       disabled={!isSupabaseInitialized}
-                      className="transition-all duration-300 focus:ring-2 focus:ring-primary/50"
+                      className="transition-all duration-300 focus:ring-2 focus:ring-blue-500/50 bg-slate-800/80 border-slate-700 placeholder:text-gray-500"
                     />
                   </motion.div>
 
@@ -314,19 +314,19 @@ export default function Register() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.9, duration: 0.5 }}
                   >
-                    <Label htmlFor="role">Role</Label>
+                    <Label htmlFor="role" className="text-gray-300">Role</Label>
                     <Select value={role} onValueChange={setRole} required disabled={!isSupabaseInitialized}>
                       <SelectTrigger
                         id="role"
-                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/50"
+                        className="transition-all duration-300 focus:ring-2 focus:ring-blue-500/50 bg-slate-800/80 border-slate-700 text-gray-300"
                       >
                         <SelectValue placeholder="Select your role" />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="doctor">Doctor</SelectItem>
-                        <SelectItem value="nurse">Nurse</SelectItem>
-                        <SelectItem value="patient">Patient</SelectItem>
-                        <SelectItem value="pharmacist">Pharmacist</SelectItem>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="doctor" className="text-gray-300 hover:bg-slate-700">Doctor</SelectItem>
+                        <SelectItem value="nurse" className="text-gray-300 hover:bg-slate-700">Nurse</SelectItem>
+                        <SelectItem value="patient" className="text-gray-300 hover:bg-slate-700">Patient</SelectItem>
+                        <SelectItem value="pharmacist" className="text-gray-300 hover:bg-slate-700">Pharmacist</SelectItem>
                       </SelectContent>
                     </Select>
                   </motion.div>
@@ -348,10 +348,10 @@ export default function Register() {
 
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t" />
+                      <span className="w-full border-t border-slate-700" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+                      <span className="bg-slate-900 px-2 text-gray-500">Or continue with</span>
                     </div>
                   </div>
 
@@ -363,7 +363,7 @@ export default function Register() {
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full group relative overflow-hidden"
+                      className="w-full group relative overflow-hidden border-slate-700 text-gray-300"
                       disabled={!isSupabaseInitialized}
                       onClick={async () => {
                         try {
@@ -394,21 +394,21 @@ export default function Register() {
                           ></path>
                         </svg>
                         Sign up with Google
-                        <span className="ml-2 text-xs text-muted-foreground">(as Patient)</span>
+                        <span className="ml-2 text-xs text-gray-500">(as Patient)</span>
                       </span>
-                      <span className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <span className="absolute inset-0 bg-slate-800 hover:bg-slate-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </Button>
                   </motion.div>
                 </form>
 
                 <motion.div
-                  className="text-center text-sm text-muted-foreground"
+                  className="text-center text-sm text-gray-400"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1.2, duration: 0.5 }}
                 >
                   Already have an account?{" "}
-                  <Link href="/" className="text-primary hover:underline transition-colors">
+                  <Link href="/login" className="text-blue-400 hover:underline transition-colors">
                     Log in
                   </Link>
                 </motion.div>
