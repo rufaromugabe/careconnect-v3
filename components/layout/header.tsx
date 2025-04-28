@@ -1,6 +1,5 @@
 import { ReactNode, useState } from "react"
-import { Bell, Search, Moon, Sun, User, ChevronDown, X, Crown } from "lucide-react"
-import { useTheme } from "next-themes"
+import { Bell, Search, User, ChevronDown, X, Crown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,6 +16,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import { useAuth } from "@/contexts/auth-context"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 interface HeaderProps {
   title: string
@@ -24,7 +24,6 @@ interface HeaderProps {
 }
 
 export function Header({ title, actions }: HeaderProps) {
-  const { theme, setTheme } = useTheme()
   const [showSearch, setShowSearch] = useState(false)
   const [notifications, setNotifications] = useState([
     { id: 1, content: "New appointment request", read: false, time: "5m ago" },
@@ -103,16 +102,7 @@ export function Header({ title, actions }: HeaderProps) {
           )}
           
           {/* Theme Toggle Widget */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Toggle theme</span>
-          </Button>
+          <ThemeToggle />
           
           {/* Notification Widget */}
           <DropdownMenu>

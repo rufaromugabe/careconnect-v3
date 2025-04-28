@@ -20,6 +20,7 @@ import {
 import { AnimatedBeam, AnimatedGradientText, HealthcareConnectionBeams } from "@/components/ui/animated-beam";
 import { motion, useScroll, useMotionValueEvent, useTransform, useMotionValue } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle, SimpleThemeToggle } from "@/components/ui/theme-toggle";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -134,7 +135,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-black via-slate-950 to-slate-900 text-white">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-black via-slate-950 to-slate-900 text-white dark:bg-gradient-to-b dark:from-black dark:via-slate-950 dark:to-slate-900 dark:text-white light:bg-gradient-to-b light:from-white light:via-blue-50 light:to-blue-100 light:text-slate-900">
       {/* Animated background beam */}
       <AnimatedBeam />
 
@@ -142,7 +143,7 @@ export default function Home() {
       <motion.header 
         className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-lg transition-all duration-300 ${
           scrolled 
-            ? "bg-black/70 shadow-md shadow-blue-900/20 border-b border-blue-900/30" 
+            ? "bg-black/70 shadow-md shadow-blue-900/20 border-b border-blue-900/30 dark:bg-black/70 dark:shadow-blue-900/20 dark:border-blue-900/30 light:bg-white/70 light:shadow-blue-300/20 light:border-blue-300/30" 
             : "bg-transparent"
         }`}
         initial={{ y: -100 }}
@@ -169,45 +170,52 @@ export default function Home() {
             </motion.div>
             
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
+            <nav className="hidden md:flex items-center space-x-6">
               <Link href="#features" className="text-sm relative group">
-                <span className="text-gray-300 hover:text-blue-400 transition-colors">Features</span>
+                <span className="text-gray-300 hover:text-blue-400 transition-colors dark:text-gray-300 light:text-gray-700">Features</span>
                 <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-blue-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
               </Link>
               <Link href="#testimonials" className="text-sm relative group">
-                <span className="text-gray-300 hover:text-blue-400 transition-colors">Testimonials</span>
+                <span className="text-gray-300 hover:text-blue-400 transition-colors dark:text-gray-300 light:text-gray-700">Testimonials</span>
                 <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-blue-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
               </Link>
               <Link href="#about" className="text-sm relative group">
-                <span className="text-gray-300 hover:text-blue-400 transition-colors">About</span>
+                <span className="text-gray-300 hover:text-blue-400 transition-colors dark:text-gray-300 light:text-gray-700">About</span>
                 <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-blue-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
               </Link>
               <Link href="#contact" className="text-sm relative group">
-                <span className="text-gray-300 hover:text-blue-400 transition-colors">Contact</span>
+                <span className="text-gray-300 hover:text-blue-400 transition-colors dark:text-gray-300 light:text-gray-700">Contact</span>
                 <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-blue-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
               </Link>
               <Link href="/login" className="text-sm relative group">
-                <span className="text-gray-300 hover:text-blue-400 transition-colors">Login</span>
+                <span className="text-gray-300 hover:text-blue-400 transition-colors dark:text-gray-300 light:text-gray-700">Login</span>
                 <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-blue-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
               </Link>
+              
+              {/* Theme Toggle */}
+              <SimpleThemeToggle />
+              
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => router.push("/register")}
-                className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 font-medium border border-blue-500/30"
+                className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 font-medium border border-blue-500/30 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30 light:bg-blue-500/20 light:text-blue-600 light:border-blue-500/30"
               >
                 Sign Up
               </Button>
             </nav>
             
-            {/* Mobile Menu Button */}
-            <motion.button 
-              className="md:hidden p-2 rounded-full hover:bg-slate-800/70 transition-colors"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              whileTap={{ scale: 0.95 }}
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </motion.button>
+            {/* Mobile Menu Button and Theme Toggle */}
+            <div className="flex items-center gap-2 md:hidden">
+              <SimpleThemeToggle />
+              <motion.button 
+                className="p-2 rounded-full hover:bg-slate-800/70 transition-colors dark:hover:bg-slate-800/70 light:hover:bg-slate-200/70"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                whileTap={{ scale: 0.95 }}
+              >
+                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </motion.button>
+            </div>
           </div>
           
           {/* Mobile Navigation */}
@@ -219,15 +227,15 @@ export default function Home() {
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <Link href="#features" className="text-gray-300 hover:text-blue-400 transition-colors px-2 py-1">Features</Link>
-              <Link href="#testimonials" className="text-gray-300 hover:text-blue-400 transition-colors px-2 py-1">Testimonials</Link>
-              <Link href="#about" className="text-gray-300 hover:text-blue-400 transition-colors px-2 py-1">About</Link>
-              <Link href="#contact" className="text-gray-300 hover:text-blue-400 transition-colors px-2 py-1">Contact</Link>
-              <Link href="/login" className="text-gray-300 hover:text-blue-400 transition-colors px-2 py-1">Login</Link>
+              <Link href="#features" className="text-gray-300 hover:text-blue-400 transition-colors px-2 py-1 dark:text-gray-300 light:text-gray-700">Features</Link>
+              <Link href="#testimonials" className="text-gray-300 hover:text-blue-400 transition-colors px-2 py-1 dark:text-gray-300 light:text-gray-700">Testimonials</Link>
+              <Link href="#about" className="text-gray-300 hover:text-blue-400 transition-colors px-2 py-1 dark:text-gray-300 light:text-gray-700">About</Link>
+              <Link href="#contact" className="text-gray-300 hover:text-blue-400 transition-colors px-2 py-1 dark:text-gray-300 light:text-gray-700">Contact</Link>
+              <Link href="/login" className="text-gray-300 hover:text-blue-400 transition-colors px-2 py-1 dark:text-gray-300 light:text-gray-700">Login</Link>
               <Button 
                 variant="ghost"
                 onClick={() => router.push("/register")}
-                className="w-full bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 font-medium border border-blue-500/30"
+                className="w-full bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 font-medium border border-blue-500/30 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30 light:bg-blue-500/20 light:text-blue-600 light:border-blue-500/30"
               >
                 Sign Up
               </Button>
@@ -263,7 +271,7 @@ export default function Home() {
               <h2 className="text-3xl md:text-4xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400">
                 Healthcare Management Reimagined
               </h2>
-              <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+              <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto dark:text-gray-400 light:text-gray-600">
                 A comprehensive platform connecting healthcare professionals and patients
                 for seamless, efficient, and personalized healthcare delivery.
               </p>
@@ -279,7 +287,7 @@ export default function Home() {
                   size="lg" 
                   variant="outline"
                   onClick={() => router.push("/login")}
-                  className="border-blue-500/50 text-blue-400 hover:bg-blue-900/20"
+                  className="border-blue-500/50 text-blue-400 hover:bg-blue-900/20 dark:border-blue-500/50 dark:text-blue-400 dark:hover:bg-blue-900/20 light:border-blue-500/50 light:text-blue-600 light:hover:bg-blue-200/20"
                 >
                   Login
                 </Button>

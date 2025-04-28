@@ -6,6 +6,7 @@ import { AuthProvider } from "@/contexts/auth-context"
 import { cookies } from "next/headers"
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
 import { ToastContainer } from 'react-toastify';
+import { ThemeProvider } from "@/components/theme-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -57,9 +58,19 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en">
-      <body className={`${inter.className} min-h-screen bg-gradient-to-br from-slate-50 to-blue-100`}>
-        <AuthProvider initialRole={userRole}>{children}</AuthProvider>   <ToastContainer />
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider initialRole={userRole}>
+            {children}
+          </AuthProvider>
+          <ToastContainer />
+        </ThemeProvider>
       </body>
     </html>
   )
