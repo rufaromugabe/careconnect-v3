@@ -159,7 +159,7 @@ export default function DoctorDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               <Card className="p-6 bg-primary-foreground shadow-lg rounded-lg">
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">Patient Visits This Week</h3>
+                <h3 className="text-lg font-semibold mb-4  ">Patient Visits This Week</h3>
                 <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData}>
@@ -174,7 +174,7 @@ export default function DoctorDashboard() {
               </Card>
 
               <Card className="p-6 bg-primary-foreground shadow-lg rounded-lg">
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">My Patients</h3>
+                <h3 className="text-lg font-semibold mb-4  ">My Patients</h3>
                 <div className="space-y-4">
                   {patients.length > 0 ? (
                     patients.slice(0, 5).map((patient) => (
@@ -188,7 +188,7 @@ export default function DoctorDashboard() {
                             "P"}
                         </div>
                         <div>
-                          <h4 className="font-medium text-gray-800">
+                          <h4 className="font-medium  ">
                             {patient.users?.user_metadata?.full_name ||
                               patient.users?.user_metadata?.name ||
                               patient.users?.email ||
@@ -207,7 +207,7 @@ export default function DoctorDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               <Card className="p-6 bg-primary-foreground shadow-lg rounded-lg">
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">Recent Vital Signs</h3>
+                <h3 className="text-lg font-semibold mb-4  ">Recent Vital Signs</h3>
                 <div className="space-y-4">
                   {healthRecords.filter((record) => record.vital_signs && record.vital_signs.length > 0).length > 0 ? (
                     healthRecords
@@ -222,7 +222,7 @@ export default function DoctorDashboard() {
                             className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
                           >
                             <div>
-                              <h4 className="font-medium text-gray-800">
+                              <h4 className="font-medium  ">
                                 {patient?.users?.user_metadata?.full_name ||
                                   patient?.users?.user_metadata?.name ||
                                   patient?.users?.email ||

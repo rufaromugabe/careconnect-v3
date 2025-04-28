@@ -191,7 +191,7 @@ export default function SuperAdminUsersPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-50 to-blue-100">
+    <div className="flex h-screen bg-muted/50">
       <Sidebar role="super-admin" />
       <div className="flex-1 flex flex-col">
         <Header title="User Management" />
@@ -280,7 +280,7 @@ export default function SuperAdminUsersPage() {
                                         ? "bg-yellow-100 text-yellow-800"
                                         : user.role === "super-admin"
                                         ? "bg-red-100 text-red-800"
-                                        : "bg-gray-100 text-gray-800"
+                                        : "bg-gray-100  "
                                     }`}
                                   >
                                     {user.role}

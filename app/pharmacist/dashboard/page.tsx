@@ -234,7 +234,7 @@ export default function PharmacistDashboard() {
         <main className="flex-1 overflow-y-auto p-6">
           <div className="container mx-auto">
             <Card className="p-6 mb-8 bg-secondary shadow-lg rounded-lg">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">Pharmacy Information</h2>
+              <h2 className="text-xl font-semibold mb-4  ">Pharmacy Information</h2>
               <p className="text-gray-600">
                 <strong>Name:</strong> {pharmacy?.name || "Not assigned to a pharmacy"}
               </p>
@@ -262,7 +262,7 @@ export default function PharmacistDashboard() {
             </div>
 
             <Card className="p-6 mb-8 bg-secondary shadow-lg rounded-lg">
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">Scan Prescription</h3>
+              <h3 className="text-lg font-semibold mb-4  ">Scan Prescription</h3>
               <p className="mb-4 text-gray-600">Scan a patient's prescription QR code to view and update its status.</p>
               <Button onClick={() => setShowScanner(true)} className="bg-blue-500 hover:bg-blue-600 text-white">
                 <QrCode className="mr-2 h-4 w-4" />
@@ -271,7 +271,7 @@ export default function PharmacistDashboard() {
             </Card>
 
             <Card className="p-6 bg-primary-foreground shadow-lg rounded-lg">
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">Inventory</h3>
+              <h3 className="text-lg font-semibold mb-4  ">Inventory</h3>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -304,7 +304,7 @@ export default function PharmacistDashboard() {
 
             {scannedPrescription && (
               <Card className="mt-8 p-6 bg-primary-foreground shadow-lg rounded-lg">
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">Scanned Prescription</h3>
+                <h3 className="text-lg font-semibold mb-4  ">Scanned Prescription</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="font-semibold text-gray-700">Patient:</p>

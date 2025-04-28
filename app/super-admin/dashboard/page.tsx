@@ -182,7 +182,7 @@ export default function SuperAdminDashboard() {
                     <h3 className="text-2xl font-bold">{stat.value}</h3>
                     <p className="text-sm opacity-90 mb-4">{stat.label}</p>
                     <Link href={stat.href} passHref>
-                      <Button className="w-full bg-white text-gray-800 hover:bg-gray-100">Manage</Button>
+                      <Button className="w-full bg-white   hover:bg-gray-100">Manage</Button>
                     </Link>
                   </Card>
                 )
@@ -191,7 +191,7 @@ export default function SuperAdminDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="p-6 bg-primary-foreground shadow-lg rounded-lg">
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">Recent User Registrations</h3>
+                <h3 className="text-lg font-semibold mb-4  ">Recent User Registrations</h3>
                 <ul className="space-y-4">
                   {recentUsers.length > 0 ? (
                     recentUsers
@@ -200,7 +200,7 @@ export default function SuperAdminDashboard() {
                       .map((user) => (
                         <li key={user.id} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
                           <div>
-                            <p className="font-medium text-gray-800">
+                            <p className="font-medium  ">
                               {user.user_metadata?.full_name || user.user_metadata?.name || user.email}
                             </p>
                             <p className="text-sm text-gray-600">{user.user_metadata?.role || "Unknown role"}</p>
@@ -220,13 +220,13 @@ export default function SuperAdminDashboard() {
               </Card>
 
               <Card className="p-6 bg-primary-foreground shadow-lg rounded-lg">
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">Recent Pharmacy Registrations</h3>
+                <h3 className="text-lg font-semibold mb-4  ">Recent Pharmacy Registrations</h3>
                 <ul className="space-y-4">
                   {pharmacies.length > 0 ? (
                     pharmacies.slice(0, 5).map((pharmacy) => (
                       <li key={pharmacy.id} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
                         <div>
-                          <p className="font-medium text-gray-800">{pharmacy.name}</p>
+                          <p className="font-medium  ">{pharmacy.name}</p>
                           <p className="text-sm text-gray-600">{pharmacy.location}</p>
                         </div>
                         <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">

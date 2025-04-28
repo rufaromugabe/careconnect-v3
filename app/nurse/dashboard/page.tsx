@@ -157,7 +157,7 @@ export default function NurseDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               <Card className="p-6 bg-primary-foreground shadow-lg rounded-lg">
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">Vital Signs Recorded This Week</h3>
+                <h3 className="text-lg font-semibold mb-4  ">Vital Signs Recorded This Week</h3>
                 <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData}>
@@ -172,7 +172,7 @@ export default function NurseDashboard() {
               </Card>
 
               <Card className="p-6 bg-primary-foreground shadow-lg rounded-lg">
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">My Patients</h3>
+                <h3 className="text-lg font-semibold mb-4  ">My Patients</h3>
                 <div className="space-y-4">
                   {patients.length > 0 ? (
                     patients.slice(0, 5).map((patient) => (
@@ -186,7 +186,7 @@ export default function NurseDashboard() {
                             "P"}
                         </div>
                         <div>
-                          <h4 className="font-medium text-gray-800">
+                          <h4 className="font-medium  ">
                             {patient.user?.user_metadata?.full_name ||
                               patient.user?.user_metadata?.name ||
                               patient.user?.email ||

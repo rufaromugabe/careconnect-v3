@@ -174,7 +174,7 @@ export default function PatientDashboard() {
           <div className="container mx-auto">
             <Card className="p-6 mb-8 bg-secondary shadow-lg rounded-lg">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-gray-800">My Doctor</h2>
+                <h2 className="text-xl font-semibold  ">My Doctor</h2>
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button className="bg-blue-500 hover:bg-blue-600">
@@ -236,7 +236,7 @@ export default function PatientDashboard() {
                     <h3 className="text-2xl font-bold">{stat.value}</h3>
                     <p className="text-sm opacity-90 mb-4">{stat.label}</p>
                     <Link href={stat.href} passHref>
-                      <Button className="w-full bg-white text-gray-800 hover:bg-gray-100">View Details</Button>
+                      <Button className="w-full bg-white   hover:bg-gray-100">View Details</Button>
                     </Link>
                   </Card>
                 )
@@ -245,13 +245,13 @@ export default function PatientDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="p-6 bg-primary-foreground shadow-lg rounded-lg">
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">Recent Prescriptions</h3>
+                <h3 className="text-lg font-semibold mb-4  ">Recent Prescriptions</h3>
                 <ul className="space-y-4">
                   {prescriptions.length > 0 ? (
                     prescriptions.slice(0, 5).map((prescription) => (
                       <li key={prescription.id} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
                         <div>
-                          <p className="font-medium text-gray-800">
+                          <p className="font-medium  ">
                             {prescription.medications[0]?.name || "Unknown Medication"}
                           </p>
                           <p className="text-sm text-gray-600">
@@ -283,13 +283,13 @@ export default function PatientDashboard() {
               </Card>
 
               <Card className="p-6 bg-primary-foreground shadow-lg rounded-lg">
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">Recent Health Records</h3>
+                <h3 className="text-lg font-semibold mb-4  ">Recent Health Records</h3>
                 <ul className="space-y-4">
                   {healthRecords.length > 0 ? (
                     healthRecords.slice(0, 5).map((record) => (
                       <li key={record.id} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
                         <div>
-                          <p className="font-medium text-gray-800">{record.diagnosis_name}</p>
+                          <p className="font-medium  ">{record.diagnosis_name}</p>
                           <p className="text-sm text-gray-600">{new Date(record.visit_date).toLocaleDateString()}</p>
                         </div>
                         <Badge
@@ -317,7 +317,7 @@ export default function PatientDashboard() {
               </Card>
 
               <Card className="p-6 bg-primary-foreground shadow-lg rounded-lg">
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">Recent Vital Signs</h3>
+                <h3 className="text-lg font-semibold mb-4  ">Recent Vital Signs</h3>
                 <div className="space-y-4">
                   {healthRecords.filter((record) => record.vital_signs && record.vital_signs.length > 0).length > 0 ? (
                     healthRecords
@@ -331,7 +331,7 @@ export default function PatientDashboard() {
                             className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
                           >
                             <div>
-                              <h4 className="font-medium text-gray-800">{record.diagnosis_name}</h4>
+                              <h4 className="font-medium  ">{record.diagnosis_name}</h4>
                               <div className="flex items-center gap-2 text-sm text-gray-600">
                                 <Thermometer className="h-4 w-4" />
                                 <span>{latestVitalSign.temperature}°C</span>
