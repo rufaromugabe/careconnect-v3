@@ -19,10 +19,57 @@ import {
   X,
 } from "lucide-react";
 import { AnimatedBeam, AnimatedGradientText, HealthcareConnectionBeams } from "@/components/ui/animated-beam";
-import { motion, useScroll, useMotionValueEvent } from "framer-motion";
+import { motion, useScroll, useMotionValueEvent, useTransform, useMotionValue } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
+
+// New MouseParallax component for device showcase
+const MouseParallax = ({ children, strength = 0.1 }: { children: React.ReactNode; strength?: number }) => {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+
+  useEffect(() => {
+    const handleMouseMove = (e: { clientX: any; clientY: any; }) => {
+      if (!isHovering) return;
+      const { clientX, clientY } = e;
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+      const posX = (clientX - centerX) * strength;
+      const posY = (clientY - centerY) * strength;
+      setPosition({ x: posX, y: posY });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [strength, isHovering]);
+
+  return (
+    <div 
+      className="relative"
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => {
+        setIsHovering(false);
+        setPosition({ x: 0, y: 0 });
+      }}
+    >
+      <motion.div
+        animate={{ 
+          x: position.x, 
+          y: position.y,
+          transition: { 
+            type: "spring", 
+            stiffness: 100, 
+            damping: 30,
+            mass: 0.8
+          }
+        }}
+      >
+        {children}
+      </motion.div>
+    </div>
+  );
+};
 
 export default function Home() {
   const router = useRouter();
@@ -274,6 +321,133 @@ export default function Home() {
               transition={{ duration: 0.8, delay: 0.4 }}
             >
               <HealthcareConnectionBeams className="max-w-4xl mx-auto" />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Device Showcase Section */}
+      <section className="relative z-10 py-16 md:py-28 overflow-hidden">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Experience CareConnect</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Seamlessly manage healthcare on any device, anywhere.
+            </p>
+          </motion.div>
+
+          <div className="flex flex-col lg:flex-row gap-12 items-center justify-center">
+            {/* iPhone Mockup */}
+            <motion.div 
+              className="relative z-10"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              whileHover={{ scale: 1.05 }}
+            >
+              <div className="relative">
+                <MouseParallax strength={0.03}>
+                  <div className="relative h-[600px] w-[300px] mx-auto">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/30 to-purple-500/30 rounded-[40px] blur-3xl opacity-30" />
+                    <Image
+                      src="/iphone.png"
+                      alt="CareConnect on Mobile"
+                      width={300}
+                      height={600}
+                      className="object-contain relative z-10"
+                      priority
+                    />
+                    <motion.div
+                      className="absolute -top-10 -left-10 h-24 w-24 bg-blue-500/40 rounded-full blur-xl"
+                      animate={{
+                        y: [0, 10, 0],
+                        opacity: [0.5, 0.8, 0.5],
+                      }}
+                      transition={{
+                        duration: 4,
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                      }}
+                    />
+                    <motion.div
+                      className="absolute -bottom-8 -right-4 h-20 w-20 bg-purple-500/30 rounded-full blur-xl"
+                      animate={{
+                        y: [0, -15, 0],
+                        opacity: [0.3, 0.7, 0.3],
+                      }}
+                      transition={{
+                        duration: 5,
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                        delay: 1,
+                      }}
+                    />
+                  </div>
+                </MouseParallax>
+                <div className="mt-6 text-center">
+                  <h3 className="text-xl font-semibold mb-2">Mobile Experience</h3>
+                  <p className="text-muted-foreground">Access your healthcare on the go</p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Laptop Mockup */}
+            <motion.div 
+              className="relative z-10"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              whileHover={{ scale: 1.03 }}
+            >
+              <div className="relative">
+                <MouseParallax strength={0.02}>
+                  <div className="relative h-[400px] w-[650px] mx-auto">
+                    <div className="absolute inset-0 bg-gradient-to-bl from-primary/20 to-blue-500/20 rounded-[20px] blur-3xl opacity-30" />
+                    <Image
+                      src="/laptop.png"
+                      alt="CareConnect on Desktop"
+                      width={650}
+                      height={400}
+                      className="object-contain relative z-10"
+                      priority
+                    />
+                    <motion.div
+                      className="absolute -top-10 -right-10 h-32 w-32 bg-primary/20 rounded-full blur-xl"
+                      animate={{
+                        x: [0, 15, 0],
+                        opacity: [0.4, 0.6, 0.4],
+                      }}
+                      transition={{
+                        duration: 6,
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                      }}
+                    />
+                    <motion.div
+                      className="absolute -bottom-4 -left-10 h-28 w-28 bg-blue-500/20 rounded-full blur-xl"
+                      animate={{
+                        x: [0, -10, 0],
+                        opacity: [0.3, 0.5, 0.3],
+                      }}
+                      transition={{
+                        duration: 5,
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                        delay: 0.5,
+                      }}
+                    />
+                  </div>
+                </MouseParallax>
+                <div className="mt-6 text-center">
+                  <h3 className="text-xl font-semibold mb-2">Desktop Experience</h3>
+                  <p className="text-muted-foreground">Powerful tools for healthcare professionals</p>
+                </div>
+              </div>
             </motion.div>
           </div>
         </div>
