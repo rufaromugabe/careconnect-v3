@@ -84,21 +84,7 @@ export default function Home() {
     setScrolled(latest > 20);
   });
 
-  useEffect(() => {
-    const checkSession = async () => {
-      setIsLoading(true);
-      if (session && user) {
-        const role = await getUserRole();
-        if (role) {
-          setIsLoggedIn(true);
-          router.push(`/${role}/dashboard`);
-        }
-      }
-      setIsLoading(false);
-    };
-
-    checkSession();
-  }, [session, user, getUserRole, router]);
+ 
 
   const features = [
     {
