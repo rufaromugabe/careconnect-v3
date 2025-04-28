@@ -100,9 +100,12 @@ export default function NurseDashboard() {
     return (
       <div className="flex h-screen">
         <Sidebar role="nurse" />
+        <div className="flex-1 flex flex-col">
+                <Header title={`Loading `} />
         <div className="flex-1 flex flex-col items-center justify-center">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
           <p className="mt-4 text-lg">Loading dashboard data...</p>
+        </div>
         </div>
       </div>
     )

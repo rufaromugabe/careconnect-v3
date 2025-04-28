@@ -86,7 +86,6 @@ export default function Home() {
       title: "Analytics Dashboard",
       description: "Data-driven insights for healthcare providers to monitor patient outcomes."
     },
-   
   ];
 
   const testimonials = [
@@ -138,7 +137,15 @@ export default function Home() {
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
-              <Heart className="h-6 w-6 text-primary mr-2" />
+              <div className="mr-2 relative w-8 h-8">
+                <Image 
+                  src="/logo.png" 
+                  alt="CareConnect Logo" 
+                  width={32} 
+                  height={32}
+                  className="object-contain"
+                />
+              </div>
               <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">CareConnect</span>
             </motion.div>
             
@@ -222,7 +229,14 @@ export default function Home() {
               transition={{ duration: 0.8, delay: 0.2 }}
             >
               <div className="mb-6 flex items-center justify-center">
-                <Heart className="h-12 w-12 text-primary mr-4" />
+                <div className="relative w-16 h-16 mr-4">
+                  <Image 
+                    src="/logo.png" 
+                    alt="CareConnect Logo" 
+                    fill
+                    className="object-contain" 
+                  />
+                </div>
                 <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
                   <AnimatedGradientText>CareConnect</AnimatedGradientText>
                 </h1>
@@ -360,7 +374,14 @@ export default function Home() {
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-6 md:mb-0">
-              <Heart className="h-6 w-6 text-primary mr-2" />
+              <div className="relative w-8 h-8 mr-2">
+                <Image 
+                  src="/logo.png" 
+                  alt="CareConnect Logo" 
+                  fill
+                  className="object-contain" 
+                />
+              </div>
               <span className="text-xl font-bold">CareConnect</span>
             </div>
             <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">

@@ -207,16 +207,13 @@ const ChartTooltipContent = React.forwardRef<
                     ) : (
                       !hideIndicator && (
                         <div
-                          className={cn(
-                            "shrink-0 rounded-[2px] border-[--color-border] bg-[--color-bg]",
-                            {
-                              "h-2.5 w-2.5": indicator === "dot",
-                              "w-1": indicator === "line",
-                              "w-0 border-[1.5px] border-dashed bg-transparent":
-                                indicator === "dashed",
-                              "my-0.5": nestLabel && indicator === "dashed",
-                            }
-                          )}
+                        className={cn(
+                          "shrink-0 rounded-[2px] border-[--color-border] bg-[--color-bg]",
+                          indicator === "dot" && "h-2.5 w-2.5",
+                          indicator === "line" && "w-1",
+                          (indicator === "dashed" && !nestLabel) && "w-0 border-[1.5px] border-dashed bg-transparent",
+                          nestLabel && indicator === "dashed" && "my-0.5"
+                        )}
                           style={
                             {
                               "--color-bg": indicatorColor,
@@ -353,6 +350,265 @@ function getPayloadConfigFromPayload(
   return configLabelKey in config
     ? config[configLabelKey]
     : config[key as keyof typeof config]
+}
+
+// Line Chart Component
+interface ChartProps {
+  data: any[]
+  index: string
+  categories: string[]
+  colors?: string[]
+  valueFormatter?: (value: number) => string
+  yAxisWidth?: number
+  showXAxis?: boolean
+  showYAxis?: boolean
+  showGridLines?: boolean
+  showTooltip?: boolean
+  showLegend?: boolean
+  showAnimation?: boolean
+  animationDuration?: number
+}
+
+export function LineChart({
+  data,
+  index,
+  categories,
+  colors = ["blue", "green", "red", "orange", "purple"],
+  valueFormatter = (value) => `${value}`,
+  yAxisWidth = 40,
+  showXAxis = true,
+  showYAxis = true,
+  showGridLines = true,
+  showTooltip = true,
+  showLegend = true,
+  showAnimation = false,
+  animationDuration = 900,
+}: ChartProps) {
+  // Prepare config for the chart
+  const config = React.useMemo(() => {
+    return categories.reduce<ChartConfig>((acc, category, i) => {
+      acc[category] = {
+        label: category,
+        color: getColorForCategory(category, i, colors),
+      }
+      return acc
+    }, {})
+  }, [categories, colors])
+
+  return (
+    <ChartContainer config={config} className="w-full h-full">
+      <RechartsPrimitive.ComposedChart data={data}>
+        {showGridLines && (
+          <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" stroke="#ddd" vertical={false} />
+        )}
+        {showXAxis && (
+          <RechartsPrimitive.XAxis
+            dataKey={index}
+            stroke="#888"
+            tickLine={false}
+            axisLine={false}
+          />
+        )}
+        {showYAxis && (
+          <RechartsPrimitive.YAxis
+            width={yAxisWidth}
+            stroke="#888"
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(value) => valueFormatter(value)}
+          />
+        )}
+        {showTooltip && (
+          <ChartTooltip
+            content={<ChartTooltipContent formatter={(value) => [valueFormatter(Number(value)), ""]} />}
+          />
+        )}
+        {showLegend && <ChartLegend content={<ChartLegendContent />} />}
+        {categories.map((category, i) => (
+          <RechartsPrimitive.Line
+            key={category}
+            type="monotone"
+            dataKey={category}
+            stroke={getColorForCategory(category, i, colors)}
+            strokeWidth={2}
+            dot={true}
+            isAnimationActive={showAnimation}
+            animationDuration={animationDuration}
+          />
+        ))}
+      </RechartsPrimitive.ComposedChart>
+    </ChartContainer>
+  )
+}
+
+// Area Chart Component
+export function AreaChart({
+  data,
+  index,
+  categories,
+  colors = ["blue", "green", "red", "orange", "purple"],
+  valueFormatter = (value) => `${value}`,
+  yAxisWidth = 40,
+  showXAxis = true,
+  showYAxis = true,
+  showGridLines = true,
+  showTooltip = true,
+  showLegend = true,
+  showAnimation = false,
+  animationDuration = 900,
+}: ChartProps) {
+  // Prepare config for the chart
+  const config = React.useMemo(() => {
+    return categories.reduce<ChartConfig>((acc, category, i) => {
+      acc[category] = {
+        label: category,
+        color: getColorForCategory(category, i, colors),
+      }
+      return acc
+    }, {})
+  }, [categories, colors])
+
+  return (
+    <ChartContainer config={config} className="w-full h-full">
+      <RechartsPrimitive.ComposedChart data={data}>
+        {showGridLines && (
+          <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" stroke="#ddd" vertical={false} />
+        )}
+        {showXAxis && (
+          <RechartsPrimitive.XAxis
+            dataKey={index}
+            stroke="#888"
+            tickLine={false}
+            axisLine={false}
+          />
+        )}
+        {showYAxis && (
+          <RechartsPrimitive.YAxis
+            width={yAxisWidth}
+            stroke="#888"
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(value) => valueFormatter(value)}
+          />
+        )}
+        {showTooltip && (
+          <ChartTooltip
+            content={<ChartTooltipContent formatter={(value) => [valueFormatter(Number(value)), ""]} />}
+          />
+        )}
+        {showLegend && <ChartLegend content={<ChartLegendContent />} />}
+        {categories.map((category, i) => (
+          <RechartsPrimitive.Area
+            key={category}
+            type="monotone"
+            dataKey={category}
+            stroke={getColorForCategory(category, i, colors)}
+            fill={getColorForCategory(category, i, colors, 0.2)}
+            strokeWidth={2}
+            isAnimationActive={showAnimation}
+            animationDuration={animationDuration}
+          />
+        ))}
+      </RechartsPrimitive.ComposedChart>
+    </ChartContainer>
+  )
+}
+
+// Bar Chart Component
+export function BarChart({
+  data,
+  index,
+  categories,
+  colors = ["blue", "green", "red", "orange", "purple"],
+  valueFormatter = (value) => `${value}`,
+  yAxisWidth = 40,
+  showXAxis = true,
+  showYAxis = true,
+  showGridLines = true,
+  showTooltip = true,
+  showLegend = true,
+  showAnimation = false,
+  animationDuration = 900,
+}: ChartProps) {
+  // Prepare config for the chart
+  const config = React.useMemo(() => {
+    return categories.reduce<ChartConfig>((acc, category, i) => {
+      acc[category] = {
+        label: category,
+        color: getColorForCategory(category, i, colors),
+      }
+      return acc
+    }, {})
+  }, [categories, colors])
+
+  return (
+    <ChartContainer config={config} className="w-full h-full">
+      <RechartsPrimitive.ComposedChart data={data}>
+        {showGridLines && (
+          <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" stroke="#ddd" vertical={false} />
+        )}
+        {showXAxis && (
+          <RechartsPrimitive.XAxis
+            dataKey={index}
+            stroke="#888"
+            tickLine={false}
+            axisLine={false}
+          />
+        )}
+        {showYAxis && (
+          <RechartsPrimitive.YAxis
+            width={yAxisWidth}
+            stroke="#888"
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(value) => valueFormatter(value)}
+          />
+        )}
+        {showTooltip && (
+          <ChartTooltip
+            content={<ChartTooltipContent formatter={(value) => [valueFormatter(Number(value)), ""]} />}
+          />
+        )}
+        {showLegend && <ChartLegend content={<ChartLegendContent />} />}
+        {categories.map((category, i) => (
+          <RechartsPrimitive.Bar
+            key={category}
+            dataKey={category}
+            fill={getColorForCategory(category, i, colors)}
+            radius={[4, 4, 0, 0]}
+            isAnimationActive={showAnimation}
+            animationDuration={animationDuration}
+          />
+        ))}
+      </RechartsPrimitive.ComposedChart>
+    </ChartContainer>
+  )
+}
+
+// Helper function to get a color for a category
+function getColorForCategory(
+  category: string,
+  index: number,
+  colors: string[],
+  opacity: number = 1
+): string {
+  const colorMap: Record<string, string> = {
+    blue: `rgba(59, 130, 246, ${opacity})`,
+    green: `rgba(16, 185, 129, ${opacity})`,
+    red: `rgba(239, 68, 68, ${opacity})`,
+    orange: `rgba(249, 115, 22, ${opacity})`,
+    purple: `rgba(147, 51, 234, ${opacity})`,
+    indigo: `rgba(79, 70, 229, ${opacity})`,
+    pink: `rgba(236, 72, 153, ${opacity})`,
+    yellow: `rgba(234, 179, 8, ${opacity})`,
+  }
+
+  if (colors[index]) {
+    return colorMap[colors[index]] || colors[index]
+  }
+
+  // Default fallback color
+  return `rgba(107, 114, 128, ${opacity})`
 }
 
 export {
