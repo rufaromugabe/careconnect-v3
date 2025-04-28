@@ -89,7 +89,7 @@ body {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-muted/50 text-foreground;
   }
 
   /* Custom styling for the dark theme with landing page gradients */

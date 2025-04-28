@@ -166,7 +166,7 @@ export default function PatientDashboard() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-muted/50">
       <Sidebar role="patient" />
       <div className="flex-1 flex flex-col">
         <Header title="Patient Dashboard" />

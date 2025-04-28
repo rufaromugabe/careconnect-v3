@@ -162,7 +162,7 @@ export default function SuperAdminDashboard() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-muted/50">
       <Sidebar role="super-admin" />
       <div className="flex-1 flex flex-col">
         <Header title="Super Admin Dashboard" />

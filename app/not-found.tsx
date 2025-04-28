@@ -19,7 +19,7 @@ export default function NotFound() {
 
       {/* Header Navigation */}
       <motion.header
-        className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-background/70 shadow-sm border-b border-border/20 transition-all"
+        className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-muted/50/70 shadow-sm border-b border-border/20 transition-all"
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.3 }}

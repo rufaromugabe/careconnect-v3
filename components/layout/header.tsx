@@ -45,7 +45,7 @@ export function Header({ title, actions }: HeaderProps) {
   }
 
   return (
-    <header className="bg-background border-b sticky top-0 z-10 backdrop-blur-sm bg-opacity-90">
+    <header className="bg-muted/50 border-b sticky top-0 z-10 backdrop-blur-sm bg-opacity-90">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-4">
           <div className="relative w-7 h-7 hidden sm:block">

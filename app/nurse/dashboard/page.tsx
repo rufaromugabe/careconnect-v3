@@ -128,7 +128,7 @@ export default function NurseDashboard() {
   const nurseName = nurseProfile?.users?.user_metadata?.full_name || nurseProfile?.users?.user_metadata?.name || "Nurse"
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-muted/50">
       <Sidebar role="nurse" />
       <div className="flex-1 flex flex-col">
         <Header title={`${nurseName}'s Dashboard`} />
