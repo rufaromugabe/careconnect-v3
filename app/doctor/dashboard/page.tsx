@@ -130,7 +130,7 @@ export default function DoctorDashboard() {
     doctorProfile?.users?.user_metadata?.full_name || doctorProfile?.users?.user_metadata?.name || "Doctor"
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-50 to-blue-100">
+    <div className="flex h-screen bg-background">
       <Sidebar role="doctor" />
       <div className="flex-1 flex flex-col">
         <Header title={`Dr. ${doctorName}'s Dashboard`} />
