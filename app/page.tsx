@@ -387,7 +387,7 @@ export default function Home() {
             >
               <div className="relative">
                 <MouseParallax strength={0.02}>
-                  <div className="relative h-[400px] w-[650px] mx-auto">
+                  <div className="relative max-h-[400px] max-w-[650px] mx-auto">
                     <div className="absolute inset-0 bg-gradient-to-bl from-cyan-600/40 to-blue-600/40 rounded-[20px] blur-3xl opacity-40" />
                     <Image
                       src="/laptop.png"
