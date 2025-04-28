@@ -244,12 +244,12 @@ export default function PatientDashboard() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="p-6 bg-white shadow-lg rounded-lg">
+              <Card className="p-6 bg-primary-foreground shadow-lg rounded-lg">
                 <h3 className="text-lg font-semibold mb-4 text-gray-800">Recent Prescriptions</h3>
                 <ul className="space-y-4">
                   {prescriptions.length > 0 ? (
                     prescriptions.slice(0, 5).map((prescription) => (
-                      <li key={prescription.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <li key={prescription.id} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
                         <div>
                           <p className="font-medium text-gray-800">
                             {prescription.medications[0]?.name || "Unknown Medication"}
@@ -282,12 +282,12 @@ export default function PatientDashboard() {
                 </Link>
               </Card>
 
-              <Card className="p-6 bg-white shadow-lg rounded-lg">
+              <Card className="p-6 bg-primary-foreground shadow-lg rounded-lg">
                 <h3 className="text-lg font-semibold mb-4 text-gray-800">Recent Health Records</h3>
                 <ul className="space-y-4">
                   {healthRecords.length > 0 ? (
                     healthRecords.slice(0, 5).map((record) => (
-                      <li key={record.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <li key={record.id} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
                         <div>
                           <p className="font-medium text-gray-800">{record.diagnosis_name}</p>
                           <p className="text-sm text-gray-600">{new Date(record.visit_date).toLocaleDateString()}</p>
@@ -316,7 +316,7 @@ export default function PatientDashboard() {
                 </Link>
               </Card>
 
-              <Card className="p-6 bg-white shadow-lg rounded-lg">
+              <Card className="p-6 bg-primary-foreground shadow-lg rounded-lg">
                 <h3 className="text-lg font-semibold mb-4 text-gray-800">Recent Vital Signs</h3>
                 <div className="space-y-4">
                   {healthRecords.filter((record) => record.vital_signs && record.vital_signs.length > 0).length > 0 ? (

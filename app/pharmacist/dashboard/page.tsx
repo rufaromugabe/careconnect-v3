@@ -270,7 +270,7 @@ export default function PharmacistDashboard() {
               </Button>
             </Card>
 
-            <Card className="p-6 bg-white shadow-lg rounded-lg">
+            <Card className="p-6 bg-primary-foreground shadow-lg rounded-lg">
               <h3 className="text-lg font-semibold mb-4 text-gray-800">Inventory</h3>
               <Table>
                 <TableHeader>
@@ -303,7 +303,7 @@ export default function PharmacistDashboard() {
             </Card>
 
             {scannedPrescription && (
-              <Card className="mt-8 p-6 bg-white shadow-lg rounded-lg">
+              <Card className="mt-8 p-6 bg-primary-foreground shadow-lg rounded-lg">
                 <h3 className="text-lg font-semibold mb-4 text-gray-800">Scanned Prescription</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>

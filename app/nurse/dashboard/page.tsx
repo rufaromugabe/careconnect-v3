@@ -156,7 +156,7 @@ export default function NurseDashboard() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              <Card className="p-6 bg-white shadow-lg rounded-lg">
+              <Card className="p-6 bg-primary-foreground shadow-lg rounded-lg">
                 <h3 className="text-lg font-semibold mb-4 text-gray-800">Vital Signs Recorded This Week</h3>
                 <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
@@ -171,7 +171,7 @@ export default function NurseDashboard() {
                 </div>
               </Card>
 
-              <Card className="p-6 bg-white shadow-lg rounded-lg">
+              <Card className="p-6 bg-primary-foreground shadow-lg rounded-lg">
                 <h3 className="text-lg font-semibold mb-4 text-gray-800">My Patients</h3>
                 <div className="space-y-4">
                   {patients.length > 0 ? (

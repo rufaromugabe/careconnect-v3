@@ -190,7 +190,7 @@ export default function SuperAdminDashboard() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="p-6 bg-white shadow-lg rounded-lg">
+              <Card className="p-6 bg-primary-foreground shadow-lg rounded-lg">
                 <h3 className="text-lg font-semibold mb-4 text-gray-800">Recent User Registrations</h3>
                 <ul className="space-y-4">
                   {recentUsers.length > 0 ? (
@@ -198,7 +198,7 @@ export default function SuperAdminDashboard() {
                       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
                       .slice(0, 5)
                       .map((user) => (
-                        <li key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <li key={user.id} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
                           <div>
                             <p className="font-medium text-gray-800">
                               {user.user_metadata?.full_name || user.user_metadata?.name || user.email}
@@ -219,12 +219,12 @@ export default function SuperAdminDashboard() {
                 </Link>
               </Card>
 
-              <Card className="p-6 bg-white shadow-lg rounded-lg">
+              <Card className="p-6 bg-primary-foreground shadow-lg rounded-lg">
                 <h3 className="text-lg font-semibold mb-4 text-gray-800">Recent Pharmacy Registrations</h3>
                 <ul className="space-y-4">
                   {pharmacies.length > 0 ? (
                     pharmacies.slice(0, 5).map((pharmacy) => (
-                      <li key={pharmacy.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <li key={pharmacy.id} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
                         <div>
                           <p className="font-medium text-gray-800">{pharmacy.name}</p>
                           <p className="text-sm text-gray-600">{pharmacy.location}</p>

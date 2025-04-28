@@ -217,7 +217,7 @@ export default function SuperAdminNursesPage() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-gradient-to-br from-slate-50 to-blue-100">
       <Sidebar role="super-admin" />
       <div className="flex-1 flex flex-col">
         <Header title="Nurse Management" />
