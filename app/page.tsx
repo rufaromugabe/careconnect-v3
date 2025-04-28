@@ -2,7 +2,6 @@
 
 import type React from "react";
 import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
 import {
   Stethoscope,
@@ -73,9 +72,6 @@ const MouseParallax = ({ children, strength = 0.1 }: { children: React.ReactNode
 
 export default function Home() {
   const router = useRouter();
-  const { user, session, getUserRole } = useAuth();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { scrollY } = useScroll();
@@ -139,13 +135,7 @@ export default function Home() {
     }
   ];
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-background to-muted">
