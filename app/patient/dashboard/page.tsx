@@ -172,7 +172,7 @@ export default function PatientDashboard() {
         <Header title="Patient Dashboard" />
         <main className="flex-1 overflow-y-auto p-6">
           <div className="container mx-auto">
-            <Card className="p-6 mb-8 bg-white shadow-lg rounded-lg">
+            <Card className="p-6 mb-8 bg-secondary shadow-lg rounded-lg">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold text-gray-800">My Doctor</h2>
                 <Dialog>
