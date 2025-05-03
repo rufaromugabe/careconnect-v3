@@ -9,7 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function DashboardRedirect() {
   const router = useRouter()
-  const { getUserRole, isLoading, user, session } = useAuth()
+  const { getUserRole, isLoading, user, session, isActive, isVerified } = useAuth()
   const [error, setError] = useState<string | null>(null)
   const [isRedirecting, setIsRedirecting] = useState(true)
   const [attempts, setAttempts] = useState(0)
@@ -31,8 +31,27 @@ export default function DashboardRedirect() {
 
         // Get the role directly from user metadata or from auth context
         const role = user.user_metadata?.role || await getUserRole()
+        // Get the is active status from user metadata or from auth context
+        const isActive = user?.user_metadata?.is_active
+        const isVerified = user?.user_metadata?.is_verified
+        const isProfileCompleted = user?.user_metadata?.profile_completed
 
         if (role) {
+          if (!isActive) {
+            console.log("Dashboard redirect - User is not active, redirecting to activation page")
+            router.push(`/${role}/in-active`)
+            return
+          }
+          if (!isProfileCompleted) {
+            console.log("Dashboard redirect - User profile is not completed, redirecting to profile completion page")
+            router.push(`/${role}/complete-profile`)
+            return
+          }
+          if (!isVerified) {
+            console.log("Dashboard redirect - User is not verified, redirecting to verification page")
+            router.push(`/${role}/verify`)
+            return
+          }
           console.log("Dashboard redirect - Role found:", role)
           router.push(`/${role}/dashboard`)
         } else {
@@ -50,6 +69,16 @@ export default function DashboardRedirect() {
 
         // If we've tried multiple times and still failing, check if we can use user metadata
         if (attempts > 2 && user?.user_metadata?.role) {
+          if (!isActive) {
+            console.log("Dashboard redirect - User is not active, redirecting to activation page")
+            router.push(`/${user.user_metadata.role}/in-active`)
+            return
+          }
+          if (!isVerified) {
+            console.log("Dashboard redirect - User is not verified, redirecting to verification page")
+            router.push(`/${user.user_metadata.role}/verify`)
+            return
+          }
           console.log("Dashboard redirect - Using role from metadata after failures:", user.user_metadata.role)
           router.push(`/${user.user_metadata.role}/dashboard`)
         }

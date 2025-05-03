@@ -49,7 +49,7 @@ export default function Login() {
       }
 
       // Successfully logged in
-      toast.success("Login successful! Redirecting to dashboard...");
+      toast.success("Login successful!");
 
       // Delay redirect slightly to allow for a smoother transition
       setTimeout(() => {
