@@ -128,12 +128,13 @@ export default function SuperAdminPharmacistsPage() {
     if (!token) return
 
     try {
-      const response = await fetch(`/api/admin/pharmacists/${userId}/verify`, {
+      const response = await fetch(`/api/admin/usersVerification/${userId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify({ is_verified: true }),
       })
 
       if (!response.ok) {
@@ -279,7 +280,7 @@ export default function SuperAdminPharmacistsPage() {
               </CardContent>
             </Card>
             <Dialog open={isVerifyDialogOpen} onOpenChange={setIsVerifyDialogOpen}>
-              <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
                 <DialogHeader>
                   <DialogTitle>Pharmacist Details</DialogTitle>
                 </DialogHeader>
@@ -304,6 +305,24 @@ export default function SuperAdminPharmacistsPage() {
                           <p className="font-medium break-words">{currentPharmacist.pharmacy_name || "Not assigned"}</p>
                         </div>
                       </div>
+                      <div className="py-4">
+                  <p>
+                    Are you sure you want to verify pharmacist <strong>{currentPharmacist?.name}</strong>?
+                  </p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    This will grant them access to perform pharmacist-specific tasks.
+                  </p>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setIsVerifyDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => currentPharmacist?.user_id? handleVerifyPharmacist(currentPharmacist.user_id) : null}
+                  >
+                    Verify
+                  </Button>
+                </div>
                     </>
                   )}
                 </div>

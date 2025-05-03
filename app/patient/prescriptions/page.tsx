@@ -177,7 +177,8 @@ export default function PatientPrescriptionsPage() {
       </div>
 
       <Dialog open={!!selectedPrescription} onOpenChange={() => setSelectedPrescription(null)}>
-        <DialogContent>
+      <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
+
           <DialogHeader>
             <DialogTitle>Prescription QR Code</DialogTitle>
             <DialogDescription>Show this QR code at the pharmacy to fill your prescription.</DialogDescription>

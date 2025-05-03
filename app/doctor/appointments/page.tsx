@@ -214,7 +214,8 @@ export default function DoctorAppointmentsPage() {
                   <Plus className="mr-2 h-4 w-4" /> New Appointment
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px]">
+              <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
+
                 <DialogHeader>
                   <DialogTitle>Create New Appointment</DialogTitle>
                   <DialogDescription>Schedule a new appointment with a patient.</DialogDescription>

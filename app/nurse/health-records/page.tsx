@@ -288,7 +288,8 @@ export default function NurseHealthRecordsPage() {
       </div>
 
       <Dialog open={isAddVitalSignsOpen} onOpenChange={setIsAddVitalSignsOpen}>
-        <DialogContent>
+      <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
+
           <DialogHeader>
             <DialogTitle>Add Vital Signs</DialogTitle>
             <DialogDescription>
@@ -307,7 +308,8 @@ export default function NurseHealthRecordsPage() {
         open={selectedRecord?.showVitalSigns}
         onOpenChange={() => setSelectedRecord((prev) => (prev ? { ...prev, showVitalSigns: false } : null))}
       >
-        <DialogContent>
+                    <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
+
           <DialogHeader>
             <DialogTitle>Vital Signs</DialogTitle>
             <DialogDescription>Detailed vital signs information</DialogDescription>

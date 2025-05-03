@@ -327,7 +327,7 @@ export default function SuperAdminPharmaciesPage() {
                       Add Pharmacy
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
+                  <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
                     <DialogHeader>
                       <DialogTitle>Create New Pharmacy</DialogTitle>
                     </DialogHeader>
@@ -446,7 +446,7 @@ export default function SuperAdminPharmaciesPage() {
 
             {/* Edit Pharmacy Dialog */}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-              <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
                 <DialogHeader>
                   <DialogTitle>Edit Pharmacy</DialogTitle>
                 </DialogHeader>
@@ -479,7 +479,8 @@ export default function SuperAdminPharmaciesPage() {
 
             {/* Delete Pharmacy Dialog */}
             <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-              <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
+              
                 <DialogHeader>
                   <DialogTitle>Confirm Deletion</DialogTitle>
                 </DialogHeader>

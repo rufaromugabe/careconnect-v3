@@ -766,7 +766,8 @@ export default function PharmacistPrescriptionsPage() {
 
       {/* Receipt Dialog */}
       <Dialog open={showReceiptDialog} onOpenChange={setShowReceiptDialog}>
-        <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
+
           <DialogHeader>
             <DialogTitle>Prescription Receipt</DialogTitle>
             <DialogDescription>Details of the filled prescription</DialogDescription>

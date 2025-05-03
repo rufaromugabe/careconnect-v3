@@ -182,7 +182,7 @@ export default function PatientDashboard() {
                       Change Doctor
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
                     <DialogHeader>
                       <DialogTitle>Select Your Doctor</DialogTitle>
                       <DialogDescription>

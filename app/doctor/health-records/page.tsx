@@ -331,7 +331,8 @@ export default function HealthRecordsPage() {
 
       {/* Dialog for viewing vital signs */}
       <Dialog open={!!selectedVitalSigns} onOpenChange={() => setSelectedVitalSigns(null)}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto bg-white dark:bg-gray-900 shadow-lg rounded-xl">
+
           <DialogHeader>
             <DialogTitle>Vital Signs</DialogTitle>
             <DialogDescription>Detailed vital signs information</DialogDescription>
@@ -375,7 +376,7 @@ export default function HealthRecordsPage() {
 
       {/* Dialog for creating new health record */}
       <Dialog open={isNewRecordDialogOpen} onOpenChange={setIsNewRecordDialogOpen}>
-        <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto bg-white dark:bg-gray-900 shadow-lg rounded-xl">
           <DialogHeader>
             <DialogTitle>Create New Health Record</DialogTitle>
             <DialogDescription>Add a new health record for a patient. You can add vital signs later.</DialogDescription>

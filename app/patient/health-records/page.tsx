@@ -180,7 +180,8 @@ export default function PatientHealthRecordsPage() {
       </div>
 
       <Dialog open={!!selectedRecord} onOpenChange={() => setSelectedRecord(null)}>
-        <DialogContent>
+      <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
+
           <DialogHeader>
             <DialogTitle>Health Record Details</DialogTitle>
             <DialogDescription>Detailed information about your health record.</DialogDescription>
@@ -210,7 +211,8 @@ export default function PatientHealthRecordsPage() {
         </DialogContent>
       </Dialog>
       <Dialog open={!!selectedVitalSigns} onOpenChange={() => setSelectedVitalSigns(null)}>
-        <DialogContent>
+      <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
+
           <DialogHeader>
             <DialogTitle>Vital Signs</DialogTitle>
             <DialogDescription>Detailed vital signs information</DialogDescription>

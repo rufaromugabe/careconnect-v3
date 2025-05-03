@@ -307,7 +307,8 @@ export default function VitalSignsPage() {
       </div>
 
       <Dialog open={isAddVitalSignsOpen} onOpenChange={setIsAddVitalSignsOpen}>
-        <DialogContent>
+      <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
+
           <DialogHeader>
             <DialogTitle>Record Vital Signs</DialogTitle>
             <DialogDescription>Enter the patient's vital signs information below.</DialogDescription>

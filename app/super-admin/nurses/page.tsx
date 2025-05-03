@@ -137,12 +137,13 @@ export default function SuperAdminNursesPage() {
     if (!token) return
 
     try {
-      const response = await fetch(`/api/admin/nurses/${userId}/verify`, {
+      const response = await fetch(`/api/admin/usersVerification/${userId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify({ is_verified: true }),
       })
 
       if (!response.ok) {
@@ -296,7 +297,7 @@ export default function SuperAdminNursesPage() {
 
             {/* Verify Nurse Dialog */}
             <Dialog open={isVerifyDialogOpen} onOpenChange={setIsVerifyDialogOpen}>
-              <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
                 <DialogHeader>
                   <DialogTitle>Nurse Details</DialogTitle>
                 </DialogHeader>
@@ -322,15 +323,24 @@ export default function SuperAdminNursesPage() {
                         </div>
                       </div>
 
-                      <div className="pt-4 flex justify-center">
-                        <Button
-                          onClick={() => handleVerifyNurse(currentNurse.user_id)}
-                          className="w-full"
-                          disabled={currentNurse.is_verified}
-                        >
-                          {currentNurse.is_verified ? "Already Verified" : "Verify Nurse"}
-                        </Button>
-                      </div>
+                      <div className="py-4">
+                  <p>
+                    Are you sure you want to verify Nurse <strong>{currentNurse?.name}</strong>?
+                  </p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    This will grant them access to perform nurse-specific tasks.
+                  </p>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setIsVerifyDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => currentNurse?.user_id? handleVerifyNurse(currentNurse.user_id) : null}
+                  >
+                    Verify
+                  </Button>
+                </div>
                     </>
                   )}
                 </div>

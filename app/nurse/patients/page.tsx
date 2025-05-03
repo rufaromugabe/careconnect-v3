@@ -245,7 +245,8 @@ export default function NursePatientsPage() {
       </div>
 
       <Dialog open={!!selectedPatient} onOpenChange={() => setSelectedPatient(null)}>
-        <DialogContent>
+      <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
+
           <DialogHeader>
             <DialogTitle>Record Vital Signs</DialogTitle>
             <DialogDescription>

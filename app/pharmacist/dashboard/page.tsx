@@ -352,7 +352,8 @@ export default function PharmacistDashboard() {
 
       {/* QR Code Scanner Dialog */}
       <Dialog open={showScanner} onOpenChange={setShowScanner}>
-        <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
+
           <DialogHeader>
             <DialogTitle>Scan Prescription QR Code</DialogTitle>
             <DialogDescription>

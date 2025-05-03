@@ -372,7 +372,7 @@ function PatientFormDialog({ isOpen, onClose, onSubmit, title, patient = null }:
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>Enter the patient's information below.</DialogDescription>
