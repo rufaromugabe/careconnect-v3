@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/auth-context"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { toast } from 'react-toastify'
+import { toast } from "react-toastify"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { supabase } from "@/lib/supabase"
 import { logAction } from "@/lib/logging"
@@ -41,8 +41,7 @@ export default function SuperAdminPharmaciesPage() {
   })
   const [newPharmacy, setNewPharmacy] = useState({
     name: "",
-    address: "",
-    phone: "",
+    location: "",
   })
   const [token, setToken] = useState<string | null>(null)
 
@@ -91,14 +90,10 @@ export default function SuperAdminPharmaciesPage() {
         const data = await response.json()
         setPharmacies(data)
         // log action
-        await logAction(
-          user?.id || "",
-          "accessed pharmacies list",
-          {
-            email: user?.email || "",
-            status: "ok",
-          }
-        )
+        await logAction(user?.id || "", "accessed pharmacies list", {
+          email: user?.email || "",
+          status: "ok",
+        })
       } catch (err: any) {
         console.error("Error loading pharmacies data:", err)
         setError(err.message || "Failed to load pharmacies data")
@@ -142,7 +137,7 @@ export default function SuperAdminPharmaciesPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(newPharmacy),
       })
 
       if (!response.ok) {
@@ -150,19 +145,15 @@ export default function SuperAdminPharmaciesPage() {
         throw new Error(errorData.error || "Failed to create pharmacy")
       }
 
-      const newPharmacy = await response.json()
-      await logAction(
-        user?.id || "",
-        `created new pharmacy: ${newPharmacy.name}`,
-        {
-          email: user?.email || "",
-          status: "created",
-          pharmacy_name: newPharmacy.name,
-          pharmacy_location: newPharmacy.location,
-        }
-      )
-      setPharmacies((prev) => [...prev, newPharmacy])
-      setFormData({ name: "", location: "" })
+      const createdPharmacy = await response.json()
+      await logAction(user?.id || "", `created new pharmacy: ${createdPharmacy.name}`, {
+        email: user?.email || "",
+        status: "created",
+        pharmacy_name: createdPharmacy.name,
+        pharmacy_location: createdPharmacy.location,
+      })
+      setPharmacies((prev) => [...prev, createdPharmacy])
+      setNewPharmacy({ name: "", location: "" })
       setIsAddDialogOpen(false)
 
       toast.success("Pharmacy created successfully")
@@ -194,16 +185,12 @@ export default function SuperAdminPharmaciesPage() {
       }
 
       const updatedPharmacy = await response.json()
-      await logAction(
-        user?.id || "",
-        `updated pharmacy: ${currentPharmacy.name}`,
-        {
-          email: user?.email || "",
-          status: "created",
-          pharmacy_name: updatedPharmacy.name,
-          pharmacy_location: updatedPharmacy.location,
-        }
-      )
+      await logAction(user?.id || "", `updated pharmacy: ${currentPharmacy.name}`, {
+        email: user?.email || "",
+        status: "created",
+        pharmacy_name: updatedPharmacy.name,
+        pharmacy_location: updatedPharmacy.location,
+      })
       setPharmacies((prev) => prev.map((pharmacy) => (pharmacy.id === updatedPharmacy.id ? updatedPharmacy : pharmacy)))
       setCurrentPharmacy(null)
       setFormData({ name: "", location: "" })
@@ -234,16 +221,12 @@ export default function SuperAdminPharmaciesPage() {
         throw new Error(errorData.error || "Failed to delete pharmacy")
       }
 
-      await logAction(
-        user?.id || "",
-        `deleted pharmacy: ${currentPharmacy.name}`,
-        {
-          email: user?.email || "",
-          status: "deleted",
-          pharmacy_name: currentPharmacy.name,
-          pharmacy_location: currentPharmacy.location,
-        }
-      )
+      await logAction(user?.id || "", `deleted pharmacy: ${currentPharmacy.name}`, {
+        email: user?.email || "",
+        status: "deleted",
+        pharmacy_name: currentPharmacy.name,
+        pharmacy_location: currentPharmacy.location,
+      })
       setPharmacies((prev) => prev.filter((pharmacy) => pharmacy.id !== currentPharmacy.id))
       setCurrentPharmacy(null)
       setIsDeleteDialogOpen(false)
@@ -276,11 +259,11 @@ export default function SuperAdminPharmaciesPage() {
       <div className="flex h-screen">
         <Sidebar role="super-admin" />
         <div className="flex-1 flex flex-col">
-                <Header title={`Loading `} />
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p className="mt-4 text-lg">Loading pharmacies data...</p>
-        </div>
+          <Header title={`Loading `} />
+          <div className="flex-1 flex flex-col items-center justify-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="mt-4 text-lg">Loading pharmacies data...</p>
+          </div>
         </div>
       </div>
     )
@@ -345,13 +328,13 @@ export default function SuperAdminPharmaciesPage() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <label htmlFor="address" className="text-sm font-medium">
-                            Address
+                          <label htmlFor="location" className="text-sm font-medium">
+                            Location
                           </label>
                           <Input
-                            id="address"
-                            value={newPharmacy.address}
-                            onChange={(e) => setNewPharmacy({ ...newPharmacy, address: e.target.value })}
+                            id="location"
+                            value={newPharmacy.location}
+                            onChange={(e) => setNewPharmacy({ ...newPharmacy, location: e.target.value })}
                             required
                           />
                         </div>
@@ -446,7 +429,7 @@ export default function SuperAdminPharmaciesPage() {
 
             {/* Edit Pharmacy Dialog */}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-            <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
+              <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
                 <DialogHeader>
                   <DialogTitle>Edit Pharmacy</DialogTitle>
                 </DialogHeader>
@@ -479,8 +462,7 @@ export default function SuperAdminPharmaciesPage() {
 
             {/* Delete Pharmacy Dialog */}
             <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-            <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
-              
+              <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
                 <DialogHeader>
                   <DialogTitle>Confirm Deletion</DialogTitle>
                 </DialogHeader>
