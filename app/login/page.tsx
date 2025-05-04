@@ -142,7 +142,7 @@ export default function Login() {
                       onChange={(e) => setEmail(e.target.value)}
                       required
                       disabled={isLoading || !isSupabaseInitialized}
-                      className="transition-all duration-300 focus:ring-2 focus:ring-blue-500/50 bg-slate-800/80 border-slate-700 placeholder:text-gray-500"
+                      className="transition-all duration-300 focus:ring-2 focus:ring-blue-500/50 bg-slate-800/80 border-slate-700 placeholder:text-gray-500 text-white"
                     />
                   </motion.div>
 
@@ -166,7 +166,7 @@ export default function Login() {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       disabled={isLoading || !isSupabaseInitialized}
-                      className="transition-all duration-300 focus:ring-2 focus:ring-blue-500/50 bg-slate-800/80 border-slate-700 placeholder:text-gray-500"
+                      className="transition-all duration-300 focus:ring-2 focus:ring-blue-500/50 bg-slate-800/80 border-slate-700 placeholder:text-gray-500 text-white"
                     />
                   </motion.div>
 

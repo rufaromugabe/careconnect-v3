@@ -188,7 +188,7 @@ export default function DoctorDashboard() {
                             "P"}
                         </div>
                         <div>
-                          <h4 className="font-medium  ">
+                          <h4 className="font-medium dark:text-black">
                             {patient.users?.user_metadata?.full_name ||
                               patient.users?.user_metadata?.name ||
                               patient.users?.email ||

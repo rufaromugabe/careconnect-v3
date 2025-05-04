@@ -355,7 +355,7 @@ export default function SuperAdminPharmaciesPage() {
                             required
                           />
                         </div>
-                        <div className="space-y-2">
+                        {/*<div className="space-y-2">
                           <label htmlFor="phone" className="text-sm font-medium">
                             Phone Number
                           </label>
@@ -364,8 +364,8 @@ export default function SuperAdminPharmaciesPage() {
                             value={newPharmacy.phone}
                             onChange={(e) => setNewPharmacy({ ...newPharmacy, phone: e.target.value })}
                             required
-                          />
-                        </div>
+                          /> 
+                        </div> */}
                         <div className="flex justify-end space-x-2">
                           <Button variant="outline" type="button" onClick={() => setIsDeleteDialogOpen(false)}>
                             Cancel

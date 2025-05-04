@@ -10,7 +10,23 @@ import { Loader2, UserPlus, UserX, UserCheck, Filter } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { supabase } from "@/lib/supabase";
 import { logAction } from "@/lib/logging";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  ShieldCheck,
+  Stethoscope,
+  Pill,
+  User as UserIcon,
+  UserCog,
+  UserCircle,
+} from "lucide-react";
 
 export default function SuperAdminUsersPage() {
   const { user } = useAuth();
@@ -100,11 +116,11 @@ export default function SuperAdminUsersPage() {
     currentIsActive: boolean
   ) => {
     const { data: sessionData } = await supabase.auth.getSession();
-        const token = sessionData?.session?.access_token;
+    const token = sessionData?.session?.access_token;
 
-        if (!token) {
-          throw new Error("No authentication token available");
-        }
+    if (!token) {
+      throw new Error("No authentication token available");
+    }
     try {
       const response = await fetch(`/api/admin/users/${userId}`, {
         method: "PUT",
@@ -123,8 +139,8 @@ export default function SuperAdminUsersPage() {
       }
       //log action
       const action = currentIsActive
-      ? `disabled user account: ${userId}`
-      : `enabled user account: ${userId}`;
+        ? `disabled user account: ${userId}`
+        : `enabled user account: ${userId}`;
 
       if (user) {
         await logAction(user.id, action, {
@@ -137,21 +153,25 @@ export default function SuperAdminUsersPage() {
       // Refresh UI or update local state as needed
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
-          user.id === userId
-            ? { ...user, is_active: !currentIsActive }
-            : user
+          user.id === userId ? { ...user, is_active: !currentIsActive } : user
         )
       );
-      
+
       // Display success toast notification
-      toast.success(`User ${currentIsActive ? 'disabled' : 'enabled'} successfully`, {
-      });
+      toast.success(
+        `User ${currentIsActive ? "disabled" : "enabled"} successfully`,
+        {}
+      );
     } catch (error) {
       console.error("Error updating verification:", error);
-      
+
       // Display error toast notification
-      toast.error(`Failed to ${currentIsActive ? 'disable' : 'enable'} user: ${error instanceof Error ? error.message : 'Unknown error'}`, {
-      });
+      toast.error(
+        `Failed to ${currentIsActive ? "disable" : "enable"} user: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+        {}
+      );
     }
   };
 
@@ -164,11 +184,11 @@ export default function SuperAdminUsersPage() {
       <div className="flex h-screen">
         <Sidebar role="super-admin" />
         <div className="flex-1 flex flex-col">
-                <Header title={`Loading `} />
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p className="mt-4 text-lg">Loading users data...</p>
-        </div>
+          <Header title={`Loading `} />
+          <div className="flex-1 flex flex-col items-center justify-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="mt-4 text-lg">Loading users data...</p>
+          </div>
         </div>
       </div>
     );
@@ -245,104 +265,121 @@ export default function SuperAdminUsersPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="overflow-x-auto">
-                      <table className="w-full text-sm text-left">
-                        <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-                          <tr>
-                            <th className="px-6 py-3">Name</th>
-                            <th className="px-6 py-3">Email</th>
-                            <th className="px-6 py-3">Role</th>
-                            <th className="px-6 py-3">Created</th>
-                            <th className="px-6 py-3">Status</th>
-                            <th className="px-6 py-3">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filteredUsers.length > 0 ? (
-                            filteredUsers.map((user) => (
-                              <tr
-                                key={user.id}
-                                className="bg-white border-b hover:bg-gray-50"
-                              >
-                                <td className="px-6 py-4 font-medium">
-                                  {user.name}
-                                </td>
-                                <td className="px-6 py-4">{user.email}</td>
-                                <td className="px-6 py-4">
-                                  <span
-                                    className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                      user.role === "doctor"
-                                        ? "bg-blue-100 text-blue-800"
-                                        : user.role === "patient"
-                                        ? "bg-green-100 text-green-800"
-                                        : user.role === "pharmacist"
-                                        ? "bg-purple-100 text-purple-800"
-                                        : user.role === "nurse"
-                                        ? "bg-yellow-100 text-yellow-800"
-                                        : user.role === "super-admin"
-                                        ? "bg-red-100 text-red-800"
-                                        : "bg-gray-100  "
-                                    }`}
-                                  >
-                                    {user.role}
-                                  </span>
-                                </td>
-                                <td className="px-6 py-4">
-                                  {user.createdAt.toLocaleDateString()}
-                                </td>
-                                <td className="px-6 py-4">
-                                  {user.is_active ? (
-                                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                      Active
-                                    </span>
-                                  ) : (
-                                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                      Inactive
-                                    </span>
-                                  )}
-                                </td>
+<Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Name</TableHead>
+      <TableHead>Email</TableHead>
+      <TableHead>Role</TableHead>
+      <TableHead>Created</TableHead>
+      <TableHead>Status</TableHead>
+      <TableHead className="text-right">Actions</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    {filteredUsers.length > 0 ? (
+      filteredUsers.map((user) => {
+        // Choose icon based on role
+        const roleIcon =
+          user.role === "doctor" ? (
+            <Stethoscope className="h-4 w-4 mr-1 text-blue-600" />
+          ) : user.role === "pharmacist" ? (
+            <Pill className="h-4 w-4 mr-1 text-purple-600" />
+          ) : user.role === "nurse" ? (
+            <ShieldCheck className="h-4 w-4 mr-1 text-yellow-600" />
+          ) : user.role === "super-admin" ? (
+            <UserCog className="h-4 w-4 mr-1 text-red-600" />
+          ) : user.role === "patient" ? (
+            <UserCircle className="h-4 w-4 mr-1 text-green-600" />
+          ) : (
+            <UserIcon className="h-4 w-4 mr-1 text-gray-600" />
+          );
 
-                                <td className="px-6 py-4">
-                                  <div className="flex space-x-2">
-                                    <Button
-                                      onClick={() =>
-                                        handleToggleActive(
-                                          user.id,
-                                          user.is_active
-                                        )
-                                      }
-                                      variant="ghost"
-                                      size="sm"
-                                      className={`${
-                                        user.is_active
-                                          ? "text-red-600 hover:text-red-800"
-                                          : "text-green-600 hover:text-green-800"
-                                      }`}
-                                    >
-                                      {user.is_active ? (
-                                        <>
-                                          <UserX className="h-4 w-4 mr-1" />
-                                          Disable
-                                        </>
-                                      ) : (
-                                        <>
-                                          <UserCheck className="h-4 w-4 mr-1" />
-                                          Enable
-                                        </>
-                                      )}
-                                    </Button>
-                                  </div>
-                                </td>
-                              </tr>
-                            ))
-                          ) : (
-                            <tr>
-                              <td colSpan={6} className="px-6 py-4 text-center">
-                                No users found
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
+        return (
+          <TableRow key={user.id}>
+            <TableCell className="font-medium">{user.name}</TableCell>
+            <TableCell>{user.email}</TableCell>
+            <TableCell>
+              <div className="flex items-center">
+                {roleIcon}
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    user.role === "doctor"
+                      ? "bg-blue-100 text-blue-800"
+                      : user.role === "patient"
+                      ? "bg-green-100 text-green-800"
+                      : user.role === "pharmacist"
+                      ? "bg-purple-100 text-purple-800"
+                      : user.role === "nurse"
+                      ? "bg-yellow-100 text-yellow-800"
+                      : user.role === "super-admin"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-gray-100 text-gray-800"
+                  }`}
+                >
+                  {user.role}
+                </span>
+              </div>
+            </TableCell>
+            <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+            <TableCell>
+              <div className="flex items-center">
+                {user.is_active ? (
+                  <>
+                    <UserCheck className="h-4 w-4 mr-1 text-green-600" />
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Active
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <UserX className="h-4 w-4 mr-1 text-red-600" />
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                      Inactive
+                    </span>
+                  </>
+                )}
+              </div>
+            </TableCell>
+            <TableCell className="text-right">
+              <div className="flex justify-end space-x-2">
+                <Button
+                  onClick={() => handleToggleActive(user.id, user.is_active)}
+                  variant="ghost"
+                  size="sm"
+                  className={
+                    user.is_active
+                      ? "text-red-600 hover:text-red-800"
+                      : "text-green-600 hover:text-green-800"
+                  }
+                >
+                  {user.is_active ? (
+                    <>
+                      <UserX className="h-4 w-4 mr-1" />
+                      Disable
+                    </>
+                  ) : (
+                    <>
+                      <UserCheck className="h-4 w-4 mr-1" />
+                      Enable
+                    </>
+                  )}
+                </Button>
+              </div>
+            </TableCell>
+          </TableRow>
+        );
+      })
+    ) : (
+      <TableRow>
+        <TableCell colSpan={6} className="text-center py-6 text-gray-500">
+          No users found
+        </TableCell>
+      </TableRow>
+    )}
+  </TableBody>
+</Table>
+
                     </div>
                   </CardContent>
                 </Card>

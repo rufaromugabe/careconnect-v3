@@ -216,7 +216,7 @@ export default function NursePatientsPage() {
                         <TableCell className="font-medium">
                           {patient.users?.user_metadata?.full_name || patient.users?.user_metadata?.name || "Unknown"}
                         </TableCell>
-                        <TableCell>{patient.users?.email}</TableCell>
+                        <TableCell>{patient.users?.email || "Unknown"}</TableCell>
                         <TableCell>{patient.blood_type || "Not specified"}</TableCell>
                         <TableCell>
                           <div className="flex space-x-2">

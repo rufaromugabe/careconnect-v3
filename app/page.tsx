@@ -287,7 +287,7 @@ export default function Home() {
                   size="lg" 
                   variant="outline"
                   onClick={() => router.push("/login")}
-                  className="border-blue-500/50 text-blue-400 hover:bg-blue-900/20 dark:border-blue-500/50 dark:text-blue-400 dark:hover:bg-blue-900/20 light:border-blue-500/50 light:text-blue-600 light:hover:bg-blue-200/20"
+                  className="border-blue-500/50 text-black hover:text-white hover:bg-blue-900/20 dark:border-blue-500/50 dark:text-blue-400 dark:hover:bg-blue-900/20"
                 >
                   Login
                 </Button>

@@ -186,7 +186,7 @@ export default function NurseDashboard() {
                             "P"}
                         </div>
                         <div>
-                          <h4 className="font-medium  ">
+                          <h4 className="font-medium dark:text-black ">
                             {patient.user?.user_metadata?.full_name ||
                               patient.user?.user_metadata?.name ||
                               patient.user?.email ||

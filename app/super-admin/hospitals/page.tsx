@@ -312,7 +312,7 @@ export default function SuperAdminHospitalsPage() {
                       Add Hospital
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
+                  <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
                     <DialogHeader>
                       <DialogTitle>Create New Hospital</DialogTitle>
                     </DialogHeader>
@@ -414,7 +414,7 @@ export default function SuperAdminHospitalsPage() {
 
             {/* Edit Hospital Dialog */}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-              <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
                 <DialogHeader>
                   <DialogTitle>Edit Hospital</DialogTitle>
                 </DialogHeader>
@@ -447,7 +447,7 @@ export default function SuperAdminHospitalsPage() {
 
             {/* Delete Hospital Dialog */}
             <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-              <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg rounded-xl">
                 <DialogHeader>
                   <DialogTitle>Confirm Deletion</DialogTitle>
                 </DialogHeader>

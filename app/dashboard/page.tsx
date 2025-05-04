@@ -9,7 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function DashboardRedirect() {
   const router = useRouter()
-  const { getUserRole, isLoading, user, session, isActive, isVerified } = useAuth()
+  const { getUserRole, isLoading, user, session, isActive, isVerified, isProfileCompleted } = useAuth()
   const [error, setError] = useState<string | null>(null)
   const [isRedirecting, setIsRedirecting] = useState(true)
   const [attempts, setAttempts] = useState(0)
@@ -72,6 +72,11 @@ export default function DashboardRedirect() {
           if (!isActive) {
             console.log("Dashboard redirect - User is not active, redirecting to activation page")
             router.push(`/${user.user_metadata.role}/in-active`)
+            return
+          }
+          if (!isProfileCompleted) {
+            console.log("Dashboard redirect - User profile is not completed, redirecting to profile completion page")
+            router.push(`/${user.user_metadata.role}}/complete-profile`)
             return
           }
           if (!isVerified) {

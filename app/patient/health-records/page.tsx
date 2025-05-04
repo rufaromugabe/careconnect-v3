@@ -147,13 +147,13 @@ export default function PatientHealthRecordsPage() {
                           {record.vital_signs && record.vital_signs.length > 0 ? (
                             <Badge
                               variant="outline"
-                              className="bg-green-50 cursor-pointer"
+                              className="bg-green-50 cursor-pointer dark:bg-green-500 dark:text-black"
                               onClick={() => setSelectedVitalSigns(record.vital_signs)}
                             >
                               <Activity className="h-3 w-3 mr-1" /> Recorded
                             </Badge>
                           ) : (
-                            <Badge variant="outline" className="bg-amber-50">
+                            <Badge variant="outline" className="bg-amber-50 dark:bg-amber-400 dark:text-black">
                               <Thermometer className="h-3 w-3 mr-1" /> Not Recorded
                             </Badge>
                           )}
