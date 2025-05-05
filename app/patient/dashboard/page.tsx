@@ -210,7 +210,7 @@ export default function PatientDashboard() {
                   </DialogContent>
                 </Dialog>
               </div>
-              <p className="mt-2 text-gray-600">
+              <p className="mt-2 ">
                 Current Doctor:{" "}
                 {currentDoctor
                   ? currentDoctor.users
@@ -254,7 +254,7 @@ export default function PatientDashboard() {
                           <p className="font-medium  ">
                             {prescription.medications[0]?.name || "Unknown Medication"}
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm ">
                             {prescription.medications[0]?.dosage || "No dosage specified"}
                           </p>
                         </div>
@@ -290,7 +290,7 @@ export default function PatientDashboard() {
                       <li key={record.id} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
                         <div>
                           <p className="font-medium  ">{record.diagnosis_name}</p>
-                          <p className="text-sm text-gray-600">{new Date(record.visit_date).toLocaleDateString()}</p>
+                          <p className="text-sm ">{new Date(record.visit_date).toLocaleDateString()}</p>
                         </div>
                         <Badge
                           variant={
@@ -328,11 +328,11 @@ export default function PatientDashboard() {
                         return (
                           <div
                             key={record.id}
-                            className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
+                            className="flex items-center justify-between p-3 rounded-lg bg-secondary"
                           >
                             <div>
                               <h4 className="font-medium  ">{record.diagnosis_name}</h4>
-                              <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <div className="flex items-center gap-2 text-sm ">
                                 <Thermometer className="h-4 w-4" />
                                 <span>{latestVitalSign.temperature}°C</span>
                                 <span className="mx-1">|</span>

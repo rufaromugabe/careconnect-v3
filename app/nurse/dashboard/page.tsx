@@ -178,7 +178,7 @@ export default function NurseDashboard() {
                     patients.slice(0, 5).map((patient) => (
                       <div
                         key={patient.id}
-                        className="flex items-center gap-4 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
+                        className="flex items-center gap-4 p-3 rounded-lg bg-secondary"
                       >
                         <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
                           {patient.user?.user_metadata?.full_name?.charAt(0) ||
@@ -192,7 +192,7 @@ export default function NurseDashboard() {
                               patient.user?.email ||
                               "Unknown Patient"}
                           </h4>
-                          <p className="text-sm text-gray-600">{patient.user?.email}</p>
+                          <p className="text-sm ">{patient.user?.email}</p>
                         </div>
                       </div>
                     ))

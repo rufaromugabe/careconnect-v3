@@ -235,10 +235,10 @@ export default function PharmacistDashboard() {
           <div className="container mx-auto">
             <Card className="p-6 mb-8 bg-secondary shadow-lg rounded-lg">
               <h2 className="text-xl font-semibold mb-4  ">Pharmacy Information</h2>
-              <p className="text-gray-600">
+              <p className="">
                 <strong>Name:</strong> {pharmacy?.name || "Not assigned to a pharmacy"}
               </p>
-              <p className="text-gray-600">
+              <p className="">
                 <strong>Location:</strong> {pharmacy?.location || "N/A"}
               </p>
             </Card>
@@ -263,7 +263,7 @@ export default function PharmacistDashboard() {
 
             <Card className="p-6 mb-8 bg-secondary shadow-lg rounded-lg">
               <h3 className="text-lg font-semibold mb-4  ">Scan Prescription</h3>
-              <p className="mb-4 text-gray-600">Scan a patient's prescription QR code to view and update its status.</p>
+              <p className="mb-4 ">Scan a patient's prescription QR code to view and update its status.</p>
               <Button onClick={() => setShowScanner(true)} className="bg-blue-500 hover:bg-blue-600 text-white">
                 <QrCode className="mr-2 h-4 w-4" />
                 Scan QR Code
@@ -308,7 +308,7 @@ export default function PharmacistDashboard() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="font-semibold text-gray-700">Patient:</p>
-                    <p className="text-gray-600">
+                    <p className="">
                       {scannedPrescription.patients?.users?.user_metadata?.full_name ||
                         scannedPrescription.patients?.users?.user_metadata?.name ||
                         "Unknown Patient"}
@@ -316,15 +316,15 @@ export default function PharmacistDashboard() {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-700">Medication:</p>
-                    <p className="text-gray-600">{scannedPrescription.medications?.[0]?.name || "N/A"}</p>
+                    <p className="">{scannedPrescription.medications?.[0]?.name || "N/A"}</p>
                   </div>
                   <div>
                     <p className="font-semibold text-gray-700">Dosage:</p>
-                    <p className="text-gray-600">{scannedPrescription.medications?.[0]?.dosage || "N/A"}</p>
+                    <p className="">{scannedPrescription.medications?.[0]?.dosage || "N/A"}</p>
                   </div>
                   <div>
                     <p className="font-semibold text-gray-700">Status:</p>
-                    <p className="text-gray-600">{scannedPrescription.status}</p>
+                    <p className="">{scannedPrescription.status}</p>
                   </div>
                 </div>
                 <div className="mt-4 flex justify-end space-x-2">

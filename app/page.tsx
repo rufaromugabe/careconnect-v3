@@ -271,7 +271,7 @@ export default function Home() {
               <h2 className="text-3xl md:text-4xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400">
                 Healthcare Management Reimagined
               </h2>
-              <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto dark:text-gray-400 light:text-gray-600">
+              <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto dark:text-gray-400 light:">
                 A comprehensive platform connecting healthcare professionals and patients
                 for seamless, efficient, and personalized healthcare delivery.
               </p>

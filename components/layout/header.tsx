@@ -30,7 +30,7 @@ export function Header({ title, actions }: HeaderProps) {
     { id: 2, content: "Your prescription has been approved", read: false, time: "1h ago" },
     { id: 3, content: "Reminder: Follow-up appointment tomorrow", read: true, time: "3h ago" },
   ])
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
   
   const unreadCount = notifications.filter(n => !n.read).length
   
@@ -186,7 +186,10 @@ export function Header({ title, actions }: HeaderProps) {
                 Upgrade Plan
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">
+              <DropdownMenuItem 
+                className="text-destructive"
+                onClick={() => signOut()}
+              >
                 Log out
               </DropdownMenuItem>
             </DropdownMenuContent>

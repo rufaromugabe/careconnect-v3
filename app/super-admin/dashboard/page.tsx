@@ -203,7 +203,7 @@ export default function SuperAdminDashboard() {
                             <p className="font-medium  ">
                               {user.user_metadata?.full_name || user.user_metadata?.name || user.email}
                             </p>
-                            <p className="text-sm text-gray-600">{user.user_metadata?.role || "Unknown role"}</p>
+                            <p className="text-sm ">{user.user_metadata?.role || "Unknown role"}</p>
                           </div>
                           <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
                             View
@@ -227,7 +227,7 @@ export default function SuperAdminDashboard() {
                       <li key={pharmacy.id} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
                         <div>
                           <p className="font-medium  ">{pharmacy.name}</p>
-                          <p className="text-sm text-gray-600">{pharmacy.location}</p>
+                          <p className="text-sm ">{pharmacy.location}</p>
                         </div>
                         <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
                           View

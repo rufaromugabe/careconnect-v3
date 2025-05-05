@@ -292,7 +292,7 @@ export default function SuperAdminUsersPage() {
           ) : user.role === "patient" ? (
             <UserCircle className="h-4 w-4 mr-1 text-green-600" />
           ) : (
-            <UserIcon className="h-4 w-4 mr-1 text-gray-600" />
+            <UserIcon className="h-4 w-4 mr-1 " />
           );
 
         return (

@@ -180,7 +180,7 @@ export default function DoctorDashboard() {
                     patients.slice(0, 5).map((patient) => (
                       <div
                         key={patient.id}
-                        className="flex items-center gap-4 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
+                        className="flex items-center gap-4 p-3 rounded-lg bg-secondary"
                       >
                         <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
                           {patient.users?.user_metadata?.full_name?.charAt(0) ||
@@ -188,13 +188,13 @@ export default function DoctorDashboard() {
                             "P"}
                         </div>
                         <div>
-                          <h4 className="font-medium dark:text-black">
+                          <h4 className="font-medium">
                             {patient.users?.user_metadata?.full_name ||
                               patient.users?.user_metadata?.name ||
                               patient.users?.email ||
                               "Unknown Patient"}
                           </h4>
-                          <p className="text-sm text-gray-600">{patient.users?.email}</p>
+                          <p className="text-sm ">{patient.users?.email}</p>
                         </div>
                       </div>
                     ))
@@ -219,7 +219,7 @@ export default function DoctorDashboard() {
                         return (
                           <div
                             key={record.id}
-                            className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
+                            className="flex items-center justify-between p-3 rounded-lg bg-secondary"
                           >
                             <div>
                               <h4 className="font-medium  ">
@@ -228,7 +228,7 @@ export default function DoctorDashboard() {
                                   patient?.users?.email ||
                                   "Unknown Patient"}
                               </h4>
-                              <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <div className="flex items-center gap-2 text-sm ">
                                 <Thermometer className="h-4 w-4" />
                                 <span>{latestVitalSign.temperature}°C</span>
                                 <span className="mx-1">|</span>
