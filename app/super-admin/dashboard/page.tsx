@@ -182,7 +182,7 @@ export default function SuperAdminDashboard() {
                     <h3 className="text-2xl font-bold">{stat.value}</h3>
                     <p className="text-sm opacity-90 mb-4">{stat.label}</p>
                     <Link href={stat.href} passHref>
-                      <Button className="w-full bg-white   hover:bg-gray-100">Manage</Button>
+                      <Button className="w-full bg-white text-black   hover:bg-gray-100">Manage</Button>
                     </Link>
                   </Card>
                 )
