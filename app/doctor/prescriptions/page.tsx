@@ -212,6 +212,7 @@ export default function PrescriptionsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Prescription No</TableHead>
                     <TableHead>Patient</TableHead>
                     <TableHead>Medications</TableHead>
                     <TableHead>Status</TableHead>
@@ -222,8 +223,9 @@ export default function PrescriptionsPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredPrescriptions.length > 0 ? (
-                    filteredPrescriptions.map((prescription) => (
+                    filteredPrescriptions.map((prescription, i) => (
                       <TableRow key={prescription.id}>
+                        <TableCell className="font-medium">{i + 1}</TableCell>
                         <TableCell>
                           {prescription.patients?.users?.user_metadata?.full_name ||
                             prescription.patients?.users?.user_metadata?.name ||

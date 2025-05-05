@@ -128,7 +128,8 @@ export default function PatientPrescriptionsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Medication</TableHead>
+                    <TableHead className="w-[200px]">Prescription No</TableHead>
+                    <TableHead>Medications</TableHead>
                     <TableHead>Dosage</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Date</TableHead>
@@ -137,9 +138,17 @@ export default function PatientPrescriptionsPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredPrescriptions.length > 0 ? (
-                    filteredPrescriptions.map((prescription) => (
+                    filteredPrescriptions.map((prescription, i) => (
                       <TableRow key={prescription.id}>
-                        <TableCell>{prescription.medications[0]?.name || "Unknown"}</TableCell>
+                        <TableCell className="font-medium">{i+1}</TableCell>
+                        <TableCell>
+                        <span>{prescription.medications[0].name}</span>
+                              {prescription.medications.length > 1 && (
+                                <Badge variant="outline" className="ml-2">
+                                  +{prescription.medications.length - 1} more
+                                </Badge>
+                              )}
+                        </TableCell>
                         <TableCell>{prescription.medications[0]?.dosage || "Not specified"}</TableCell>
                         <TableCell>
                           <Badge
