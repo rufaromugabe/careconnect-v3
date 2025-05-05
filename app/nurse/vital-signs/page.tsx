@@ -108,6 +108,7 @@ export default function VitalSignsPage() {
           // Get nurse's patients
           const patientData = await getNursePatients(profile.id)
           setPatients(patientData)
+        
 
           // Get vital signs recorded by this nurse
           const vitalSignsData = await getVitalSigns({ recorded_by: user.id })
@@ -265,7 +266,6 @@ export default function VitalSignsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>ID</TableHead>
                     <TableHead>Patient</TableHead>
                     <TableHead>Temperature</TableHead>
                     <TableHead>Blood Pressure</TableHead>
@@ -277,7 +277,6 @@ export default function VitalSignsPage() {
                   {filteredVitalSigns.length > 0 ? (
                     filteredVitalSigns.map((vs) => (
                       <TableRow key={vs.id}>
-                        <TableCell className="font-medium">{vs.id}</TableCell>
                         <TableCell>
                           {vs.health_record?.patient?.user?.user_metadata?.full_name ||
                             vs.health_record?.patient?.user?.user_metadata?.name ||

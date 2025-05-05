@@ -32,7 +32,7 @@ interface VitalSigns {
 
 interface Patient {
   id: string
-  users?: {
+  user?: {
     email: string
     user_metadata?: {
       full_name?: string
@@ -73,6 +73,7 @@ export default function NursePatientsPage() {
           // Get nurse's patients
           const patientData = await getNursePatients(profile.id)
           setPatients(patientData)
+          console.log("Patients data:", patientData)
         }
       } catch (err: any) {
         console.error("Error loading patients data:", err)
@@ -86,8 +87,8 @@ export default function NursePatientsPage() {
   }, [user])
 
   const filteredPatients = patients.filter((patient) => {
-    const patientName = patient.users?.user_metadata?.full_name || patient.users?.user_metadata?.name || ""
-    const patientEmail = patient.users?.email || ""
+    const patientName = patient.user?.user_metadata?.full_name || patient.user?.user_metadata?.name || ""
+    const patientEmail = patient.user?.email || ""
 
     return (
       patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -214,9 +215,9 @@ export default function NursePatientsPage() {
                     filteredPatients.map((patient) => (
                       <TableRow key={patient.id}>
                         <TableCell className="font-medium">
-                          {patient.users?.user_metadata?.full_name || patient.users?.user_metadata?.name || "Unknown"}
+                        {patient.user?.user_metadata?.full_name || patient.user?.user_metadata?.name || "Unknown"}
                         </TableCell>
-                        <TableCell>{patient.users?.email || "Unknown"}</TableCell>
+                        <TableCell>{patient.user?.email || "Unknown"}</TableCell>
                         <TableCell>{patient.blood_type || "Not specified"}</TableCell>
                         <TableCell>
                           <div className="flex space-x-2">
@@ -251,8 +252,8 @@ export default function NursePatientsPage() {
             <DialogTitle>Record Vital Signs</DialogTitle>
             <DialogDescription>
               Record vital signs for{" "}
-              {selectedPatient?.users?.user_metadata?.full_name ||
-                selectedPatient?.users?.user_metadata?.name ||
+              {selectedPatient?.user?.user_metadata?.full_name ||
+                selectedPatient?.user?.user_metadata?.name ||
                 "this patient"}
               .
             </DialogDescription>

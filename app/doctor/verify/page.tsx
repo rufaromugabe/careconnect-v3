@@ -17,7 +17,7 @@ export default function WaitingForAdmin() {
         backgroundSize: '60px 60px'
       }} />
       
-      <Card className="w-full max-w-md relative backdrop-blur-sm bg-white/90">
+      <Card className="w-full max-w-md relative backdrop-blur-sm">
         <CardHeader>
           <div className="flex items-center justify-center mb-4">
             <ShieldAlert className="h-12 w-12 text-amber-500" />
