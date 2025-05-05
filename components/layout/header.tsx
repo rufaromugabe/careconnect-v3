@@ -188,7 +188,7 @@ export function Header({ title, actions }: HeaderProps) {
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 className="text-destructive"
-                onClick={() => signOut()}
+                onClick={signOut}
               >
                 Log out
               </DropdownMenuItem>
