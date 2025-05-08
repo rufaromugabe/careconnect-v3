@@ -25,6 +25,7 @@ import {
   getHealthRecords,
 } from "@/lib/data-service"
 import { logAction } from "@/lib/logging"
+import { isEncrypted, safeDecrypt } from "@/lib/encryption"
 import { he } from "date-fns/locale"
 
 // Define interfaces for our data types
@@ -112,13 +113,25 @@ export default function VitalSignsPage() {
 
           // Get vital signs recorded by this nurse
           const vitalSignsData = await getVitalSigns({ recorded_by: user.id })
-          // Map to ensure health_record_id is present at the top level for type safety
-          setVitalSigns(
-            vitalSignsData.map((vs: any) => ({
-              ...vs,
-              health_record_id: vs.health_record_id || (vs.health_record ? vs.health_record.id : undefined),
-            }))
-          )
+          
+          // Process vital signs to decrypt notes if encrypted
+          const processedVitalSigns = vitalSignsData.map((vs: any) => {
+            // Make a copy of the vital sign
+            const processed = { ...vs };
+            
+            // Decrypt notes if they are encrypted
+            if (processed.notes && isEncrypted(processed.notes)) {
+              processed.notes = safeDecrypt(processed.notes);
+            }
+            
+            return {
+              ...processed,
+              health_record_id: processed.health_record_id || (processed.health_record ? processed.health_record.id : undefined),
+            };
+          });
+          
+          // Set the processed vital signs with decrypted notes
+          setVitalSigns(processedVitalSigns);
         }
       } catch (err: any) {
         console.error("Error loading vital signs data:", err)
